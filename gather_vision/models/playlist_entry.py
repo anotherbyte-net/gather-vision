@@ -2,9 +2,10 @@ from django.db import models
 
 from gather_vision.models import PlaylistTrack
 from gather_vision.models import PlaylistItem
+from gather_vision.models.abstract_base import AbstractBase
 
 
-class PlaylistEntry(models.Model):
+class PlaylistEntry(AbstractBase):
     """An entry in a playlist that is linked to a number of tracks."""
 
     playlist = models.ForeignKey(

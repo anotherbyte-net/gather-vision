@@ -1,9 +1,10 @@
 from django.db import models
 
 from gather_vision.models import OutageItem
+from gather_vision.models.abstract_base import AbstractBase
 
 
-class OutageChange(models.Model):
+class OutageChange(AbstractBase):
     """A change in the number of customers for an outage."""
 
     outage = models.ForeignKey(

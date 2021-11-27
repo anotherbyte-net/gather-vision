@@ -1,7 +1,9 @@
 from django.db import models
 
+from gather_vision.models.abstract_base import AbstractBase
 
-class PetitionSource(models.Model):
+
+class PetitionSource(AbstractBase):
     """A source that provides information about petitions."""
 
     name = models.CharField(

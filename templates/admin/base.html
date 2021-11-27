@@ -1,0 +1,17 @@
+{% extends 'admin/base.html' %}
+
+{% block extrastyle %}{{ block.super }}
+    <style>
+        :root {
+            --header-bg: #004000;
+            --primary: #004000;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --header-bg: #004000;
+                --primary: #004000;
+            }
+        }
+    </style>
+{% endblock %}

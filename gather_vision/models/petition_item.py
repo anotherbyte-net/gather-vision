@@ -2,8 +2,10 @@ from django.db import models
 
 from gather_vision.models.petition_source import PetitionSource
 
+from gather_vision.models.abstract_base import AbstractBase
 
-class PetitionItem(models.Model):
+
+class PetitionItem(AbstractBase):
     """A petition to a governing body."""
 
     source = models.ForeignKey(

@@ -1,7 +1,9 @@
 from django.db import models
 
+from gather_vision.models.abstract_base import AbstractBase
 
-class OutageItem(models.Model):
+
+class OutageItem(AbstractBase):
     """An electricity outage."""
 
     event_name = models.CharField(

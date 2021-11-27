@@ -1,7 +1,8 @@
 from django.db import models
+from gather_vision.models.abstract_base import AbstractBase
 
 
-class PlaylistTrack(models.Model):
+class PlaylistTrack(AbstractBase):
     """A music track."""
 
     source = models.ForeignKey(

@@ -8,3 +8,6 @@ from .playlist_track_source import PlaylistTrackSource
 from .petition_source import PetitionSource
 from .petition_change import PetitionChange
 from .petition_item import PetitionItem
+from .transport_source import TransportSource
+from .transport_item import TransportItem
+from .transport_line import TransportLine

@@ -2,8 +2,10 @@ from django.db import models
 
 from gather_vision.models.petition_item import PetitionItem
 
+from gather_vision.models.abstract_base import AbstractBase
 
-class PetitionChange(models.Model):
+
+class PetitionChange(AbstractBase):
     """A change in the number of signatures for a petition."""
 
     petition = models.ForeignKey(

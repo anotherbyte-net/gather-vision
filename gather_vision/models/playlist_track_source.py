@@ -1,7 +1,8 @@
 from django.db import models
+from gather_vision.models.abstract_base import AbstractBase
 
 
-class PlaylistTrackSource(models.Model):
+class PlaylistTrackSource(AbstractBase):
     """A source that provides information about music tracks."""
 
     name = models.CharField(

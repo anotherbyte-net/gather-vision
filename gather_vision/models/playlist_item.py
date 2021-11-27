@@ -1,9 +1,10 @@
 from django.db import models
 
 from gather_vision.models.playlist_source import PlaylistSource
+from gather_vision.models.abstract_base import AbstractBase
 
 
-class PlaylistItem(models.Model):
+class PlaylistItem(AbstractBase):
     """An ordered collection of playlist entries."""
 
     source = models.ForeignKey(
