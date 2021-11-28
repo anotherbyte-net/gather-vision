@@ -13,16 +13,6 @@ class PlaylistEntryAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(app_models.PlaylistSource)
-class PlaylistSourceAdmin(admin.ModelAdmin):
-    pass
-
-
 @admin.register(app_models.PlaylistTrack)
 class PlaylistTrackAdmin(admin.ModelAdmin):
     list_filter = ("source",)
-
-
-@admin.register(app_models.PlaylistTrackSource)
-class PlaylistTrackSourceAdmin(admin.ModelAdmin):
-    list_display = ("name", "title", "info_url")

@@ -22,4 +22,4 @@ class PetitionChange(AbstractBase):
     )
 
     def __str__(self):
-        return f"{self.signatures} aggregate signatures by {self.retrieved_date}"
+        return f"{self.signatures} total signatures by {self.retrieved_date}"

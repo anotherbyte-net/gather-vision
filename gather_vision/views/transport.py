@@ -1,6 +1,7 @@
 from typing import Optional
 
 from django.http import HttpResponse
+from django.utils.html import escape
 from django.utils.translation import gettext as _
 from django.views import View
 from django.views.generic import TemplateView
@@ -42,9 +43,9 @@ class TransportDataView(View):
         requested_format = requested_formats[0]
 
         if requested_format not in available_formats:
-            return HttpResponse(
-                f"Format '{requested_format}' is not available.", status=406
-            )
+            msg = escape(f"Format '{requested_format}' is not available.")
+            return HttpResponse(msg, status=406)
 
         media_type = available_formats[requested_format]
-        return HttpResponse(f"Format is '{requested_format}' - '{media_type}'.")
+        msg = escape(f"Format is '{requested_format}' - '{media_type}'.")
+        return HttpResponse(msg)

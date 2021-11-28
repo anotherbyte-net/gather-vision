@@ -19,3 +19,6 @@ class OutageChange(AbstractBase):
     retrieved_date = models.DateTimeField(
         help_text="The date this outage update was retrieved.",
     )
+
+    def __str__(self):
+        return f"{self.customers} customers affected on {self.retrieved_date}"

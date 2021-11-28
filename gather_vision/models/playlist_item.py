@@ -1,6 +1,7 @@
 from django.db import models
 
-from gather_vision.models.playlist_source import PlaylistSource
+
+from gather_vision.models import InformationSource
 from gather_vision.models.abstract_base import AbstractBase
 
 
@@ -8,7 +9,7 @@ class PlaylistItem(AbstractBase):
     """An ordered collection of playlist entries."""
 
     source = models.ForeignKey(
-        PlaylistSource,
+        InformationSource,
         related_name="playlists",
         on_delete=models.CASCADE,
     )

@@ -1,4 +1,6 @@
 from django.db import models
+
+from gather_vision.models import InformationSource
 from gather_vision.models.abstract_base import AbstractBase
 
 
@@ -6,7 +8,7 @@ class PlaylistTrack(AbstractBase):
     """A music track."""
 
     source = models.ForeignKey(
-        "PlaylistTrackSource",
+        InformationSource,
         related_name="tracks",
         on_delete=models.CASCADE,
     )

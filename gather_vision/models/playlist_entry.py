@@ -30,7 +30,7 @@ class PlaylistEntry(AbstractBase):
     )
 
     class Meta:
-        verbose_name_plural = "Music playlist entries"
+        verbose_name_plural = "Playlist entries"
         constraints = [
             models.UniqueConstraint(
                 fields=["playlist", "order"],

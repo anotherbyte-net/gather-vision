@@ -3,11 +3,6 @@ from django.contrib import admin
 import gather_vision.models as app_models
 
 
-@admin.register(app_models.PetitionSource)
-class PetitionSourceAdmin(admin.ModelAdmin):
-    list_display = ("name", "title", "info_url")
-
-
 @admin.register(app_models.PetitionChange)
 class PetitionChangeAdmin(admin.ModelAdmin):
     list_display = ("retrieved_date", "signatures")

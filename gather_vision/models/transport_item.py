@@ -1,6 +1,6 @@
 from django.db import models
 
-from gather_vision.models import TransportSource
+from gather_vision.models import InformationSource
 from gather_vision.models.abstract_base import AbstractBase
 
 
@@ -8,8 +8,8 @@ class TransportItem(AbstractBase):
     """A transport notice item."""
 
     source = models.ForeignKey(
-        TransportSource,
-        related_name="notices",
+        InformationSource,
+        related_name="transport_items",
         on_delete=models.CASCADE,
     )
     lines = models.ManyToManyField(

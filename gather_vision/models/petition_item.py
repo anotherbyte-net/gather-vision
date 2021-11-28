@@ -1,15 +1,14 @@
 from django.db import models
 
-from gather_vision.models.petition_source import PetitionSource
 
-from gather_vision.models.abstract_base import AbstractBase
+from gather_vision.models import AbstractBase, InformationSource
 
 
 class PetitionItem(AbstractBase):
     """A petition to a governing body."""
 
     source = models.ForeignKey(
-        PetitionSource,
+        InformationSource,
         related_name="petitions",
         on_delete=models.CASCADE,
     )
