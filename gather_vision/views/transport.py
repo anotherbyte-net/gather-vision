@@ -34,7 +34,7 @@ class TransportDataView(View):
             {i.strip(" .").casefold() for i in requested_formats if i and i.strip()}
         )
         if len(requested_formats) > 1:
-            return HttpResponse(f"Too many formats.", status=406)
+            return HttpResponse("Too many formats.", status=406)
 
         if len(requested_formats) < 1:
             requested_formats = [default_format]

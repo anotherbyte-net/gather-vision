@@ -116,9 +116,9 @@ class Normalise:
                 if not is_aware(result):
                     result = tz.localize(result, is_dst=None)
                 return result
-            except ValueError as e:
+            except ValueError:
                 continue
-            except OverflowError as e:
+            except OverflowError:
                 continue
         raise ValueError(f"No datetime pattern matched '{value}'.")
 

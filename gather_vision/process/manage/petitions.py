@@ -124,12 +124,10 @@ class Petitions:
         return petition, change
 
     def create_sources(self):
+        url = "https://www.parliament.qld.gov.au/Work-of-the-Assembly/Petitions"
         self._source_au_qld, qld_created = PetitionSource.objects.get_or_create(
             name="au_qld",
-            defaults={
-                "title": "Queensland Government Petitions",
-                "info_url": "https://www.parliament.qld.gov.au/Work-of-the-Assembly/Petitions",
-            },
+            defaults={"title": "Queensland Government Petitions", "info_url": url},
         )
         self._source_au_qld_bcc, bcc_created = PetitionSource.objects.get_or_create(
             name="au_qld_bcc",
@@ -183,5 +181,5 @@ class Petitions:
         value = value.strip()
         sig = int(value, 10) if value else 0
         if sig < 1:
-            a = 1
+            pass
         return sig

@@ -35,6 +35,6 @@ def bs_breadcrumb(context, *args):
     for url_name in args:
         item_url = reverse(url_name)
         view_class = resolve(item_url).func.view_class
-        page_title = getattr(view_class, "page_title")
+        page_title = view_class.page_title
         items.append({"text": page_title, "url": item_url})
     return {"items": items}

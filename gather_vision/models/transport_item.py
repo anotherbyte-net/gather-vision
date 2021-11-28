@@ -41,41 +41,35 @@ class TransportItem(AbstractBase):
     view_url = models.URLField(
         # Link
         blank=True,
-        null=True,
         help_text="The url to view the transport notice.",
     )
     notice_type = models.CharField(
         # EventType
         blank=True,
-        null=True,
         max_length=200,
         help_text="The type of the transport notice.",
     )
     category = models.CharField(
         # Category
         blank=True,
-        null=True,
         max_length=200,
         help_text="The category of the transport notice.",
     )
     severity = models.CharField(
         # Severity
         blank=True,
-        null=True,
         max_length=200,
         help_text="The severity of the transport notice.",
     )
     timing = models.CharField(
         # When
         blank=True,
-        null=True,
         max_length=200,
         help_text="The timing of the transport notice.",
     )
     location = models.CharField(
         # Locations
         blank=True,
-        null=True,
         max_length=500,
         help_text="The location covered by the transport notice.",
     )

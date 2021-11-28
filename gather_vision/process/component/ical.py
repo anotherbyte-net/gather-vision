@@ -40,15 +40,18 @@ class ICal:
     ):
         """Add a new event to the calendar."""
 
-        # vevent: https://datatracker.ietf.org/doc/html/rfc5545#section-3.6.1
+        # vevent:
+        # https://datatracker.ietf.org/doc/html/rfc5545#section-3.6.1
         e = cal.Event()
         e.add("summary", title)
         e.add("description", body)
 
-        # dtstart: https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4
+        # dtstart:
+        # https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4
         e.add("dtstart", date_start)
 
-        # dtend: https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.2
+        # dtend:
+        # https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.2
         e.add("dtend", date_stop)
 
         if location:
@@ -65,19 +68,23 @@ class ICal:
             e.add("uid", uid)
 
         if date_stamp:
-            # dtstamp: https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.7.2
+            # dtstamp:
+            # https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.7.2
             e.add("dtstamp", date_stamp)
 
         if date_modified:
-            # last-modified: https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.7.3
+            # last-modified:
+            # https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.7.3
             e.add("last-modified", date_modified)
 
         if date_created:
-            # created: https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.7.1
+            # created:
+            # https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.7.1
             e.add("created", date_created)
 
         if sequence_num is not None:
-            # sequence: https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.7.4
+            # sequence:
+            # https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.7.4
             e.add("sequence", sequence_num)
 
         self._c.add_component(e)

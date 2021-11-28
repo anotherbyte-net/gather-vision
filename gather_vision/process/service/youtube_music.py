@@ -33,7 +33,7 @@ class YoutubeMusic:
         limit: Optional[int] = None,
     ) -> Iterable[Track]:
         """Get the tracks in the playlist."""
-        self._logger.info(f"Retrieving tracks for YouTube Music playlist.")
+        self._logger.info("Retrieving tracks for YouTube Music playlist.")
         items = self._client.playlist_tracks_get(playlist_id, limit)
         tracks = []
         for index, item in enumerate(items):

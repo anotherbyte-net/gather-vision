@@ -105,7 +105,7 @@ class SpotifyClient:
         if not limit:
             limit = 5
 
-        url = f"https://api.spotify.com/v1/search"
+        url = "https://api.spotify.com/v1/search"
         params = {
             "q": query,
             "limit": limit,

@@ -22,13 +22,13 @@ class TranslinkNotices:
 
     summary_patterns = [
         re.compile(
-            r"^\((?P<type>[^)]+)\)\s*(?P<description>.+)\.\s*Starts\s*affecting:\s*(?P<date_start>.+)$"
+            r"^\((?P<type>[^)]+)\)\s*(?P<description>.+)\.\s*Starts\s*affecting:\s*(?P<date_start>.+)$"  # noqa: E501
         ),
         re.compile(
             r"^Start\s*date:\s*(?P<date_start>[^a-z]+),\s*Services:\s*(?P<services>.+)$"
         ),
         re.compile(
-            r"^Start\s*date:\s*(?P<date_start>[^a-z]+),\s*End\s*date:\s*(?P<date_stop>[^a-z]+),\s*Services:\s*(?P<services>.+)$"
+            r"^Start\s*date:\s*(?P<date_start>[^a-z]+),\s*End\s*date:\s*(?P<date_stop>[^a-z]+),\s*Services:\s*(?P<services>.+)$"  # noqa: E501
         ),
     ]
 

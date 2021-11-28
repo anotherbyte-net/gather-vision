@@ -43,7 +43,7 @@ class Spotify:
         limit: Optional[int] = None,
     ) -> Iterable[Track]:
         """Get the tracks in the playlist."""
-        self._logger.info(f"Retrieving tracks for Spotify playlist.")
+        self._logger.info("Retrieving tracks for Spotify playlist.")
         status, content = self._client.playlist_tracks_get(
             access_token=self._access_token,
             playlist_id=playlist_id,

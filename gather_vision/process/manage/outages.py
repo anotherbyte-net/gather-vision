@@ -1,8 +1,6 @@
 from pathlib import Path
 
 import pytz
-
-from gather_vision.models import OutageItem
 from gather_vision.process.component.http_client import HttpClient
 from gather_vision.process.component.logger import Logger
 from gather_vision.process.component.normalise import Normalise
@@ -45,29 +43,31 @@ class Outages:
         raise ValueError()
 
     def import_demand(self, data: dict):
-        demand = data.get("demand")
-        rating = data.get("rating")
-        retrieved_at = self._normalise.parse_date(data.get("retrieved_at"), self._tz)
+        # demand = data.get("demand")
+        # rating = data.get("rating")
+        # retrieved_at = self._normalise.parse_date(data.get("retrieved_at"), self._tz)
         raise NotImplementedError()
 
     def import_summary(self, data: dict):
-        retrieved_at = self._normalise.parse_date(data.get("retrieved_at"), self._tz)
-        total_cust = data.get("total_cust")
-        updated_at = self._normalise.parse_date(data.get("updated_at"), self._tz)
+        # retrieved_at = self._normalise.parse_date(data.get("retrieved_at"), self._tz)
+        # total_cust = data.get("total_cust")
+        # updated_at = self._normalise.parse_date(data.get("updated_at"), self._tz)
         raise NotImplementedError()
 
     def import_info(self, data: dict):
-        event_name = data.get("event_name")
-        council = data.get("council")
-        suburb = data.get("suburb")
-        post_code = data.get("post_code")
-        cust = data.get("cust")
-        cause = data.get("cause")
-        streets = data.get("streets")
-        restored_date = data.get("restore_at")
-        retrieved_date = self._normalise.parse_date(data.get("retrieved_at"), self._tz)
+        # event_name = data.get("event_name")
+        # council = data.get("council")
+        # suburb = data.get("suburb")
+        # post_code = data.get("post_code")
+        # cust = data.get("cust")
+        # cause = data.get("cause")
+        # streets = data.get("streets")
+        # restored_date = data.get("restore_at")
 
-        outage, created = OutageItem.objects.get_or_create(defaults={})
+        # retrieved_date = data.get("retrieved_at")
+        # retrieved_date = self._normalise.parse_date(retrieved_date, self._tz)
+        #
+        # outage, created = OutageItem.objects.get_or_create(defaults={})
         raise NotImplementedError()
 
     def is_demand(self, data: dict):

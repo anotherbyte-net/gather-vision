@@ -40,7 +40,7 @@ class QldRailEvents:
         "Accept": "application/json",
         "Host": "www.queenslandrail.com.au",
         "Origin": "https://www.queenslandrail.com.au",
-        "Referer": "https://www.queenslandrail.com.au/forcustomers/trackclosures/12monthcalendar",
+        "Referer": "https://www.queenslandrail.com.au/forcustomers/trackclosures/12monthcalendar",  # noqa: E501
     }
 
     def __init__(

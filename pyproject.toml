@@ -2,7 +2,9 @@
 name = "gather-vision"
 version = "0.1.0"
 description = ""
-authors = ["Mark Cottman-Fields <cofiem@gmail.com>"]
+authors = [
+    "Mark Cottman-Fields <cofiem@gmail.com>"
+]
 
 [tool.poetry.dependencies]
 python = "^3.9"
@@ -11,7 +13,7 @@ python = "^3.9"
 Django = "^3.2.9"
 docutils = "^0.18"
 requests = "^2.26.0"
-requests-cache = {extras = ["sqlite"], version = "^0.8.1"}
+requests-cache = "^0.8.1"
 feedparser = "^6.0.8"
 
 # calendar
@@ -23,9 +25,67 @@ ytmusicapi = "^0.19.4"
 
 [tool.poetry.dev-dependencies]
 black = "^21.10b0"
-flake8 = "^4.0.1"
+flake8 = "^3.8.4"
 requests-mock = "^1.9.3"
+coverage = "^6.2"
+django-coverage-plugin = "^2.0.2"
+pytest = "^6.2.5"
+pytest-django = "^4.4.0"
+flake8-django = "^1.1.2"
+flake8-bugbear = "^21.9.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+gather-vision = "manage:main"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra --quiet"
+testpaths = [
+    "gather_vision/tests",
+]
+python_files = [
+    'tests.py',
+    'test_*.py',
+    '*_tests.py',
+]
+DJANGO_SETTINGS_MODULE = 'gather_vision_proj.settings'
+
+[tool.coverage.run]
+# "Specifying the source option enables coverage.py to report on unexecuted files,
+# since it can search the source tree for files that haven’t been measured at all."
+source = [
+    "gather_vision",
+    "gather_vision_proj",
+    "templates",
+]
+omit = [
+    "*/site-packages/*",
+    "*/tests/*",
+    "gather_vision/migrations/",
+]
+plugins = [
+    "django_coverage_plugin",
+]
+
+[tool.coverage.report]
+skip_empty = true
+
+[tool.coverage.html]
+directory = "coverage-html"
+
+[tool.black]
+line-length = 88
+target-version = [
+    "py37",
+    "py38",
+    "py39",
+]
+extend-exclude = """
+# Exclude files in addition to the defaults.
+# A regex preceded with ^/ will apply only to files and directories in the root of the project.
+gather_vision/migrations
+"""
