@@ -2,7 +2,6 @@ import json
 from datetime import tzinfo
 
 from django.utils.text import slugify
-from requests_cache import CachedSession
 
 from gather_vision.process.component.html_extract import HtmlExtract
 from gather_vision.process.component.http_client import HttpClient
@@ -63,11 +62,12 @@ class QldRailEvents:
             yield self.get_event(item)
 
     def get_items(self):
-        s = CachedSession("http_cache", backend="filesystem", use_cache_dir=True)
         # GET first to populate cookies
-        s.get(self.page_url)
+        self._http_client.get(self.page_url)
         # POST to retrieve event data
-        r2 = s.post(self.cal_url, json=self.params, headers=self.headers)
+        r2 = self._http_client.post(
+            self.cal_url, json=self.params, headers=self.headers
+        )
         # the json has syntax errors
         fix_syntax_errors = r2.text.replace('\\":,', '\\":\\"\\",')
         items = json.loads(json.loads(fix_syntax_errors))

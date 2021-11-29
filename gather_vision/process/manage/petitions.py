@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytz
 
-from gather_vision.models import PetitionSource, PetitionItem, PetitionChange
+from gather_vision import models as app_models
 from gather_vision.process.component.http_client import HttpClient
 from gather_vision.process.component.logger import Logger
 from gather_vision.process.component.normalise import Normalise
@@ -28,7 +28,14 @@ class Petitions:
         raise NotImplementedError()
 
     def import_petitions(self, path: Path):
+
+        self._logger.info("Importing petitions.")
         self.create_sources()
+
+        petitions_seen = 0
+        petitions_imported = 0
+        changes_seen = 0
+        changes_imported = 0
 
         db = SqliteClient(path)
         conn = db.get_sqlite_db()
@@ -37,16 +44,45 @@ class Petitions:
             for row in db.get_table_data(conn, table_name):
                 row_keys = list(row.keys())
                 row_values = list(row)
-                row_data = dict(zip(row_keys, row_values))
-                self.import_row(row_data)
+                data = dict(zip(row_keys, row_values))
 
-    def import_row(self, data: dict):
-        if self.is_au_qld(data):
-            return self.import_au_qld(data)
-        elif self._is_au_qld_bcc(data):
-            return self.import_au_qld_bcc(data)
+                if self.is_au_qld(data):
+                    (
+                        petition,
+                        petition_created,
+                        change,
+                        change_created,
+                    ) = self.import_au_qld(data)
+                elif self._is_au_qld_bcc(data):
+                    (
+                        petition,
+                        petition_created,
+                        change,
+                        change_created,
+                    ) = self.import_au_qld_bcc(data)
+                else:
+                    raise ValueError("Unrecognised data format.")
 
-        raise ValueError()
+                petitions_seen += 1
+                if petition_created:
+                    petitions_imported += 1
+
+                changes_seen += 1
+                if change_created:
+                    changes_imported += 1
+
+                if petitions_seen % 1000 == 0:
+                    self._logger.info(
+                        f"Running total petitions {petitions_seen} "
+                        f"({petitions_imported} imported) "
+                        f"changes {changes_seen} ({changes_imported} imported)."
+                    )
+
+        self._logger.info(
+            f"petitions {petitions_seen} ({petitions_imported} imported) "
+            f"changes {changes_seen} ({changes_imported} imported)."
+        )
+        self._logger.info("Finished importing petitions.")
 
     def import_au_qld(self, data: dict):
         source = self._source_au_qld
@@ -64,7 +100,7 @@ class Petitions:
         signatures = str(data.get("signatures", ""))
         signatures = int(signatures, 10) if signatures else 0
 
-        petition, petition_created = PetitionItem.objects.get_or_create(
+        petition, petition_created = app_models.PetitionItem.objects.get_or_create(
             source=source,
             code=code,
             defaults={
@@ -79,13 +115,13 @@ class Petitions:
             },
         )
 
-        change, change_created = PetitionChange.objects.get_or_create(
+        change, change_created = app_models.PetitionChange.objects.get_or_create(
             petition=petition,
             retrieved_date=retrieved_date,
             defaults={"signatures": signatures},
         )
 
-        return petition, change
+        return petition, petition_created, change, change_created
 
     def import_au_qld_bcc(self, data: dict):
         source = self._source_au_qld_bcc
@@ -102,7 +138,7 @@ class Petitions:
         retrieved_date = self._normalise.parse_date(data.get("retrieved_at"), self._tz)
         signatures = self._norm_signatures(str(data.get("signatures", "")))
 
-        petition, petition_created = PetitionItem.objects.get_or_create(
+        petition, petition_created = app_models.PetitionItem.objects.get_or_create(
             source=source,
             code=code,
             defaults={
@@ -115,21 +151,27 @@ class Petitions:
             },
         )
 
-        change, change_created = PetitionChange.objects.get_or_create(
+        change, change_created = app_models.PetitionChange.objects.get_or_create(
             petition=petition,
             retrieved_date=retrieved_date,
             defaults={"signatures": signatures},
         )
 
-        return petition, change
+        return petition, petition_created, change, change_created
 
     def create_sources(self):
         url = "https://www.parliament.qld.gov.au/Work-of-the-Assembly/Petitions"
-        self._source_au_qld, qld_created = PetitionSource.objects.get_or_create(
+        (
+            self._source_au_qld,
+            qld_created,
+        ) = app_models.InformationSource.objects.get_or_create(
             name="au_qld",
             defaults={"title": "Queensland Government Petitions", "info_url": url},
         )
-        self._source_au_qld_bcc, bcc_created = PetitionSource.objects.get_or_create(
+        (
+            self._source_au_qld_bcc,
+            bcc_created,
+        ) = app_models.InformationSource.objects.get_or_create(
             name="au_qld_bcc",
             defaults={
                 "title": "Brisbane City Council Petitions",

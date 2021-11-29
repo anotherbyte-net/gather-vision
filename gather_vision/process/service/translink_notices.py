@@ -4,7 +4,6 @@ from datetime import tzinfo
 
 import feedparser
 from django.utils.text import slugify
-from requests_cache import CachedSession
 
 from gather_vision.process.component.html_extract import HtmlExtract
 from gather_vision.process.component.http_client import HttpClient
@@ -21,6 +20,9 @@ class TranslinkNotices:
     notice_url = "https://translink.com.au/service-updates/rss"
 
     summary_patterns = [
+        re.compile(
+            r"^\((?P<type>[^)]+)\)\s*(?P<description>.+)\.\s*Starts\s*affecting:\s*(?P<date_start>.+)\s*Finishes affecting:\s*(?P<date_stop>.+)$"  # noqa: E501
+        ),
         re.compile(
             r"^\((?P<type>[^)]+)\)\s*(?P<description>.+)\.\s*Starts\s*affecting:\s*(?P<date_start>.+)$"  # noqa: E501
         ),
@@ -47,6 +49,7 @@ class TranslinkNotices:
     ]
 
     tag_keys = {
+        "Current": "When",
         "Upcoming": "When",
         "Minor": "Severity",
         "Major": "Severity",
@@ -79,10 +82,7 @@ class TranslinkNotices:
             yield event
 
     def get_data(self):
-        s = CachedSession("http_cache", backend="filesystem", use_cache_dir=True)
-
-        # use requests to do the actual request
-        r = s.get(self.notice_url)
+        r = self._http_client.get(self.notice_url)
 
         # build the info for feedparser
         content = io.BytesIO(r.content)

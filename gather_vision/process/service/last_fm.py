@@ -1,7 +1,5 @@
 from datetime import datetime, tzinfo
-from string import Template
 from typing import Optional
-from urllib.parse import urlencode
 
 from gather_vision.process.component.http_client import HttpClient
 from gather_vision.process.component.logger import Logger
@@ -29,7 +27,7 @@ class LastFm:
 
         self._api_key = None
 
-        self._url_template = Template("https://ws.audioscrobbler.com/2.0/?$qs")
+        self._url = "https://ws.audioscrobbler.com/2.0/"
         self._collection_config = {
             "most_popular": {
                 "method": "geo.gettoptracks",
@@ -55,15 +53,16 @@ class LastFm:
         if name not in self._collection_config:
             raise ValueError(f"Unrecognised collection name '{name}'.")
 
-        config = self._collection_config[name]
-        url = self.build_url(**config, limit=limit)
-
         # download the tracks
         self._logger.info(
             f"Downloading up to {limit} tracks "
             f"from '{self.service_name}' collection '{name}'."
         )
-        data = self._http_client.get(url)
+
+        config = self._collection_config[name]
+        params = self.build_qs(**config, limit=limit)
+
+        data = self._http_client.get(self._url, params=params)
         if data:
             data = data.json().get("tracks", {}).get("track", {})
         else:
@@ -107,7 +106,7 @@ class LastFm:
         )
         return playlist
 
-    def build_url(
+    def build_qs(
         self,
         method: str,
         country: str,
@@ -126,18 +125,15 @@ class LastFm:
         if not page or page < 1:
             raise ValueError("Must provide page greater than 0.")
 
-        qs = urlencode(
-            {
-                "api_key": self._api_key,
-                "method": method,
-                "country": country,
-                "format": output_format,
-                "limit": limit,
-                "page": page,
-            }
-        )
-        url_str = self._url_template.substitute(qs=qs)
-        return url_str
+        qs = {
+            "api_key": self._api_key,
+            "method": method,
+            "country": country,
+            "format": output_format,
+            "limit": limit,
+            "page": page,
+        }
+        return qs
 
     def login_next(self, api_key: str):
         """Get the next login token."""

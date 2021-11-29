@@ -112,7 +112,7 @@ class Normalise:
         ]
         for pattern in patterns:
             try:
-                result = datetime.strptime(value, pattern)
+                result = datetime.strptime(value.strip(), pattern)
                 if not is_aware(result):
                     result = tz.localize(result, is_dst=None)
                 return result

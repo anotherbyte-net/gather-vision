@@ -1,0 +1,3 @@
+class PetitionsAuQld:
+    # TODO
+    pass

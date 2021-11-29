@@ -27,12 +27,12 @@ class TestPlaylistsComponentLastFm(TestCase):
         self._service = LastFm(logger, http_client, normalise, tz)
         self._service.login_next(api_key)
 
-    def test_build_url_missing(self):
+    def test_build_qs_missing(self):
         # arrange
 
         # act
         with self.assertRaises(ValueError) as ar:
-            url = self._service.build_url(None, None)
+            self._service.build_qs(None, None)
 
         # assert
         self.assertEqual(str(ar.exception), "Must provide method.")
@@ -46,19 +46,23 @@ class TestPlaylistsComponentLastFm(TestCase):
         limit = 20
 
         # act
-        url = self._service.build_url(
+        qs = self._service.build_qs(
             method=method,
             country=country,
             limit=limit,
         )
 
         # assert
-        expected_url = (
-            "https://ws.audioscrobbler.com/2.0/?"
-            + f"api_key={self._api_key}&method={method}&country={country}&"
-            + f"format=json&limit={limit}&page=1"
-        )
-        self.assertEqual(url, expected_url)
+        expected_qs = {
+            "api_key": self._api_key,
+            "method": method,
+            "country": country,
+            "format": "json",
+            "limit": limit,
+            "page": 1,
+        }
+
+        self.assertEqual(qs, expected_qs)
 
     def test_get_playlist(self):
         # arrange

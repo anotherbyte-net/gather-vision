@@ -30,40 +30,41 @@ class TestPlaylistsComponentAbcRadio(TestCase):
 
         # act
         with self.assertRaises(ValueError) as ar:
-            url = self._service.build_url(
+            self._service.build_qs(
                 name=None, start_date=datetime.now(), end_date=datetime.now()
             )
 
         # assert
         self.assertEqual(str(ar.exception), "Must provide name.")
 
-    def test_build_url(self):
+    def test_build_qs(self):
         # arrange
         collection_name = "testing"
-        start_date = datetime.now() - timedelta(days=8)
-        end_date = start_date + timedelta(days=7)
+        start = datetime.now() - timedelta(days=8)
+        end = start + timedelta(days=7)
         order = "desc"
         limit = 20
 
         # act
-        url = self._service.build_url(
+        qs = self._service.build_qs(
             name=collection_name,
-            start_date=start_date,
-            end_date=end_date,
+            start_date=start,
+            end_date=end,
             order=order,
             limit=limit,
         )
 
         # assert
-        expected_url = (
-            "https://music.abcradio.net.au/api/v1/recordings/plays.json?"
-            + f"order={order}&limit={limit}&service={collection_name}&"
-            + f"from={start_date.year:04}-{start_date.month:02}-{start_date.day:02}T"
-            + f"{start_date.hour:02}%3A{start_date.minute:02}%3A{start_date.second:02}Z&"
-            + f"to={end_date.year:04}-{end_date.month:02}-{end_date.day:02}T"
-            + f"{end_date.hour:02}%3A{end_date.minute:02}%3A{end_date.second:02}Z"
-        )
-        self.assertEqual(url, expected_url)
+        expected_qs = {
+            "order": order,
+            "limit": limit,
+            "service": collection_name,
+            "from": f"{start.year:04}-{start.month:02}-{start.day:02}T"
+            f"{start.hour:02}:{start.minute:02}:{start.second:02}Z",
+            "to": f"{end.year:04}-{end.month:02}-{end.day:02}T"
+            f"{end.hour:02}:{end.minute:02}:{end.second:02}Z",
+        }
+        self.assertEqual(qs, expected_qs)
 
     def test_get_playlist(self):
         # arrange

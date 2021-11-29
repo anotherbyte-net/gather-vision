@@ -1,7 +1,5 @@
 from datetime import tzinfo, datetime, timedelta
-from string import Template
 from typing import Optional
-from urllib.parse import urlencode
 
 from gather_vision.process.component.http_client import HttpClient
 from gather_vision.process.component.logger import Logger
@@ -33,9 +31,8 @@ class AbcRadio:
         self._normalise = normalise
         self._tz = tz
 
-        self._url_template = Template(
-            "https://music.abcradio.net.au/api/v1/recordings/plays.json?$qs"
-        )
+        self._url = "https://music.abcradio.net.au/api/v1/recordings/plays.json"
+
         self._collection_config = {
             "doublej_most_played": "doublej",
             "triplej_most_played": "triplej",
@@ -70,7 +67,7 @@ class AbcRadio:
 
         # build the url
         url_name = self._collection_config[name]
-        url = self.build_url(
+        qs = self.build_qs(
             name=url_name,
             start_date=start_date,
             end_date=end_date,
@@ -82,7 +79,7 @@ class AbcRadio:
             f"Downloading up to {limit} tracks "
             f"from '{self.service_name}' collection '{name}'."
         )
-        data = self._http_client.get(url)
+        data = self._http_client.get(self._url, params=qs)
 
         # build the playlist
         playlist = Playlist(
@@ -141,14 +138,14 @@ class AbcRadio:
         )
         return playlist
 
-    def build_url(
+    def build_qs(
         self,
         name: str,
         start_date: datetime,
         end_date: datetime,
         order: str = "desc",
         limit: int = 50,
-    ) -> str:
+    ) -> dict:
 
         if not name:
             raise ValueError("Must provide name.")
@@ -161,14 +158,11 @@ class AbcRadio:
         if not limit or limit < 1:
             raise ValueError("Must provide limit greater than 0.")
 
-        qs = urlencode(
-            {
-                "order": order,
-                "limit": limit,
-                "service": name,
-                "from": f"{start_date.strftime('%Y-%m-%dT%H:%M:%SZ')}",
-                "to": f"{end_date.strftime('%Y-%m-%dT%H:%M:%SZ')}",
-            }
-        )
-        url_str = self._url_template.substitute(qs=qs)
-        return url_str
+        qs = {
+            "order": order,
+            "limit": limit,
+            "service": name,
+            "from": f"{start_date.strftime('%Y-%m-%dT%H:%M:%SZ')}",
+            "to": f"{end_date.strftime('%Y-%m-%dT%H:%M:%SZ')}",
+        }
+        return qs

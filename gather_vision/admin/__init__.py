@@ -2,7 +2,7 @@
 from .shared import InformationSourceAdmin  # noqa: F401
 
 # outages
-from .outages import OutageChangeAdmin  # noqa: F401
+from .outages import OutageGroupAdmin  # noqa: F401
 from .outages import OutageItemAdmin  # noqa: F401
 
 # petitions

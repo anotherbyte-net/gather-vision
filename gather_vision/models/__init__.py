@@ -4,7 +4,7 @@ from .information_source import InformationSource  # noqa: F401
 
 # outages
 from .outage_item import OutageItem  # noqa: F401
-from .outage_change import OutageChange  # noqa: F401
+from .outage_group import OutageGroup  # noqa: F401
 
 # petitions
 from .petition_change import PetitionChange  # noqa: F401
