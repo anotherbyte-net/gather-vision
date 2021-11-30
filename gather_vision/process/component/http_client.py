@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 import requests
 from requests import Session
 from requests_cache import CachedSession
@@ -12,7 +14,9 @@ class HttpClient:
         self._headers = {"user-agent": agent}
 
         if use_cache:
-            self._session = CachedSession(".local/http_cache", backend="sqlite")
+            self._session = CachedSession(
+                ".local/http_cache", backend="sqlite", expire_after=timedelta(days=1)
+            )
             logger.debug(f"HTTP cache: {self._session.cache.db_path}")
         else:
             self._session = Session()

@@ -9,9 +9,9 @@ from django.utils.timezone import is_aware
 
 class Normalise:
 
-    sep = "|"
-    sep_spaced = " | "
-    seps = [
+    track_sep = "|"
+    track_sep_spaced = " | "
+    track_seps = [
         "[",
         "]",
         "{",
@@ -44,12 +44,12 @@ class Normalise:
         if primary_artists and isinstance(primary_artists, str):
             artist = primary_artists or ""
         else:
-            artist = self.sep_spaced.join(primary_artists)
+            artist = self.track_sep_spaced.join(primary_artists)
 
         if featured_artists and isinstance(featured_artists, str):
-            artist += self.sep_spaced + featured_artists
+            artist += self.track_sep_spaced + featured_artists
         else:
-            artist += self.sep_spaced.join(featured_artists)
+            artist += self.track_sep_spaced.join(featured_artists)
 
         artists = self._track_norm_text(artist)
 
@@ -86,10 +86,10 @@ class Normalise:
         value1 = (value or "").casefold()
 
         value2 = value1
-        for sep in self.seps:
-            value2 = value2.replace(sep, self.sep_spaced)
+        for sep in self.track_seps:
+            value2 = value2.replace(sep, self.track_sep_spaced)
 
-        value3 = value2.split(self.sep)
+        value3 = value2.split(self.track_sep)
         value4 = [slugify(i) for i in value3]
         value5 = [i.replace("-", " ").replace("_", " ") for i in value4 if i]
         return value5
@@ -109,6 +109,8 @@ class Normalise:
             "%a, %d %b %Y",
             # 12:00 AM
             "%I:%M %p",
+            "%d %B %Y %I:%M %p",
+            "%Y-%m-%dT%H%M%S%z",
         ]
         for pattern in patterns:
             try:
@@ -145,3 +147,16 @@ class Normalise:
         if unmatched_key:
             return {unmatched_key: value}
         raise ValueError(f"No patterns matched '{value}'.")
+
+    def norm_signatures(self, value: str):
+        value = value.replace("(View signature)", "")
+        value = value.replace("\t", "")
+        value = value.replace("\r", "")
+        value = value.replace("\n", "")
+        value = value.replace("signatures", "")
+        value = value.replace("signature", "")
+        value = value.strip()
+        sig = int(value, 10) if value else 0
+        if sig < 1:
+            pass
+        return sig

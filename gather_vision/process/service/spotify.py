@@ -1,6 +1,7 @@
 from datetime import tzinfo
 from typing import Optional, Iterable
 
+import pytz
 from requests import codes
 
 from gather_vision.process.component.http_client import HttpClient
@@ -23,7 +24,7 @@ class Spotify:
         logger: Logger,
         http_client: HttpClient,
         normalise: Normalise,
-        tz: tzinfo,
+        tz: pytz.timezone,
         market: str = "AU",
     ):
         self._logger = logger

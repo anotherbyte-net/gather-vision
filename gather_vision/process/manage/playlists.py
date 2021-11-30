@@ -151,25 +151,28 @@ class Playlists:
         old_track_queries = dict([(q, i) for i in old_tracks for q in i.queries])
         new_track_queries = dict([(q, i) for i in new_tracks for q in i.queries])
 
-        matches = set()
-        old_misses = set()
-        new_misses = set()
-        for q, old_track in old_track_queries.items():
-            new_track = new_track_queries.get(q)
-            # TODO
-            if new_track:
-                matches.add(old_track)
-            else:
-                old_misses.add(old_track)
-
-        for q, new_track in new_track_queries.items():
-            old_track = old_track_queries.get(q)
-            if old_track:
-                matches.add(new_track)
-            else:
-                new_misses.add(new_track)
+        # matches = set()
+        # old_misses = set()
+        # new_misses = set()
 
         # TODO
+        for q, old_track in old_track_queries.items():
+            pass
+            # new_track = new_track_queries.get(q)
+        #     if new_track:
+        #         matches.add(old_track)
+        #     else:
+        #         old_misses.add(old_track)
+        #
+        for q, new_track in new_track_queries.items():
+            pass
+            # old_track = old_track_queries.get(q)
+        #     if old_track:
+        #         matches.add(new_track)
+        #     else:
+        #         new_misses.add(new_track)
+
+        raise NotImplementedError()
         # update_success = streaming_class.playlist_tracks_set(
         #     playlist.name, playlist_id, new_tracks, old_tracks
         # )
@@ -177,7 +180,6 @@ class Playlists:
         #     pass
 
         # streaming_class.playlist_details_set()
-        raise NotImplementedError()
 
     def _get_env_var(self, key: str):
         value = os.getenv(key)

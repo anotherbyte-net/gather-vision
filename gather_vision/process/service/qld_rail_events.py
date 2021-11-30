@@ -1,6 +1,6 @@
 import json
-from datetime import tzinfo
 
+import pytz
 from django.utils.text import slugify
 
 from gather_vision.process.component.html_extract import HtmlExtract
@@ -48,7 +48,7 @@ class QldRailEvents:
         http_client: HttpClient,
         normalise: Normalise,
         html_extract: HtmlExtract,
-        tz: tzinfo,
+        tz: pytz.timezone,
     ):
         self._logger = logger
         self._http_client = http_client
@@ -89,6 +89,7 @@ class QldRailEvents:
             tags.append(("IsDueToCrossRiverRail", "Yes"))
 
         tags.append(("Severity", "Major"))
+        tags.append(("Category", "track"))
 
         title = item.get("Title", "")
         description = self.get_description(item)

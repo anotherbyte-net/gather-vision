@@ -1,6 +1,8 @@
 from datetime import tzinfo, datetime, timedelta
 from typing import Optional
 
+import pytz
+
 from gather_vision.process.component.http_client import HttpClient
 from gather_vision.process.component.logger import Logger
 from gather_vision.process.component.normalise import Normalise
@@ -24,7 +26,11 @@ class AbcRadio:
     ]
 
     def __init__(
-        self, logger: Logger, http_client: HttpClient, normalise: Normalise, tz: tzinfo
+        self,
+        logger: Logger,
+        http_client: HttpClient,
+        normalise: Normalise,
+        tz: pytz.timezone,
     ):
         self._logger = logger
         self._http_client = http_client
@@ -93,7 +99,7 @@ class AbcRadio:
             original_artists = item["artists"]
 
             # get primary artist and featured artists
-            sep = self._normalise.sep_spaced
+            sep = self._normalise.track_sep_spaced
             primary_artists = ""
             featured_artists = ""
             for raw_artist in original_artists:

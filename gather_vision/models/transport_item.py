@@ -12,6 +12,10 @@ class TransportItem(AbstractBase):
         related_name="transport_items",
         on_delete=models.CASCADE,
     )
+    source_identifier = models.CharField(
+        max_length=200,
+        help_text="The identifier for this transport notice from the source.",
+    )
     lines = models.ManyToManyField(
         "TransportLine",
         related_name="notices",
@@ -22,6 +26,7 @@ class TransportItem(AbstractBase):
         help_text="The title of the transport notice.",
     )
     body = models.TextField(
+        blank=True,
         help_text="The text of the transport notice.",
     )
     start_date = models.DateField(
@@ -75,11 +80,9 @@ class TransportItem(AbstractBase):
     )
 
     def __str__(self):
-        result = [
-            ("source", f"{self.source.name}-{self.source.id}"),
-            ("title", self.title),
-            ("start", self.start_date.isoformat() if self.start_date else ""),
-            ("stop", self.stop_date.isoformat() if self.stop_date else ""),
-            ("lines", ", ".join(self.lines or [])),
-        ]
-        return "; ".join(f"{k}={v}" for k, v in result)
+        txt = f'{self.source.name} ({self.source.id}): "{self.title}"'
+        if self.start_date:
+            txt += f" starting {self.start_date.isoformat()}"
+        if self.stop_date:
+            txt += f" ending {self.stop_date.isoformat()}"
+        return txt

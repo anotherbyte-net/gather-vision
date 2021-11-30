@@ -1,5 +1,7 @@
-from datetime import datetime, tzinfo
+import datetime
 from typing import Optional
+
+import pytz
 
 from gather_vision.process.component.http_client import HttpClient
 from gather_vision.process.component.logger import Logger
@@ -18,7 +20,11 @@ class LastFm:
     key_api_key = "LASTFM_AUTH_API_KEY"
 
     def __init__(
-        self, logger: Logger, http_client: HttpClient, normalise: Normalise, tz: tzinfo
+        self,
+        logger: Logger,
+        http_client: HttpClient,
+        normalise: Normalise,
+        tz: pytz.timezone,
     ):
         self._logger = logger
         self._http_client = http_client
@@ -39,8 +45,8 @@ class LastFm:
         self,
         name: str,
         title: str,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
+        start_date: Optional[datetime.datetime] = None,
+        end_date: Optional[datetime.datetime] = None,
         limit: Optional[int] = None,
     ) -> Playlist:
         # set the limit

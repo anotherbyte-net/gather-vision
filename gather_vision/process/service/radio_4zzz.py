@@ -1,6 +1,7 @@
 from datetime import tzinfo, datetime, timedelta
 from typing import Optional
 
+import pytz
 from django.utils.text import slugify
 
 
@@ -19,7 +20,11 @@ class Radio4zzz:
     collection_titles = ["Most Played"]
 
     def __init__(
-        self, logger: Logger, http_client: HttpClient, normalise: Normalise, tz: tzinfo
+        self,
+        logger: Logger,
+        http_client: HttpClient,
+        normalise: Normalise,
+        tz: pytz.timezone,
     ):
         self._logger = logger
         self._http_client = http_client

@@ -1,6 +1,8 @@
 from datetime import tzinfo
 from typing import Optional, Iterable
 
+import pytz
+
 from gather_vision.process.component.http_client import HttpClient
 from gather_vision.process.component.logger import Logger
 from gather_vision.process.component.normalise import Normalise
@@ -16,7 +18,11 @@ class YoutubeMusic:
     key_config = "YOUTUBE_MUSIC_AUTH_CONFIG"
 
     def __init__(
-        self, logger: Logger, http_client: HttpClient, normalise: Normalise, tz: tzinfo
+        self,
+        logger: Logger,
+        http_client: HttpClient,
+        normalise: Normalise,
+        tz: pytz.timezone,
     ):
         self._logger = logger
         self._http_client = http_client
