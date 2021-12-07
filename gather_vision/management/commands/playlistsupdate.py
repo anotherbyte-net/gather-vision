@@ -1,4 +1,4 @@
-import pytz
+from zoneinfo import ZoneInfo
 from django.core.management.base import BaseCommand, CommandError
 
 from gather_vision.process.component.logger import Logger
@@ -9,7 +9,7 @@ class Command(BaseCommand):
     help = "Update the music playlists."
 
     def add_arguments(self, parser):
-        parser.add_argument("timezone", type=pytz.timezone)
+        parser.add_argument("timezone", type=ZoneInfo)
 
     def handle(self, *args, **options):
         logger = Logger(stdout=self.stdout, style=self.style)

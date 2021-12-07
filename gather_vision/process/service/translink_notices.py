@@ -1,6 +1,6 @@
 import re
 
-import pytz
+from zoneinfo import ZoneInfo
 import xmltodict
 from django.utils.text import slugify
 
@@ -13,10 +13,13 @@ from gather_vision.process.item.transport_event import TransportEvent
 
 class TranslinkNotices:
     code = "translink"
+    title = "Translink Service Updates"
+    short_title = "Translink"
 
     # from https://translink.com.au/about-translink/open-data
     # see also https://translink.com.au/service-updates
     notice_url = "https://translink.com.au/service-updates/rss"
+    page_url = "https://translink.com.au/service-updates"
 
     summary_patterns = [
         re.compile(
@@ -59,7 +62,7 @@ class TranslinkNotices:
         http_client: HttpClient,
         normalise: Normalise,
         html_extract: HtmlExtract,
-        tz: pytz.timezone,
+        tz: ZoneInfo,
     ):
         self._logger = logger
         self._http_client = http_client
@@ -76,8 +79,6 @@ class TranslinkNotices:
             lines = event.lines
             if lines and all(i[-1].isnumeric() for i in lines):
                 continue
-            if lines:
-                a = 1
             yield event
 
     def get_data(self):

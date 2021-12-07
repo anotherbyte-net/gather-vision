@@ -2,7 +2,7 @@ import re
 from datetime import datetime
 from typing import Iterable, Union, Optional
 
-import pytz
+from zoneinfo import ZoneInfo
 from django.utils.text import slugify
 from django.utils.timezone import is_aware
 
@@ -94,7 +94,7 @@ class Normalise:
         value5 = [i.replace("-", " ").replace("_", " ") for i in value4 if i]
         return value5
 
-    def parse_date(self, value: str, tz: pytz.timezone):
+    def parse_date(self, value: str, tz: ZoneInfo):
         if not value or not value.strip():
             return None
         patterns = [
@@ -116,7 +116,7 @@ class Normalise:
             try:
                 result = datetime.strptime(value.strip(), pattern)
                 if not is_aware(result):
-                    result = tz.localize(result, is_dst=None)
+                    result = result.replace(tzinfo=tz)
                 return result
             except ValueError:
                 continue
@@ -157,6 +157,4 @@ class Normalise:
         value = value.replace("signature", "")
         value = value.strip()
         sig = int(value, 10) if value else 0
-        if sig < 1:
-            pass
         return sig

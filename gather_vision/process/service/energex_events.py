@@ -1,4 +1,4 @@
-import pytz
+from zoneinfo import ZoneInfo
 from django.utils import timezone
 from django.utils.text import slugify
 
@@ -26,7 +26,7 @@ class EnergexEvents:
         http_client: HttpClient,
         normalise: Normalise,
         html_extract: HtmlExtract,
-        tz: pytz.timezone,
+        tz: ZoneInfo,
     ):
         self._logger = logger
         self._http_client = http_client
@@ -56,8 +56,8 @@ class EnergexEvents:
 
         group, group_created = app_models.OutageGroup.objects.get_or_create(
             source_updated_date=updated_date,
+            retrieved_date=retrieved_date,
             defaults={
-                "retrieved_date": retrieved_date,
                 "demand": demand_amount,
                 "rating": demand_rating,
                 "total_customers": customer_count,
@@ -79,8 +79,8 @@ class EnergexEvents:
             item, item_created = app_models.OutageItem.objects.update_or_create(
                 source=self._source,
                 event_name=event_name,
+                group=group,
                 defaults={
-                    "group": group,
                     "council": council or "",
                     "suburb": suburb or "",
                     "post_code": post_code or "",

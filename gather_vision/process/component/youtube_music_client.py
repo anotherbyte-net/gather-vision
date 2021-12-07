@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Optional, Iterable
 
-import pytz
+from zoneinfo import ZoneInfo
 from ytmusicapi import YTMusic
 
 from gather_vision.process.component.http_client import HttpClient
@@ -12,9 +12,7 @@ from gather_vision.process.item.track import Track
 class YoutubeMusicClient:
     """YouTube Music client."""
 
-    def __init__(
-        self, logger: Logger, http_client: HttpClient, time_zone: pytz.timezone
-    ):
+    def __init__(self, logger: Logger, http_client: HttpClient, time_zone: ZoneInfo):
         self._logger = logger
         self._http_client = http_client
         self._time_zone = time_zone

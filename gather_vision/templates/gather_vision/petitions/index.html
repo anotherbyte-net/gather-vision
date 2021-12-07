@@ -1,8 +1,18 @@
 {% extends "gather_vision/layout.html" %}
 {% load gather_vision_extras %}
+{% load static %}
 
 {% block page_title %}{% view_attr 'page_title' %}{% endblock %}
 
 {% block page_body %}
     {% bs_breadcrumb 'vision:home-index' 'vision:petitions-index' %}
+
+    {{ graph_data }}
+    {{ graph_data|json_script:"graph-change-over-time-data" }}
+
+    <div id="tester" style="width:600px;height:250px;"></div>
+
+{% endblock %}
+{% block page_scripts %}
+    <script type="module" src="{% static 'gather_vision/graph-change-over-time.js' %}"></script>
 {% endblock %}

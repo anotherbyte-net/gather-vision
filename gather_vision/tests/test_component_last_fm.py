@@ -1,6 +1,6 @@
 import uuid
 
-import pytz
+from zoneinfo import ZoneInfo
 import requests_mock
 from django.test import TestCase
 
@@ -13,7 +13,7 @@ from gather_vision.process.service.last_fm import LastFm
 class TestPlaylistsComponentLastFm(TestCase):
     def setUp(self) -> None:
         logger = Logger()
-        tz = pytz.timezone("Australia/Brisbane")
+        tz = ZoneInfo("Australia/Brisbane")
         normalise = Normalise()
         api_key = f"api_key-{uuid.uuid4()}"
         http_client = HttpClient(logger, use_cache=False)

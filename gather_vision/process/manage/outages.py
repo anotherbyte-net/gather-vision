@@ -1,6 +1,7 @@
+from datetime import timedelta
 from pathlib import Path
 
-import pytz
+from zoneinfo import ZoneInfo
 
 from gather_vision.process.component.html_extract import HtmlExtract
 from gather_vision.process.component.http_client import HttpClient
@@ -12,8 +13,10 @@ from gather_vision.process.service.energex_import import EnergexImport
 
 
 class Outages:
-    def __init__(self, logger: Logger, tz: pytz.timezone):
-        http_client = HttpClient(logger, use_cache=True)
+    def __init__(self, logger: Logger, tz: ZoneInfo):
+        http_client = HttpClient(
+            logger, use_cache=True, cache_expire=timedelta(minutes=10)
+        )
         normalise = Normalise()
         html_extract = HtmlExtract()
 
@@ -38,7 +41,6 @@ class Outages:
         self.create_energex()
         ei = EnergexImport(
             self._logger,
-            self._http_client,
             self._normalise,
             self._tz,
         )

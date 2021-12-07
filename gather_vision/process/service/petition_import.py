@@ -1,10 +1,8 @@
 from pathlib import Path
 
-import pytz
+from zoneinfo import ZoneInfo
 
 from gather_vision import models as app_models
-from gather_vision.process.component.html_extract import HtmlExtract
-from gather_vision.process.component.http_client import HttpClient
 from gather_vision.process.component.logger import Logger
 from gather_vision.process.component.normalise import Normalise
 from gather_vision.process.component.sqlite_client import SqliteClient
@@ -13,18 +11,9 @@ from gather_vision.process.service.petitions_au_qld_bcc import PetitionsAuQldBcc
 
 
 class PetitionImport:
-    def __init__(
-        self,
-        logger: Logger,
-        http_client: HttpClient,
-        normalise: Normalise,
-        html_extract: HtmlExtract,
-        tz: pytz.timezone,
-    ):
+    def __init__(self, logger: Logger, normalise: Normalise, tz: ZoneInfo):
         self._logger = logger
-        self._http_client = http_client
         self._normalise = normalise
-        self._html_extract = html_extract
         self._tz = tz
 
         self._source_au_qld = app_models.InformationSource.objects.get(

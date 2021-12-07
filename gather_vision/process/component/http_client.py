@@ -1,21 +1,27 @@
-from datetime import timedelta
-
 import requests
 from requests import Session
-from requests_cache import CachedSession
+from requests_cache import CachedSession, ExpirationTime
 
 from gather_vision.process.component.logger import Logger
 
 
 class HttpClient:
-    def __init__(self, logger: Logger, use_cache: bool = True):
+    def __init__(
+        self,
+        logger: Logger,
+        use_cache: bool = True,
+        cache_expire: ExpirationTime = None,
+    ):
         self._logger = logger
         agent = "gather-vision (+https://github.com/anotherbyte-net/gather-vision)"
         self._headers = {"user-agent": agent}
 
         if use_cache:
             self._session = CachedSession(
-                ".local/http_cache", backend="sqlite", expire_after=timedelta(days=1)
+                ".local/http_cache",
+                backend="sqlite",
+                cache_control=True,
+                expire_after=cache_expire,
             )
             logger.debug(f"HTTP cache: {self._session.cache.db_path}")
         else:

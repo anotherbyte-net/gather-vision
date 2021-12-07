@@ -1,6 +1,7 @@
+from datetime import timedelta
 from pathlib import Path
 
-import pytz
+from zoneinfo import ZoneInfo
 
 from gather_vision.process.component.html_extract import HtmlExtract
 from gather_vision.process.component.http_client import HttpClient
@@ -13,8 +14,10 @@ from gather_vision import models as app_models
 
 
 class Petitions:
-    def __init__(self, logger: Logger, tz: pytz.timezone):
-        http_client = HttpClient(logger, use_cache=True)
+    def __init__(self, logger: Logger, tz: ZoneInfo):
+        http_client = HttpClient(
+            logger, use_cache=True, cache_expire=timedelta(minutes=30)
+        )
         normalise = Normalise()
         html_extract = HtmlExtract()
         self._logger = logger
@@ -47,13 +50,7 @@ class Petitions:
     def import_petitions(self, path: Path) -> None:
         self.create_au_qld()
         self.create_au_qld_bcc()
-        pi = PetitionImport(
-            self._logger,
-            self._http_client,
-            self._normalise,
-            self._html_extract,
-            self._tz,
-        )
+        pi = PetitionImport(self._logger, self._normalise, self._tz)
         pi.import_petitions(path)
 
     def create_au_qld(self):

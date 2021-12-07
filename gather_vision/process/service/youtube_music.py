@@ -1,7 +1,5 @@
-from datetime import tzinfo
 from typing import Optional, Iterable
-
-import pytz
+from zoneinfo import ZoneInfo
 
 from gather_vision.process.component.http_client import HttpClient
 from gather_vision.process.component.logger import Logger
@@ -22,7 +20,7 @@ class YoutubeMusic:
         logger: Logger,
         http_client: HttpClient,
         normalise: Normalise,
-        tz: pytz.timezone,
+        tz: ZoneInfo,
     ):
         self._logger = logger
         self._http_client = http_client

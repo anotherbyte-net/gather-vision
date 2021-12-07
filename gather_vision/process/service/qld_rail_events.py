@@ -1,6 +1,6 @@
 import json
 
-import pytz
+from zoneinfo import ZoneInfo
 from django.utils.text import slugify
 
 from gather_vision.process.component.html_extract import HtmlExtract
@@ -12,6 +12,8 @@ from gather_vision.process.item.transport_event import TransportEvent
 
 class QldRailEvents:
     code = "qldrail"
+    title = "Queensland Rail Track Closures"
+    short_title = "Qld Rail"
 
     page_url = (
         "https://www.queenslandrail.com.au/forcustomers/trackclosures/12monthcalendar"
@@ -48,7 +50,7 @@ class QldRailEvents:
         http_client: HttpClient,
         normalise: Normalise,
         html_extract: HtmlExtract,
-        tz: pytz.timezone,
+        tz: ZoneInfo,
     ):
         self._logger = logger
         self._http_client = http_client

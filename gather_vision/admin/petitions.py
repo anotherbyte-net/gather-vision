@@ -9,6 +9,7 @@ class PetitionChangeAdmin(admin.ModelAdmin):
     date_hierarchy = "retrieved_date"
     list_filter = ("petition__source__title",)
     search_fields = ("signatures", "petition__title", "petition__code")
+    ordering = ("-retrieved_date",)
 
 
 class PetitionChangeInlineAdmin(admin.TabularInline):
@@ -28,3 +29,4 @@ class PetitionItemAdmin(admin.ModelAdmin):
     inlines = [
         PetitionChangeInlineAdmin,
     ]
+    ordering = ("-closed_date",)

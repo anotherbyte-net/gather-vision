@@ -1,4 +1,4 @@
-name: App Tests
+name: Test and build
 
 on:
   push:
@@ -11,7 +11,9 @@ defaults:
 
 jobs:
   build:
+    name: Test and build
     runs-on: ubuntu-latest
+
     strategy:
       fail-fast: false
       max-parallel: 4
@@ -21,6 +23,7 @@ jobs:
           - '3.10'
         poetry-version:
           - '1.1.12'
+
     steps:
       # These steps are trying to keep the Python package and the testing tools separate.
       # This way, the dev tools won't conflict with the package dependencies.
@@ -46,22 +49,9 @@ jobs:
             python-venv-${{ runner.os }}
             python-venv
 
-      - name: Cache Python Poetry
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.local/bin
-            ~/.cache/pypoetry
-          key: python-poetry-${{ runner.os }}-${{ matrix.python-version }}
-          restore-keys: |
-            python-poetry-${{ runner.os }}
-            python-poetry
-
       - name: Install Python Poetry
         run: |
-          if [[ ! -d ~/.local/bin ]]; then
-            curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python -
-          fi
+          curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python -
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Create and populate Python virtual environment

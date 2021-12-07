@@ -1,18 +1,13 @@
-import csv
 from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Iterable
 from typing import Optional
+from zoneinfo import ZoneInfo
 
-import icalendar as cal
-import pytz
 from django.utils import timezone
 from django.utils.text import slugify
 
 from gather_vision import models as app_models
 from gather_vision.process.component.html_extract import HtmlExtract
 from gather_vision.process.component.http_client import HttpClient
-from gather_vision.process.component.ical import ICal
 from gather_vision.process.component.logger import Logger
 from gather_vision.process.component.normalise import Normalise
 from gather_vision.process.item.transport_event import TransportEvent
@@ -40,8 +35,10 @@ class Transport:
         "inner-city": "FFFFFF",
     }
 
-    def __init__(self, logger: Logger, tz: pytz.timezone):
-        http_client = HttpClient(logger, use_cache=True)
+    def __init__(self, logger: Logger, tz: ZoneInfo):
+        http_client = HttpClient(
+            logger, use_cache=True, cache_expire=timedelta(hours=12)
+        )
         normalise = Normalise()
         html_extract = HtmlExtract()
 
@@ -180,89 +177,23 @@ class Transport:
         value = ", ".join(sorted(set([v for k, v in tags if k == key])))
         return value
 
-    def generate_ics(self, events: Iterable[TransportEvent]) -> cal.Calendar:
-        descr = "Changes and closures in the Brisbane public transport network."
-        calendar = ICal(
-            provider="gather-vision",
-            title="Brisbane Public Transport Notices",
-            description=descr,
-            tz="Australia/Brisbane",
-            ttl="PT6H",
-        )
-
-        for event in events:
-            calendar.add_event(
-                title=event.title,
-                body=event.description,
-                date_start=event.event_start,
-                date_stop=event.event_stop or event.event_start,
-                location="",
-                url="",
-                uid="",
-                date_stamp="",
-                date_modified="",
-                date_created="",
-                sequence_num="",
-            )
-
-        return calendar.get_calendar()
-
-    def ics_export(self, path: Path, events: Iterable[TransportEvent]) -> None:
-        c = self.generate_ics(events)
-        path.write_text(c.to_ical(), encoding="utf-8")
-
-    def csv_export(self, path: Path, events: Iterable[TransportEvent]) -> None:
-        with open(path, "wt", encoding="utf-8", newline="") as f:
-            writer = csv.DictWriter(f, self.cvs_headers())
-            writer.writeheader()
-            for event in events:
-                writer.writerow(self.csv_row(event))
-
-    def cvs_headers(self):
-        return [
-            "source_name",
-            "source_id",
-            "title",
-            "description",
-            "event_start",
-            "event_stop",
-            "lines",
-            "tags",
-        ]
-
-    def csv_row(self, row: TransportEvent):
-        return {
-            "source_name": row.source_name,
-            "source_id": row.source_id,
-            "title": row.title,
-            "description": row.description,
-            "event_start": row.event_start.isoformat() if row.event_start else "",
-            "event_stop": row.event_stop.isoformat() if row.event_stop else "",
-            "lines": ";".join(sorted(row.lines)),
-            "tags": ";".join(sorted([f"{k}={v}" for k, v in row.tags])),
-        }
-
     def create_au_qld_translink(self):
-        url = "https://translink.com.au/service-updates"
+
         (obj, created) = app_models.InformationSource.objects.get_or_create(
             name=TranslinkNotices.code,
             defaults={
-                "title": "Translink Service Updates",
-                "info_url": url,
+                "title": TranslinkNotices.title,
+                "info_url": TranslinkNotices.page_url,
             },
         )
         return obj, created
 
     def create_au_qld_rail(self):
-        url = (
-            "https://www.queenslandrail.com.au/"
-            "forcustomers/trackclosures/12monthcalendar"
-        )
         obj, created = app_models.InformationSource.objects.get_or_create(
             name=QldRailEvents.code,
             defaults={
-                "title": "Queensland Rail Track Closures",
-                "info_url": url,
+                "title": QldRailEvents.title,
+                "info_url": QldRailEvents.page_url,
             },
         )
         return obj, created

@@ -5,4 +5,90 @@
 
 {% block page_body %}
     {% bs_breadcrumb 'vision:home-index' 'vision:transport-index' %}
+
+    <h3>Transport Notices</h3>
+
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Choose a format</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">View transport events in different formats</h6>
+                    <ul class="nav nav-pills">
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page"
+                               href="{% url 'vision:transport-filter' transport_filter=transport_filter %}">
+                                Web Page (.html)
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               href="{% url 'vision:transport-data' transport_filter=transport_filter cust_ext='ics' %}">
+                                iCalendar (.ics)
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               href="{% url 'vision:transport-data' transport_filter=transport_filter cust_ext='csv' %}">
+                                Spreadsheet (.csv)
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               href="{% url 'vision:transport-data' transport_filter=transport_filter cust_ext='json' %}">
+                                API (.json)
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Choose the events to display</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">Show the transport events you are interested in</h6>
+                    <ul class="nav nav-pills">
+                        <li class="nav-item">
+                            {% bs_nav_link 'vision:transport-filter' 'All' transport_filter='all' %}
+                        </li>
+                        <li class="nav-item">
+                            {% bs_nav_link 'vision:transport-filter' 'Train Track Closures' transport_filter='track-closures' %}
+                        </li>
+                        <li class="nav-item">
+                            {% bs_nav_link 'vision:transport-filter' 'Train Track &amp; Access Issues' transport_filter='track-access' %}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <h3>Notices ({{ items | length }})</h3>
+
+    <div class="row row-cols-1 row-cols-md-2 g-3">
+
+        {% for item in items %}
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ item.title }}</h5>
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="card-subtitle mb-2 text-muted">{{ item.body }}</h6>
+                            <small>{{ item.date_range }}</small>
+                        </div>
+                        {% for tag in item.tags %}
+                            <span class="badge {{ tag.classes }}">{{ tag.title }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+
+    </div>
+
+    <hr>
+
 {% endblock %}

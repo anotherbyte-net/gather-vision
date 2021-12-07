@@ -1,8 +1,7 @@
 import os
 from datetime import datetime, timedelta
 from typing import Union
-
-import pytz
+from zoneinfo import ZoneInfo
 
 from gather_vision.process.component.http_client import HttpClient
 from gather_vision.process.component.logger import Logger
@@ -18,8 +17,10 @@ from gather_vision.process.service.youtube_music import (
 
 
 class Playlists:
-    def __init__(self, logger: Logger, tz: pytz.timezone):
-        http_client = HttpClient(logger, use_cache=True)
+    def __init__(self, logger: Logger, tz: ZoneInfo):
+        http_client = HttpClient(
+            logger, use_cache=True, cache_expire=timedelta(minutes=10)
+        )
         normalise = Normalise()
 
         spotify = Spotify(logger, http_client, normalise, tz)
@@ -145,39 +146,37 @@ class Playlists:
         playlist_id: str,
         playlist: Playlist,
     ):
-        old_tracks = streaming_class.playlist_tracks_get(playlist.name, playlist_id)
-        new_tracks = playlist.tracks
+        raise NotImplementedError()
+        # old_tracks = streaming_class.playlist_tracks_get(playlist.name, playlist_id)
+        # new_tracks = playlist.tracks
 
-        old_track_queries = dict([(q, i) for i in old_tracks for q in i.queries])
-        new_track_queries = dict([(q, i) for i in new_tracks for q in i.queries])
+        # old_track_queries = dict([(q, i) for i in old_tracks for q in i.queries])
+        # new_track_queries = dict([(q, i) for i in new_tracks for q in i.queries])
 
         # matches = set()
         # old_misses = set()
         # new_misses = set()
 
-        # TODO
-        for q, old_track in old_track_queries.items():
-            pass
-            # new_track = new_track_queries.get(q)
+        # for q, old_track in old_track_queries.items():
+
+        # new_track = new_track_queries.get(q)
         #     if new_track:
         #         matches.add(old_track)
         #     else:
         #         old_misses.add(old_track)
         #
-        for q, new_track in new_track_queries.items():
-            pass
-            # old_track = old_track_queries.get(q)
+        # for q, new_track in new_track_queries.items():
+
+        # old_track = old_track_queries.get(q)
         #     if old_track:
         #         matches.add(new_track)
         #     else:
         #         new_misses.add(new_track)
 
-        raise NotImplementedError()
         # update_success = streaming_class.playlist_tracks_set(
         #     playlist.name, playlist_id, new_tracks, old_tracks
         # )
         # if not update_success:
-        #     pass
 
         # streaming_class.playlist_details_set()
 

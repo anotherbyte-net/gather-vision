@@ -6,9 +6,9 @@ register = template.Library()
 
 
 @register.inclusion_tag("gather_vision/nav_link.html", takes_context=True)
-def bs_nav_link(context, url_name, display: str = None):
+def bs_nav_link(context, url_name, display: str = None, **kwargs):
     """Render a bootstrap nav anchor element."""
-    item_url = reverse(url_name)
+    item_url = reverse(url_name, kwargs=kwargs)
     if not display:
         view_class = resolve(item_url).func.view_class
         display = view_class.page_title

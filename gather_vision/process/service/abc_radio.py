@@ -1,7 +1,6 @@
-from datetime import tzinfo, datetime, timedelta
+from datetime import datetime, timedelta
 from typing import Optional
-
-import pytz
+from zoneinfo import ZoneInfo
 
 from gather_vision.process.component.http_client import HttpClient
 from gather_vision.process.component.logger import Logger
@@ -30,7 +29,7 @@ class AbcRadio:
         logger: Logger,
         http_client: HttpClient,
         normalise: Normalise,
-        tz: pytz.timezone,
+        tz: ZoneInfo,
     ):
         self._logger = logger
         self._http_client = http_client

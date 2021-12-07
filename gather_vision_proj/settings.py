@@ -26,7 +26,9 @@ SECRET_KEY = "django-insecure-c-1$8_s!b280by()+#_vx*5qv(2_-r^ogdn&jz^*=xh73b&+ss
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
 
 # Application definition
 
@@ -39,9 +41,11 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "gather_vision.apps.GatherVisionConfig",
+    "debug_toolbar",
 ]
 
 MIDDLEWARE = [
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",

@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timedelta
 
-import pytz
+from zoneinfo import ZoneInfo
 import requests_mock
 from django.test import TestCase
 
@@ -14,7 +14,7 @@ from gather_vision.process.service.abc_radio import AbcRadio
 class TestPlaylistsComponentAbcRadio(TestCase):
     def setUp(self) -> None:
         logger = Logger()
-        tz = pytz.timezone("Australia/Brisbane")
+        tz = ZoneInfo("Australia/Brisbane")
         normalise = Normalise()
         http_client = HttpClient(logger, use_cache=False)
 

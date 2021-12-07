@@ -1,9 +1,8 @@
-from datetime import tzinfo, datetime, timedelta
+from datetime import datetime, timedelta
 from typing import Optional
+from zoneinfo import ZoneInfo
 
-import pytz
 from django.utils.text import slugify
-
 
 from gather_vision.process.component.http_client import HttpClient
 from gather_vision.process.component.logger import Logger
@@ -24,7 +23,7 @@ class Radio4zzz:
         logger: Logger,
         http_client: HttpClient,
         normalise: Normalise,
-        tz: pytz.timezone,
+        tz: ZoneInfo,
     ):
         self._logger = logger
         self._http_client = http_client

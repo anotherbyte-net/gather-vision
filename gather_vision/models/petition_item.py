@@ -28,10 +28,12 @@ class PetitionItem(AbstractBase):
         help_text="The name (and address) of the principal petitioner.",
     )
     sponsor = models.CharField(
+        blank=True,
         max_length=100,
         help_text="The name of the sponsor of the petition.",
     )
     eligibility = models.CharField(
+        blank=True,
         max_length=100,
         help_text="The eligibility to sign the petition.",
     )
@@ -48,14 +50,12 @@ class PetitionItem(AbstractBase):
     )
 
     class Meta:
-        pass
-
-    constraints = [
-        models.UniqueConstraint(
-            fields=["source", "code"],
-            name="petition_item_unique_source_code",
-        )
-    ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["source", "code"],
+                name="petition_item_unique_source_code",
+            )
+        ]
 
     def __str__(self):
         return f'Started {self.opened_date}: "{self.title}"'

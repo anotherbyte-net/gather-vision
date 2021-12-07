@@ -1,27 +1,24 @@
 import hashlib
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
-import pytz
 from django.utils.text import slugify
 
-from gather_vision.process.component.http_client import HttpClient
+import gather_vision.models as app_models
 from gather_vision.process.component.logger import Logger
 from gather_vision.process.component.normalise import Normalise
 from gather_vision.process.component.sqlite_client import SqliteClient
 from gather_vision.process.service.energex_events import EnergexEvents
-import gather_vision.models as app_models
 
 
 class EnergexImport:
     def __init__(
         self,
         logger: Logger,
-        http_client: HttpClient,
         normalise: Normalise,
-        tz: pytz.timezone,
+        tz: ZoneInfo,
     ):
         self._logger = logger
-        self._http_client = http_client
         self._normalise = normalise
         self._tz = tz
 

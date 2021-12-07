@@ -1,6 +1,6 @@
 import uuid
 
-import pytz
+from zoneinfo import ZoneInfo
 from django.test import TestCase
 
 from gather_vision.process.component.http_client import HttpClient
@@ -12,7 +12,7 @@ from gather_vision.process.service.radio_4zzz import Radio4zzz
 class TestPlaylistsComponentRadio4zzz(TestCase):
     def setUp(self) -> None:
         logger = Logger()
-        tz = pytz.timezone("Australia/Brisbane")
+        tz = ZoneInfo("Australia/Brisbane")
         normalise = Normalise()
         api_key = f"api_key-{uuid.uuid4()}"
 

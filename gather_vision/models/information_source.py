@@ -21,3 +21,21 @@ class InformationSource(AbstractBase):
 
     def __str__(self):
         return f'{self.name}: "{self.title}"'
+
+    def long_dict(self):
+        return {
+            "name": self.name,
+            "title": self.title,
+            "info_url": self.info_url,
+            "created_date": self.created_date,
+            "modified_date": self.modified_date,
+        }
+
+    def long_csv(self):
+        return {
+            "name": self.name,
+            "title": self.title,
+            "info_url": self.info_url,
+            "created_date": self.created_date,
+            "modified_date": self.modified_date,
+        }

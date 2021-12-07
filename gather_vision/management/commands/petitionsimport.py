@@ -1,6 +1,6 @@
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
-import pytz
 from django.core.management.base import BaseCommand, CommandError
 
 from gather_vision.process.component.logger import Logger
@@ -11,7 +11,7 @@ class Command(BaseCommand):
     help = "Import the petitions from a sqlite file."
 
     def add_arguments(self, parser):
-        parser.add_argument("timezone", type=pytz.timezone)
+        parser.add_argument("timezone", type=ZoneInfo)
         parser.add_argument("path", type=Path)
 
     def handle(self, *args, **options):
