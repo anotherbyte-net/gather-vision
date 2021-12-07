@@ -7,4 +7,4 @@ name: "CodeQL config"
 # You can exclude the files in specific directories from analysis by
 # adding a paths-ignore array.
 paths-ignore:
-  - ./.venv
+  - '**/.venv'
