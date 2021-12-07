@@ -80,6 +80,7 @@ jobs:
         with:
           languages: ${{ matrix.language }}
           setup-python-dependencies: false
+          config-file: ./.github/codeql/codeql-config.yml
 
       - name: Autobuild
         uses: github/codeql-action/autobuild@v1
