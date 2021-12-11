@@ -25,6 +25,7 @@ class OutageItemAdmin(admin.ModelAdmin):
         "cause",
         "streets",
     )
+    ordering = ("-modified_date",)
 
 
 class OutageItemInlineAdmin(admin.TabularInline):
@@ -63,3 +64,4 @@ class OutageGroupAdmin(admin.ModelAdmin):
     list_filter = ("rating",)
     search_fields = ("demand", "total_customers")
     inlines = [OutageItemInlineAdmin]
+    ordering = ("-retrieved_date",)

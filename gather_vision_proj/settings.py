@@ -137,6 +137,12 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Cache
 # https://docs.djangoproject.com/en/3.2/topics/cache
 CACHES = {
+    # "default": {
+    #     "BACKEND": "django.core.cache.backends.dummy.DummyCache",
+    # },
+    # "testing": {
+    #     "BACKEND": "django.core.cache.backends.dummy.DummyCache",
+    # },
     "default": {
         "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
         "LOCATION": str(Path(BASE_DIR, ".local/django_cache")),

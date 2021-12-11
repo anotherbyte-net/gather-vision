@@ -4,13 +4,15 @@ from zoneinfo import ZoneInfo
 
 from django.utils.text import slugify
 
+from gather_vision import models as app_models
+from gather_vision.process import item as app_items
 from gather_vision.process.component.http_client import HttpClient
 from gather_vision.process.component.logger import Logger
 from gather_vision.process.component.normalise import Normalise
-from gather_vision.process.item.playlist import Playlist
+from gather_vision.process.service.abstract import PlaylistSource
 
 
-class Radio4zzz:
+class Radio4zzz(PlaylistSource):
     """Get playlists from Radio 4zzz."""
 
     service_name = "radio4zzz"
@@ -32,17 +34,21 @@ class Radio4zzz:
 
         self._url_programs = "https://airnet.org.au/rest/stations/4ZZZ/programs"
 
-        self._collection_config = {"most_played": self.build_most_played}
+        self._collection_config = {
+            "most_played": self.build_most_played,
+        }
+        self._collection_name_title = dict(
+            zip(self.collection_names, self.collection_titles)
+        )
 
     def get_playlist(
         self,
+        identifier: str,
         name: str,
-        title: str,
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None,
         limit: Optional[int] = None,
-    ) -> Playlist:
-
+    ):
         if name not in self._collection_config:
             raise ValueError(f"Unrecognised collection name '{name}'.")
 
@@ -97,6 +103,30 @@ class Radio4zzz:
         playlist = self._collection_config[name](tracks, limit)
         return playlist
 
+    def get_model_track(
+        self,
+        info: app_models.InformationSource,
+        track: app_items.Track,
+    ):
+        code = None
+        title = None
+        artists = None
+        info_url = None
+        image_url = None
+        musicbrainz_code = None
+        obj, created = app_models.PlaylistTrack.objects.update_or_create(
+            source=info,
+            code=code,
+            defaults={
+                "title": title,
+                "artists": artists,
+                "info_url": info_url,
+                "image_url": image_url,
+                "musicbrainz_code": musicbrainz_code,
+            },
+        )
+        return obj
+
     def get_programs(self):
         data = self._http_client.get(self._url_programs)
         return data.json()
@@ -147,14 +177,6 @@ class Radio4zzz:
 
     def build_most_played(self, tracks, limit: int):
         name = "most_played"
-        title = None
-        for n, t in zip(self.collection_names, self.collection_titles):
-            if n == name:
-                title = t
-                break
-
-        if not title:
-            raise ValueError(f"Could not find title for name '{name}'.")
 
         # find the top {limit} most played tracks
         most_played_tracks = sorted(
@@ -162,7 +184,8 @@ class Radio4zzz:
         )[:limit]
 
         # build playlist
-        playlist = Playlist(
+        title = self._collection_name_title[name]
+        playlist = app_items.Playlist(
             name=f"{self.service_name}_{name}",
             title=f"{self.service_title} {title}",
         )

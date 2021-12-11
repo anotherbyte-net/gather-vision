@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Min, Max
 
 from gather_vision.models.petition_item import PetitionItem
 
@@ -21,5 +22,16 @@ class PetitionChange(AbstractBase):
         help_text="The number of signatures.",
     )
 
+    class Meta:
+        ordering = ["retrieved_date"]
+
     def __str__(self):
         return f"{self.signatures} total signatures by {self.retrieved_date}"
+
+    @classmethod
+    def get_retrieved_date_range(cls):
+        query = cls.objects.aggregate(Max("retrieved_date"), Min("retrieved_date"))
+        return {
+            "min": query.get("retrieved_date__min"),
+            "max": query.get("retrieved_date__max"),
+        }

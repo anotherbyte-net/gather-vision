@@ -21,7 +21,7 @@ class YoutubeMusicClient:
 
     def playlist_tracks_get(
         self, playlist_id: str, limit: Optional[int] = None
-    ) -> Iterable[dict]:
+    ) -> dict:
         """Get the tracks in a playlist."""
         if not playlist_id:
             raise ValueError("Must provide playlist id.")
@@ -30,7 +30,7 @@ class YoutubeMusicClient:
             raw = self._client.get_playlist(playlist_id) or {}
         else:
             raw = self._client.get_playlist(playlist_id, limit) or {}
-        return raw.get("tracks", [])
+        return raw
 
     def playlist_tracks_set(
         self, playlist_id: str, new_tracks: Iterable[Track], old_tracks: Iterable[Track]

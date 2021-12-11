@@ -20,7 +20,7 @@ class InformationSource(AbstractBase):
     )
 
     def __str__(self):
-        return f'{self.name}: "{self.title}"'
+        return self.name
 
     def long_dict(self):
         return {

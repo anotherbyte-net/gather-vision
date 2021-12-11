@@ -25,7 +25,7 @@ class PlaylistEntry(AbstractBase):
         help_text="The position change of this entry "
         "compared to the previously generated playlist.",
     )
-    order = models.PositiveIntegerField(
+    position = models.PositiveIntegerField(
         help_text="The order of this entry in the playlist.",
     )
 
@@ -33,7 +33,13 @@ class PlaylistEntry(AbstractBase):
         verbose_name_plural = "Playlist entries"
         constraints = [
             models.UniqueConstraint(
-                fields=["playlist", "order"],
-                name="playlist_entry_unique_playlist_order",
+                fields=["playlist", "position"],
+                name="playlist_entry_unique_playlist_position",
             )
         ]
+
+    def __str__(self):
+        if self.position_change:
+            return f"in {self.position} (changed {self.position_change})"
+        else:
+            return f"in {self.position}"

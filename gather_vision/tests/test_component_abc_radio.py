@@ -110,8 +110,8 @@ class TestPlaylistsComponentAbcRadio(TestCase):
             )
 
             playlist = self._service.get_playlist(
+                identifier=collection_name,
                 name=collection_name,
-                title=track_title,
                 start_date=start_date,
                 end_date=end_date,
                 limit=limit,

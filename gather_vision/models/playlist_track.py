@@ -11,6 +11,7 @@ class PlaylistTrack(AbstractBase):
         InformationSource,
         related_name="tracks",
         on_delete=models.CASCADE,
+        help_text="The source for this track information.",
     )
     code = models.CharField(
         max_length=100,
@@ -45,3 +46,6 @@ class PlaylistTrack(AbstractBase):
                 name="music_track_unique_source_code",
             )
         ]
+
+    def __str__(self):
+        return f"{self.title} - {self.artists} ({self.code})"

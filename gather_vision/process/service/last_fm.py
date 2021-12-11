@@ -1,15 +1,17 @@
-import datetime
+from datetime import datetime
 from typing import Optional
 
 from zoneinfo import ZoneInfo
 
+from gather_vision.process import item as app_items
+from gather_vision import models as app_models
 from gather_vision.process.component.http_client import HttpClient
 from gather_vision.process.component.logger import Logger
 from gather_vision.process.component.normalise import Normalise
-from gather_vision.process.item.playlist import Playlist
+from gather_vision.process.service.abstract import AuthRequiredService, PlaylistSource
 
 
-class LastFm:
+class LastFm(AuthRequiredService, PlaylistSource):
     """Get playlists from Last.fm."""
 
     service_name = "lastfm"
@@ -40,15 +42,18 @@ class LastFm:
                 "country": "australia",
             }
         }
+        self._collection_name_title = dict(
+            zip(self.collection_names, self.collection_titles)
+        )
 
     def get_playlist(
         self,
+        identifier: str,
         name: str,
-        title: str,
-        start_date: Optional[datetime.datetime] = None,
-        end_date: Optional[datetime.datetime] = None,
+        start_date: Optional[datetime] = None,
+        end_date: Optional[datetime] = None,
         limit: Optional[int] = None,
-    ) -> Playlist:
+    ):
         # set the limit
         if not limit:
             limit = 100
@@ -75,7 +80,8 @@ class LastFm:
             data = []
 
         # build the playlist
-        playlist = Playlist(
+        title = self._collection_name_title[name]
+        playlist = app_items.Playlist(
             name=f"{self.service_name}_{name}",
             title=f"{self.service_title} {title}",
         )
@@ -112,6 +118,37 @@ class LastFm:
         )
         return playlist
 
+    def get_model_track(
+        self,
+        info: app_models.InformationSource,
+        track: app_items.Track,
+    ):
+        code = None
+        title = None
+        artists = None
+        info_url = None
+        image_url = None
+        musicbrainz_code = None
+        obj, created = app_models.PlaylistTrack.objects.update_or_create(
+            source=info,
+            code=code,
+            defaults={
+                "title": title,
+                "artists": artists,
+                "info_url": info_url,
+                "image_url": image_url,
+                "musicbrainz_code": musicbrainz_code,
+            },
+        )
+        return obj
+
+    def login_init(self, *args, **kwargs):
+        pass
+
+    def login_next(self, api_key: str):
+        """Get the next login token."""
+        self._api_key = api_key
+
     def build_qs(
         self,
         method: str,
@@ -140,7 +177,3 @@ class LastFm:
             "page": page,
         }
         return qs
-
-    def login_next(self, api_key: str):
-        """Get the next login token."""
-        self._api_key = api_key

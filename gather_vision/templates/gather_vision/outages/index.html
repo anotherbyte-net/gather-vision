@@ -7,8 +7,11 @@
 {% block page_body %}
     {% bs_breadcrumb 'vision:home-index' 'vision:outages-index' %}
 
-    {{ graph_data }}
-    {{ graph_data|json_script:"graph-change-over-time-data" }}
+    {{ graph_data | json_script:"graph-change-over-time-data" }}
+    {{ graph_layout | json_script:"graph-change-over-time-layout" }}
+    {{ graph_config | json_script:"graph-change-over-time-config" }}
+
+    <div id="graph-change-over-time-container" class="w-auto" style="height: 650px;"></div>
 
 {% endblock %}
 

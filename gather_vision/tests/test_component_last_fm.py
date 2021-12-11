@@ -94,7 +94,9 @@ class TestPlaylistsComponentLastFm(TestCase):
                 },
             )
             playlist = self._service.get_playlist(
-                name=collection_name, title=track_title, limit=limit
+                identifier=collection_name,
+                name=collection_name,
+                limit=limit,
             )
 
         # assert

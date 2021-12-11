@@ -1,6 +1,5 @@
 from django.db import models
 
-
 from gather_vision.models import AbstractBase, InformationSource
 
 
@@ -59,3 +58,20 @@ class PetitionItem(AbstractBase):
 
     def __str__(self):
         return f'Started {self.opened_date}: "{self.title}"'
+
+    @classmethod
+    def get_items(cls, **kwargs):
+        query = cls.objects.order_by("opened_date", "closed_date", "code")
+        if kwargs:
+            query = query.filter(**kwargs)
+        query = query.prefetch_related("source", "signature_changes")
+        return query
+
+    @classmethod
+    def get_data_items(cls, start_date, stop_date):
+        date_filters = {
+            "signature_changes__retrieved_date__gte": start_date,
+            "signature_changes__retrieved_date__lte": stop_date,
+        }
+        query = cls.get_items(**date_filters)
+        return query

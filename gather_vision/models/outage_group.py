@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Max, Min
 
 from gather_vision.models.abstract_base import AbstractBase
 
@@ -30,3 +31,27 @@ class OutageGroup(AbstractBase):
         if date:
             msg += f" affected on {date}"
         return msg
+
+    @classmethod
+    def get_retrieved_date_range(cls):
+        query = cls.objects.aggregate(Max("retrieved_date"), Min("retrieved_date"))
+        return {
+            "min": query.get("retrieved_date__min"),
+            "max": query.get("retrieved_date__max"),
+        }
+
+    @classmethod
+    def get_items(cls, **kwargs):
+        query = cls.objects.order_by("source_updated_date", "retrieved_date")
+        if kwargs:
+            query = query.filter(**kwargs)
+        return query
+
+    @classmethod
+    def get_data_items(cls, start_date, stop_date):
+        date_filters = {
+            "retrieved_date__gte": start_date,
+            "retrieved_date__lte": stop_date,
+        }
+        query = cls.get_items(**date_filters)
+        return query

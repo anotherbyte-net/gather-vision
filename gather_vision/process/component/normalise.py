@@ -1,9 +1,9 @@
 import re
+import unicodedata
 from datetime import datetime
 from typing import Iterable, Union, Optional
-
 from zoneinfo import ZoneInfo
-from django.utils.text import slugify
+
 from django.utils.timezone import is_aware
 
 
@@ -16,6 +16,8 @@ class Normalise:
         "]",
         "{",
         "}",
+        "(",
+        ")",
         " ft ",
         " ft. ",
         " feat ",
@@ -49,7 +51,9 @@ class Normalise:
         if featured_artists and isinstance(featured_artists, str):
             artist += self.track_sep_spaced + featured_artists
         else:
-            artist += self.track_sep_spaced.join(featured_artists)
+            artist += self.track_sep_spaced + self.track_sep_spaced.join(
+                featured_artists
+            )
 
         artists = self._track_norm_text(artist)
 
@@ -83,16 +87,26 @@ class Normalise:
         return result
 
     def _track_norm_text(self, value: str):
-        value1 = (value or "").casefold()
+        norm = value or ""
 
-        value2 = value1
         for sep in self.track_seps:
-            value2 = value2.replace(sep, self.track_sep_spaced)
+            norm = norm.replace(sep, self.track_sep_spaced)
 
-        value3 = value2.split(self.track_sep)
-        value4 = [slugify(i) for i in value3]
-        value5 = [i.replace("-", " ").replace("_", " ") for i in value4 if i]
-        return value5
+        norm = norm.split(self.track_sep)
+
+        result = []
+        for item in norm:
+            item = unicodedata.normalize("NFKD", item)
+            item = item.encode("ascii", "ignore").decode("ascii")
+            item = item.lower()
+            item = re.sub(r"[^\w\s\-\\'\.]+", " ", item)
+            item = item.replace("-", " ").replace("_", " ")
+            item = re.sub(r"\s+", " ", item)
+            item = item.strip()
+            if item:
+                result.append(item)
+
+        return result
 
     def parse_date(self, value: str, tz: ZoneInfo):
         if not value or not value.strip():

@@ -2,13 +2,15 @@ from datetime import datetime, timedelta
 from typing import Optional
 from zoneinfo import ZoneInfo
 
+from gather_vision import models as app_models
+from gather_vision.process import item as app_items
 from gather_vision.process.component.http_client import HttpClient
 from gather_vision.process.component.logger import Logger
 from gather_vision.process.component.normalise import Normalise
-from gather_vision.process.item.playlist import Playlist
+from gather_vision.process.service.abstract import PlaylistSource
 
 
-class AbcRadio:
+class AbcRadio(PlaylistSource):
     """Get playlists from ABC Radio."""
 
     service_name = "abcradio"
@@ -43,15 +45,18 @@ class AbcRadio:
             "triplej_most_played": "triplej",
             "unearthed_most_played": "unearthed",
         }
+        self._collection_name_title = dict(
+            zip(self.collection_names, self.collection_titles)
+        )
 
     def get_playlist(
         self,
+        identifier: str,
         name: str,
-        title: str,
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None,
         limit: Optional[int] = None,
-    ) -> Playlist:
+    ):
 
         # set the limit
         if not limit:
@@ -87,7 +92,8 @@ class AbcRadio:
         data = self._http_client.get(self._url, params=qs)
 
         # build the playlist
-        playlist = Playlist(
+        title = self._collection_name_title[name]
+        playlist = app_items.Playlist(
             name=f"{self.service_name}_{name}",
             title=f"{self.service_title} {title}",
         )
@@ -171,3 +177,74 @@ class AbcRadio:
             "to": f"{end_date.strftime('%Y-%m-%dT%H:%M:%SZ')}",
         }
         return qs
+
+    def get_model_track(
+        self,
+        info: app_models.InformationSource,
+        track: app_items.Track,
+    ):
+        if not info or not track or not track.raw:
+            raise ValueError(
+                f"Cannot build spotify playlist track from '{info}' '{track}'."
+            )
+
+        code = track.raw.get("arid", "")
+        title = track.raw.get("title", "")
+        artists = ", ".join(
+            [
+                i.get("name", "")
+                for i in track.raw.get("artists", [])
+                if i.get("name", "")
+            ]
+        )
+
+        urls1 = track.raw.get("links", [])
+        urls2 = [j for i in track.raw.get("releases", []) for j in i.get("links", [])]
+        urls3 = [j for i in track.raw.get("artists", []) for j in i.get("links", [])]
+        urls = urls1 + urls2 + urls3
+        info_url = next(
+            (i.get("url") for i in urls if i and "musicbrainz" not in i.get("url")), ""
+        )
+
+        images = [
+            j for i in track.raw.get("releases", []) for j in i.get("artwork", [])
+        ] + track.raw.get("artwork", [])
+
+        image_urls = sorted(images, reverse=True, key=lambda x: x.get("width"))
+        image_url = next((i.get("url") for i in image_urls if self._valid_url(i)), "")
+
+        musicbrainz_links = track.raw.get("links", []) + [
+            j for i in track.raw.get("releases", []) for j in i.get("links", [])
+        ]
+        musicbrainz_code = next(
+            (
+                i.get("id_component")
+                for i in musicbrainz_links
+                if i and "musicbrainz" in i.get("url")
+            ),
+            None,
+        )
+
+        obj, created = app_models.PlaylistTrack.objects.update_or_create(
+            source=info,
+            code=code,
+            defaults={
+                "title": title,
+                "artists": artists,
+                "info_url": info_url,
+                "image_url": image_url,
+                "musicbrainz_code": musicbrainz_code,
+            },
+        )
+        return obj
+
+    def _valid_url(self, item: dict):
+        image_max = 600
+        return all(
+            [
+                item,
+                item.get("url"),
+                item.get("width") < image_max,
+                item.get("height") < image_max,
+            ]
+        )

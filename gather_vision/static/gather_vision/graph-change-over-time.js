@@ -1,18 +1,5 @@
-
-function createGraphChangeOverTime(data) {
-    console.log(data);
-
-    let TESTER = document.getElementById('tester');
-
-    Plotly.newPlot( TESTER, [{
-
-        x: [1, 2, 3, 4, 5],
-
-        y: [1, 2, 4, 8, 16] }], {
-
-        margin: { t: 0 } } );
-}
-
-const graphChangeOverTimeData = JSON.parse(document.getElementById('graph-change-over-time-data').textContent);
-createGraphChangeOverTime(graphChangeOverTimeData);
-
+const element = 'graph-change-over-time-container';
+const data = JSON.parse(document.getElementById('graph-change-over-time-data').textContent);
+const layout = JSON.parse(document.getElementById('graph-change-over-time-layout').textContent);
+const config = JSON.parse(document.getElementById('graph-change-over-time-config').textContent);
+Plotly.newPlot(element, data, layout, config);

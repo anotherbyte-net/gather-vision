@@ -30,6 +30,7 @@ class TransportItemAdmin(admin.ModelAdmin):
         "title",
         "body",
     )
+    ordering = ("-start_date", "-stop_date")
 
 
 @admin.register(app_models.TransportLine)
@@ -37,3 +38,4 @@ class TransportLineAdmin(admin.ModelAdmin):
     list_display = ("title",)
     date_hierarchy = "modified_date"
     list_filter = ("notices__source__title",)
+    ordering = ("title",)

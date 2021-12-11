@@ -18,6 +18,28 @@ class SpotifyClient:
         self._http_client = http_client
         self._time_zone = time_zone
 
+    def playlist_get(
+        self,
+        access_token: str,
+        playlist_id: str,
+        market: str = "AU",
+    ) -> tuple[int, dict]:
+        """Get the details for a playlist and the tracks."""
+        if not access_token or not playlist_id or not market:
+            raise ValueError("Must provide access token and playlist id and market.")
+
+        url = f"https://api.spotify.com/v1/playlists/{playlist_id}"
+        params = {
+            "fields": "id,href,name,description,public,type,uri",
+            "market": market,
+        }
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+        }
+        r = self._http_client.get(url, params=params, headers=headers)
+        self._check_status(r)
+        return r.status_code, r.json()
+
     def playlist_tracks_get(
         self,
         access_token: str,
@@ -27,18 +49,17 @@ class SpotifyClient:
         market: str = "AU",
     ) -> tuple[int, dict]:
         """Get the tracks in a playlist."""
-        if not access_token or not playlist_id:
-            raise ValueError("Must provide access token and playlist id.")
+        if not access_token or not playlist_id or not market:
+            raise ValueError("Must provide access token and playlist id and market.")
         if not limit:
             limit = 100
         if not offset:
             offset = 0
-        if not market:
-            market = "AU"
 
         url = f"https://api.spotify.com/v1/playlists/{playlist_id}/tracks"
         params = {
-            "fields": "items(track(name,id,artists(name)))",
+            "fields": "items(track(name,id,href,external_urls,"
+            "artists(name,images),album(images)))",
             "market": market,
             "limit": limit,
             "offset": offset,
