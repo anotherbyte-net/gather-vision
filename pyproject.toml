@@ -1,10 +1,20 @@
 [tool.poetry]
 name = "gather-vision"
-version = "0.1.0"
-description = ""
+version = "0.2.0"
+description = "A collection of data and ideas related to society and government in Queensland, Australia."
+license = "Apache-2.0"
 authors = [
     "Mark Cottman-Fields <cofiem@gmail.com>"
 ]
+readme = "README.md"
+homepage = "https://github.com/anotherbyte-net/gather-vision"
+repository = "https://github.com/anotherbyte-net/gather-vision"
+documentation = "https://github.com/anotherbyte-net/gather-vision"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: Django",
+]
+
 
 [tool.poetry.dependencies]
 python = "^3.9"
@@ -14,6 +24,7 @@ Django = "^4.0"
 docutils = "^0.18"
 requests = "^2.26.0"
 requests-cache = "^0.8.1"
+django-environ = "^0.8.1"
 
 # calendar
 ics = "^0.7"
@@ -25,6 +36,7 @@ xmltodict = "^0.12.0"
 lxml = "^4.6.4"
 django-debug-toolbar = "^3.2.2"
 
+
 [tool.poetry.dev-dependencies]
 black = "^21.10b0"
 flake8 = "^3.9.2"
@@ -32,9 +44,9 @@ requests-mock = "^1.9.3"
 coverage = "^6.2"
 django-coverage-plugin = "^2.0.2"
 pytest = "^6.2.5"
-pytest-django = "^4.4.0"
 flake8-django = "^1.1.2"
 flake8-bugbear = "^21.9.2"
+tblib = "^1.7.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -82,9 +94,9 @@ directory = "coverage-html"
 [tool.black]
 line-length = 88
 target-version = [
-    "py37",
     "py38",
     "py39",
+    "py310",
 ]
 extend-exclude = """
 # Exclude files in addition to the defaults.

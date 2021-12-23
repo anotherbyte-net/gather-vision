@@ -42,8 +42,7 @@ class PlaylistTrack(AbstractBase):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["source", "code"],
-                name="music_track_unique_source_code",
+                fields=["source", "code"], name="music_track_unique_source_code"
             )
         ]
 

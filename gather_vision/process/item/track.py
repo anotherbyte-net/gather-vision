@@ -2,8 +2,6 @@ from dataclasses import dataclass
 
 from django.utils.text import slugify
 
-from gather_vision import models as app_models
-
 
 @dataclass(frozen=True)
 class Track:
@@ -17,7 +15,7 @@ class Track:
     queries: list[str]
     raw: dict
 
-    def matches_model(self, model: app_models.PlaylistTrack):
+    def matches_model(self, model: "PlaylistTrack"):
         """Match this track to a playlist track model using service and id."""
         track_source_name = f"{self.service_name}_{self.collection_name}"
         return track_source_name == model.source.name and model.code == self.track_id

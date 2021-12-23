@@ -1,43 +1,34 @@
-from datetime import timedelta
 from pathlib import Path
-
 from zoneinfo import ZoneInfo
 
-from gather_vision.process.component.html_extract import HtmlExtract
+import gather_vision.models as app_models
 from gather_vision.process.component.http_client import HttpClient
 from gather_vision.process.component.logger import Logger
 from gather_vision.process.component.normalise import Normalise
-from gather_vision.process.service.energex_events import EnergexEvents
-import gather_vision.models as app_models
-from gather_vision.process.service.energex_import import EnergexImport
+from gather_vision.process.service.outages.energex_events import EnergexEvents
+from gather_vision.process.service.outages.energex_import import EnergexImport
 
 
 class Outages:
-    def __init__(self, logger: Logger, tz: ZoneInfo):
-        http_client = HttpClient(
-            logger, use_cache=True, cache_expire=timedelta(minutes=10)
-        )
+    def __init__(self, logger: Logger, tz: ZoneInfo, http_client: HttpClient):
         normalise = Normalise()
-        html_extract = HtmlExtract()
 
         self._logger = logger
         self._http_client = http_client
         self._normalise = normalise
-        self._html_extract = html_extract
         self._tz = tz
 
-    def update_outages(self):
+    def run_update(self):
         self.create_energex()
         ee = EnergexEvents(
             self._logger,
             self._http_client,
             self._normalise,
-            self._html_extract,
             self._tz,
         )
         ee.update_outages()
 
-    def import_outages(self, path: Path):
+    def run_import(self, path: Path):
         self.create_energex()
         ei = EnergexImport(
             self._logger,

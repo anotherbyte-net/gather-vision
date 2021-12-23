@@ -2,8 +2,8 @@ from django.db import models
 from django.utils.translation import gettext as _
 from gather_vision.models import InformationSource
 from gather_vision.models.abstract_base import AbstractBase
-from gather_vision.process.service.qld_rail_events import QldRailEvents
-from gather_vision.process.service.translink_notices import TranslinkNotices
+from gather_vision.process.service.transport.qld_rail_events import QldRailEvents
+from gather_vision.process.service.transport.translink_notices import TranslinkNotices
 
 
 class TransportItem(AbstractBase):

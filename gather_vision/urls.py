@@ -1,6 +1,7 @@
 from django.urls import path
 from django.views.decorators.cache import cache_page
 
+from gather_vision.views.contact_tracing import ContactTracingIndexView
 from gather_vision.views.general import HomeIndexView, AboutIndexView
 from gather_vision.views.outages import OutageIndexView
 from gather_vision.views.petitions import PetitionIndexView
@@ -35,6 +36,11 @@ urlpatterns = [
         "playlists/",
         cache_page(_cache_sec)(PlaylistIndexView.as_view()),
         name="playlists-index",
+    ),
+    path(
+        "contact-tracing/",
+        cache_page(_cache_sec)(ContactTracingIndexView.as_view()),
+        name="contact-tracing-index",
     ),
     path(
         "transport/<transport_filter>/",

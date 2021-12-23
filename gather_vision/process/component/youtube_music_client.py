@@ -99,7 +99,9 @@ class YoutubeMusicClient:
     def login_token_next(self, credentials: str):
         """Get the next login token."""
         self._logger.info("Get next YouTube Music login.")
-        self._client = YTMusic(credentials)
+        self._client = YTMusic(
+            auth=credentials, requests_session=self._http_client.session
+        )
 
     def login_init(self):
         """Prompt for the initial YouTube headers."""

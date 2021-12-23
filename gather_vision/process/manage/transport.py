@@ -6,13 +6,12 @@ from django.utils import timezone
 from django.utils.text import slugify
 
 from gather_vision import models as app_models
-from gather_vision.process.component.html_extract import HtmlExtract
 from gather_vision.process.component.http_client import HttpClient
 from gather_vision.process.component.logger import Logger
 from gather_vision.process.component.normalise import Normalise
 from gather_vision.process.item.transport_event import TransportEvent
-from gather_vision.process.service.qld_rail_events import QldRailEvents
-from gather_vision.process.service.translink_notices import TranslinkNotices
+from gather_vision.process.service.transport.qld_rail_events import QldRailEvents
+from gather_vision.process.service.transport.translink_notices import TranslinkNotices
 
 
 class Transport:
@@ -35,20 +34,15 @@ class Transport:
         "inner-city": "FFFFFF",
     }
 
-    def __init__(self, logger: Logger, tz: ZoneInfo):
-        http_client = HttpClient(
-            logger, use_cache=True, cache_expire=timedelta(hours=12)
-        )
+    def __init__(self, logger: Logger, tz: ZoneInfo, http_client: HttpClient):
         normalise = Normalise()
-        html_extract = HtmlExtract()
 
         self._logger = logger
         self._http_client = http_client
         self._normalise = normalise
-        self._html_extract = html_extract
         self._tz = tz
 
-    def update_events(self):
+    def run_update(self):
         self._logger.info("Updating transport notices.")
         self.create_au_qld_translink()
         self.create_au_qld_rail()
@@ -57,14 +51,12 @@ class Transport:
             self._logger,
             self._http_client,
             self._normalise,
-            self._html_extract,
             self._tz,
         )
         qr = QldRailEvents(
             self._logger,
             self._http_client,
             self._normalise,
-            self._html_extract,
             self._tz,
         )
 

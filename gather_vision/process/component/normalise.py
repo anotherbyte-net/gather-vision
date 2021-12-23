@@ -6,6 +6,8 @@ from zoneinfo import ZoneInfo
 
 from django.utils.timezone import is_aware
 
+from gather_vision.process.component.html_extract import HtmlUrlParser, HtmlDataParser
+
 
 class Normalise:
 
@@ -66,7 +68,7 @@ class Normalise:
         featured = sorted(set(featured + other))
 
         if not title or not primary:
-            raise ValueError(f"Invalid title '{track_title}' or artist '{artist}'.")
+            raise ValueError(f"Invalid title '{title}' or primary artist '{primary}'.")
 
         # build the query strings
         queries = set()
@@ -96,8 +98,7 @@ class Normalise:
 
         result = []
         for item in norm:
-            item = unicodedata.normalize("NFKD", item)
-            item = item.encode("ascii", "ignore").decode("ascii")
+            item = unicodedata.normalize("NFKC", item)
             item = item.lower()
             item = re.sub(r"[^\w\s\-\\'\.]+", " ", item)
             item = item.replace("-", " ").replace("_", " ")
@@ -172,3 +173,15 @@ class Normalise:
         value = value.strip()
         sig = int(value, 10) if value else 0
         return sig
+
+    def extract_url_text(self, html: str):
+        """Extract html anchor href and data."""
+        parser = HtmlUrlParser()
+        links = parser.extract(html)
+        return links
+
+    def extract_html_data(self, html: str):
+        """Extract plain text from html."""
+        parser = HtmlDataParser()
+        links = parser.extract(html)
+        return links

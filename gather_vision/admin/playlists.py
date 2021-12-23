@@ -16,7 +16,13 @@ class PlaylistEntryAdmin(admin.ModelAdmin):
     list_display = ("playlist", "position", "position_change")
     date_hierarchy = "modified_date"
     list_filter = ("playlist__source__title",)
-    search_fields = ("position", "position_change", "tracks__title", "tracks_artists")
+    search_fields = (
+        "position",
+        "position_change",
+        "tracks__title",
+        "tracks__artists",
+        "tracks__code",
+    )
     ordering = ("playlist", "position")
     filter_horizontal = ("tracks",)
 

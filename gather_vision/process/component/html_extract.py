@@ -47,17 +47,3 @@ class HtmlDataParser(HTMLParser):
         self.text = ""
         self.feed(html)
         return self.text
-
-
-class HtmlExtract:
-    def get_url_text(self, html: str):
-        """Extract html anchor href and data."""
-        parser = HtmlUrlParser()
-        links = parser.extract(html)
-        return links
-
-    def get_data(self, html: str):
-        """Extract plain text from html."""
-        parser = HtmlDataParser()
-        links = parser.extract(html)
-        return links

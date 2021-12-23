@@ -1,8 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Iterable
 
-from gather_vision.process.item.track import Track
-
 
 @dataclass(frozen=True)
 class Playlist:
@@ -10,7 +8,7 @@ class Playlist:
     name: str
     title: str
 
-    tracks: list[Track] = field(default_factory=list, repr=False, compare=False)
+    tracks: list["Track"] = field(default_factory=list, repr=False, compare=False)
 
     def add_track(
         self,
@@ -24,6 +22,8 @@ class Playlist:
         queries: Iterable[str],
         raw: dict,
     ) -> None:
+        from gather_vision.process.item.track import Track
+
         self.tracks.append(
             Track(
                 service_name=service_name,

@@ -1,81 +1,69 @@
+from typing import Optional
+
 import requests
 from requests import Session
-from requests_cache import CachedSession, ExpirationTime
 
+from gather_vision.process.cache.external_http_cache import external_http_caches
 from gather_vision.process.component.logger import Logger
+from gather_vision.process.component.metadata import Metadata
 
 
 class HttpClient:
-    def __init__(
-        self,
-        logger: Logger,
-        use_cache: bool = True,
-        cache_expire: ExpirationTime = None,
-    ):
+    def __init__(self, logger: Logger, cache_alias: Optional[str] = "default"):
         self._logger = logger
-        agent = "gather-vision (+https://github.com/anotherbyte-net/gather-vision)"
-        self._headers = {"user-agent": agent}
+        self._metadata = Metadata()
 
-        if use_cache:
-            self._session = CachedSession(
-                ".local/http_cache",
-                backend="sqlite",
-                cache_control=True,
-                expire_after=cache_expire,
-            )
-            logger.debug(f"HTTP cache: {self._session.cache.db_path}")
+        agent_url = self._metadata.documentation_url()
+        agent = f"gather-vision (+{agent_url})"
+        self._headers = {"user-agent": agent}
+        self._logger.debug(f"User agent set to '{agent}'.")
+
+        if cache_alias:
+            self._session = external_http_caches[cache_alias]
+            logger.debug(f"Using external http client cache '{cache_alias}'.")
         else:
             self._session = Session()
+            logger.debug(f"Not using an external http client cache.")
+
+    @property
+    def session(self):
+        return self._session
 
     def get(self, url: str, **kwargs):
         """HTTP GET"""
-        if "headers" in kwargs:
-            kwargs["headers"] = {**kwargs["headers"], **self._headers}
+        return self._send_request("GET", url, **kwargs)
 
-        result = self._session.get(url, **kwargs)
-        if result.status_code != requests.codes.ok or not result.content:
-            self._logger.warning(
-                f"Response {result.status_code} '{result.reason}' "
-                f"length {len(result.content)} for GET {url}"
-            )
-            return None
-        return result
-
-    def head(self, url: str):
+    def head(self, url: str, **kwargs):
         """HTTP HEAD"""
-        result = self._session.head(url, headers=self._headers)
-        if result.status_code != requests.codes.ok or not result.content:
-            self._logger.warning(
-                f"Response {result.status_code} '{result.reason}' "
-                f"length {len(result.content)} for HEAD {url}"
-            )
-            return None
-        return result
+        return self._send_request("HEAD", url, **kwargs)
 
     def put(self, url: str, **kwargs):
         """HTTP PUT"""
-        if "headers" in kwargs:
-            kwargs["headers"] = {**kwargs["headers"], **self._headers}
-
-        result = self._session.put(url, **kwargs)
-        if result.status_code != requests.codes.ok or not result.content:
-            self._logger.warning(
-                f"Response {result.status_code} '{result.reason}' "
-                f"length {len(result.content)} for PUT {url}"
-            )
-            return None
-        return result
+        return self._send_request("PUT", url, **kwargs)
 
     def post(self, url: str, **kwargs):
         """HTTP POST"""
-        if "headers" in kwargs:
-            kwargs["headers"] = {**kwargs["headers"], **self._headers}
+        return self._send_request("POST", url, **kwargs)
 
-        result = self._session.post(url, **kwargs)
+    def _send_request(self, method: str, url: str, **kwargs):
+        """Send a request using the 'requests' library."""
+
+        # Add default headers.
+        # The default headers can be customised via the kwargs.
+        kwargs["headers"] = {**self._headers, **kwargs.get("headers", {})}
+
+        if "timeout" not in kwargs:
+            # Set a default timeout.
+            # Surprisingly, requests does not set a default timeout.
+            # Requests only provides an easy way to set a timeout on individual requests.
+            kwargs["timeout"] = 30
+
+        result = self._session.request(method, url, **kwargs)
+
         if result.status_code != requests.codes.ok or not result.content:
             self._logger.warning(
                 f"Response {result.status_code} '{result.reason}' "
-                f"length {len(result.content)} for POST {url}"
+                f"length {len(result.content)} for {method} {url}"
             )
             return None
         return result
