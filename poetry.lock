@@ -138,7 +138,7 @@ toml = ["tomli"]
 
 [[package]]
 name = "django"
-version = "4.0"
+version = "4.0.7"
 description = "A high-level Python web framework that encourages rapid development and clean, pragmatic design."
 category = "main"
 optional = false
@@ -186,9 +186,9 @@ optional = false
 python-versions = ">=3.4,<4"
 
 [package.extras]
-develop = ["coverage[toml] (>=5.0a4)", "pytest (>=4.6.11)", "furo (>=2021.8.17b43,<2021.9.0)", "sphinx (>=3.5.0)", "sphinx-notfound-page"]
-docs = ["furo (>=2021.8.17b43,<2021.9.0)", "sphinx (>=3.5.0)", "sphinx-notfound-page"]
-testing = ["coverage[toml] (>=5.0a4)", "pytest (>=4.6.11)"]
+testing = ["pytest (>=4.6.11)", "coverage[toml] (>=5.0a4)"]
+docs = ["sphinx-notfound-page", "sphinx (>=3.5.0)", "furo (>=2021.8.17b43,<2021.9.0)"]
+develop = ["sphinx-notfound-page", "sphinx (>=3.5.0)", "furo (>=2021.8.17b43,<2021.9.0)", "pytest (>=4.6.11)", "coverage[toml] (>=5.0a4)"]
 
 [[package]]
 name = "docutils"
@@ -349,8 +349,8 @@ optional = false
 python-versions = ">=3.6"
 
 [package.extras]
-dev = ["pre-commit", "tox"]
-testing = ["pytest", "pytest-benchmark"]
+testing = ["pytest-benchmark", "pytest"]
+dev = ["tox", "pre-commit"]
 
 [[package]]
 name = "py"
@@ -462,15 +462,15 @@ url-normalize = ">=1.4,<2.0"
 urllib3 = ">=1.25.5,<2.0.0"
 
 [package.extras]
-dynamodb = ["boto3 (>=1.15,<2.0)", "botocore (>=1.18,<2.0)"]
-all = ["boto3 (>=1.15,<2.0)", "botocore (>=1.18,<2.0)", "pymongo (>=3.0,<4.0)", "redis (>=3.0,<4.0)", "itsdangerous (>=2.0,<3.0)", "pyyaml (>=5.4)", "ujson (>=4.0)"]
-mongodb = ["pymongo (>=3.0,<4.0)"]
-redis = ["redis (>=3.0,<4.0)"]
-bson = ["bson (>=0.5)"]
-security = ["itsdangerous (>=2.0,<3.0)"]
-yaml = ["pyyaml (>=5.4)"]
+docs = ["sphinxcontrib-apidoc (>=0.3,<0.4)", "sphinx-panels (>=0.6,<0.7)", "sphinx-notfound-page", "sphinx-inline-tabs (>=2021.4.11-beta.9,<2022.0.0)", "sphinx-copybutton (>=0.3,<0.5)", "sphinx-automodapi (>=0.13,<0.14)", "sphinx-autodoc-typehints (>=1.11,<2.0)", "sphinx (==4.1.2)", "myst-parser (>=0.15.1,<0.16.0)", "linkify-it-py (>=1.0.1,<2.0.0)", "furo (>=2021.8.11-beta.42)"]
 json = ["ujson (>=4.0)"]
-docs = ["furo (>=2021.8.11-beta.42)", "linkify-it-py (>=1.0.1,<2.0.0)", "myst-parser (>=0.15.1,<0.16.0)", "sphinx (==4.1.2)", "sphinx-autodoc-typehints (>=1.11,<2.0)", "sphinx-automodapi (>=0.13,<0.14)", "sphinx-copybutton (>=0.3,<0.5)", "sphinx-inline-tabs (>=2021.4.11-beta.9,<2022.0.0)", "sphinx-notfound-page", "sphinx-panels (>=0.6,<0.7)", "sphinxcontrib-apidoc (>=0.3,<0.4)"]
+all = ["ujson (>=4.0)", "pyyaml (>=5.4)", "itsdangerous (>=2.0,<3.0)", "redis (>=3.0,<4.0)", "pymongo (>=3.0,<4.0)", "botocore (>=1.18,<2.0)", "boto3 (>=1.15,<2.0)"]
+yaml = ["pyyaml (>=5.4)"]
+security = ["itsdangerous (>=2.0,<3.0)"]
+bson = ["bson (>=0.5)"]
+redis = ["redis (>=3.0,<4.0)"]
+mongodb = ["pymongo (>=3.0,<4.0)"]
+dynamodb = ["botocore (>=1.18,<2.0)", "boto3 (>=1.15,<2.0)"]
 
 [[package]]
 name = "requests-mock"
@@ -701,8 +701,8 @@ coverage = [
     {file = "coverage-6.2.tar.gz", hash = "sha256:e2cad8093172b7d1595b4ad66f24270808658e11acf43a8f95b41276162eb5b8"},
 ]
 django = [
-    {file = "Django-4.0-py3-none-any.whl", hash = "sha256:59304646ebc6a77b9b6a59adc67d51ecb03c5e3d63ed1f14c909cdfda84e8010"},
-    {file = "Django-4.0.tar.gz", hash = "sha256:d5a8a14da819a8b9237ee4d8c78dfe056ff6e8a7511987be627192225113ee75"},
+    {file = "Django-4.0.7-py3-none-any.whl", hash = "sha256:41bd65a9e5f8a89cdbfa7a7bba45cd7431ae89e750af82dea8a35fd1a7ecbe66"},
+    {file = "Django-4.0.7.tar.gz", hash = "sha256:9c6d5ad36be798e562ddcaa6b17b1c3ff2d3c4f529a47432b69fb9a30f847461"},
 ]
 django-coverage-plugin = [
     {file = "django_coverage_plugin-2.0.2-py3-none-any.whl", hash = "sha256:4206c85ffba0301f83aecc38e5b01b1b9a4b45a545d9456a827e3fabea18d952"},
