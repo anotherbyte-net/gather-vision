@@ -12,6 +12,7 @@ from gather_vision.process.manage.outages import Outages
 from gather_vision.process.manage.petitions import Petitions
 from gather_vision.process.manage.playlists import Playlists
 from gather_vision.process.manage.transport import Transport
+from gather_vision.process.manage.water_quality import WaterQuality
 
 
 class Command(BaseCommand):
@@ -23,6 +24,7 @@ class Command(BaseCommand):
         "petitions": Petitions,
         "playlists": Playlists,
         "transport": Transport,
+        "waterquality": WaterQuality,
     }
 
     def add_arguments(self, parser):

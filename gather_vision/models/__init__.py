@@ -18,3 +18,7 @@ from .playlist_entry import PlaylistEntry  # noqa: F401
 # transport
 from .transport_item import TransportItem  # noqa: F401
 from .transport_line import TransportLine  # noqa: F401
+
+# water quality
+from .water_quality_sample import WaterQualitySample
+from .water_quality_site import WaterQualitySite

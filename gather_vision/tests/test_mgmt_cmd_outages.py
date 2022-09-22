@@ -1,8 +1,10 @@
 import unittest
 from io import StringIO
+from zoneinfo import ZoneInfo
 
 from django.core.management import call_command, CommandError
 from django.test import TestCase
+from django.utils import timezone
 
 from gather_vision import models as app_models
 from gather_vision.process.component.metadata import Metadata
@@ -205,6 +207,10 @@ class ManagementCommandOutageTest(TestCase):
         stderr = StringIO()
         operation = "update"
 
+        tz = ZoneInfo(self._tz)
+        date_now = timezone.now().astimezone(tz)
+        date_now_str = date_now.strftime("%Y-%m-%d")
+
         base_url = "https://www.energex.com.au/"
 
         demand_args = (
@@ -301,7 +307,7 @@ class ManagementCommandOutageTest(TestCase):
         objs = app_models.OutageGroup.objects.all()
         self.assertEquals(len(objs), 1)
         self.assertEqual(
-            repr(objs[0]), "<OutageGroup: 123 customers affected on 2021-12-23>"
+            repr(objs[0]), f"<OutageGroup: 123 customers affected on {date_now_str}>"
         )
 
         objs = app_models.OutageItem.objects.all()

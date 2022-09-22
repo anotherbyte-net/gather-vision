@@ -17,3 +17,7 @@ from .playlists import PlaylistTrackAdmin  # noqa: F401
 # transport
 from .transport import TransportItemAdmin  # noqa: F401
 from .transport import TransportLineAdmin  # noqa: F401
+
+# water quality
+from .water_quality import WaterQualitySampleAdmin  # noqa: F401
+from .water_quality import WaterQualitySiteAdmin  # noqa: F401

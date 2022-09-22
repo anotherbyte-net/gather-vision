@@ -1,6 +1,6 @@
 from urllib.parse import urlparse, parse_qs
 
-from environ import FileAwareEnv, ImproperlyConfigured
+from environ import ImproperlyConfigured, FileAwareEnv
 
 from gather_vision.process.item.playlist_conf import PlaylistConf
 

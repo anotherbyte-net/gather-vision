@@ -11,7 +11,7 @@ class PetitionChange(AbstractBase):
 
     petition = models.ForeignKey(
         PetitionItem,
-        models.CASCADE,
+        on_delete=models.CASCADE,
         related_name="signature_changes",
         help_text="The petition.",
     )

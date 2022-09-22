@@ -55,7 +55,8 @@ class HttpClient:
         if "timeout" not in kwargs:
             # Set a default timeout.
             # Surprisingly, requests does not set a default timeout.
-            # Requests only provides an easy way to set a timeout on individual requests.
+            # The requests library only provides an easy way
+            # to set a timeout on individual requests.
             kwargs["timeout"] = 30
 
         result = self._session.request(method, url, **kwargs)
