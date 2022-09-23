@@ -1,0 +1,127 @@
+name: Create Package
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test_lint:
+    name: Test and lint
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [ "3.7", "3.8", "3.9", "3.10", "3.11.0-rc.1" ]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          echo "::group::Pip dependencies"
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install --upgrade -r requirements-dev.txt -r requirements.txt
+          echo "::endgroup::"
+
+      - name: Run tests
+        run: |
+          echo "::group::Tests - Run tests with coverage"
+          (
+            set -o pipefail
+            python -X dev -m pytest --doctest-modules \
+              --junitxml=artifact-${{ matrix.python-version }}-pytest-coverage.xml \
+              --cov-report=term-missing:skip-covered --cov=src/ tests/ | tee artifact-${{ matrix.python-version }}-pytest-coverage.txt
+          )
+          echo "::endgroup::"
+          
+          echo "::group::Tests - Coverage report"
+          python -X dev -m coverage report || true
+          echo "::endgroup::"
+
+      - name: Pytest coverage comment
+        if: matrix.python-version == '3.9'
+        uses: MishaKav/pytest-coverage-comment@v1.1.35
+        with:
+          pytest-coverage-path: ./artifact-${{ matrix.python-version }}-pytest-coverage.txt
+          junitxml-path: ./artifact-${{ matrix.python-version }}-pytest-coverage.xml
+
+      - name: Run linters
+        run: |
+          echo "::group::Linter - mypy"
+          python -X dev -m mypy --junit-xml artifact-${{ matrix.python-version }}-mypy.xml src || true
+          echo "::endgroup::"
+          
+          echo "::group::Linter - black"
+          python -X dev -m black --check src || true
+          echo "::endgroup::"
+          
+          echo "::group::Linter - pylint"
+          python -X dev -m pylint src || true
+          echo "::endgroup::"
+          
+          echo "::group::Linter - pydocstyle"
+          python -X dev -m pydocstyle src || true
+          echo "::endgroup::"
+          
+          echo "::group::Linter - pyright"
+          python -X dev -m pyright src || true
+          echo "::endgroup::"
+          
+          echo "::group::Linter - flake8"
+          python -X dev -m flake8 src --count --show-source --statistics --exit-zero
+          echo "::endgroup::"
+          
+          echo "::group::Linter - pytype"
+          python -X dev -m pytype -j auto || true
+          echo "::endgroup::"
+
+      - name: Upload pytest test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: artifacts-${{ matrix.python-version }}
+          path: artifact-${{ matrix.python-version }}*
+        # Use always() to always run this step to publish test results when there are test failures
+        if: ${{ always() }}
+
+  build_publish:
+    name: Build and publish
+    runs-on: ubuntu-latest
+    needs: test_lint
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version: [ "3.9" ]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          echo "::group::Pip dependencies"
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install --upgrade -r requirements-dev.txt -r requirements.txt
+          echo "::endgroup::"
+
+      - name: Build a binary wheel and a source tarball
+        run: |
+          echo "::group::Build package"
+          python -m build --sdist --wheel --outdir dist/ .
+          echo "::endgroup::"
