@@ -1,6 +1,15 @@
+import sys
+
 import pytest
 
 from gather_vision.cli import main
+
+expected_version = "0.0.1"
+
+if sys.version_info.minor >= 10:
+    help_phrase_options = "options:"
+else:
+    help_phrase_options = "optional arguments:"
 
 
 @pytest.mark.parametrize("main_args,exit_code", [([], 1), (["--help"], 0)])
@@ -15,19 +24,19 @@ def test_cli_no_args(capsys, caplog, main_args, exit_code):
         "\n"
         "Obtain, extract, organise, and store information.\n"
         "\n"
-        "options:\n"
+        f"{help_phrase_options}\n"
         "  -h, --help            show this help message and exit\n"
         "  --version             show program's version number and exit\n"
         "  --log-level {debug,info,warning,error,critical}\n"
-        "                        the log level: debug, info, warning, error, "
-        "critical\n"
+        "                        The log level: 'debug', 'info', 'warning', 'error',\n"
+        "                        'critical'.\n"
         "\n"
         "Available subcommands:\n"
         "  The actions available for plugins\n"
         "\n"
         "  action                The subcommands available to interact with "
         "installed\n"
-        "                        plugins.\n"
+        "                        plugins ('list', 'update', 'show').\n"
     )
 
     stdout, stderr = capsys.readouterr()
@@ -42,6 +51,31 @@ def test_cli_no_args(capsys, caplog, main_args, exit_code):
         assert caplog.record_tuples == []
 
 
+def test_cli_version(capsys, caplog):
+    with pytest.raises(SystemExit, match="0"):
+        main(["--version"])
+
+    stdout, stderr = capsys.readouterr()
+    assert stdout == f"gather-vision {expected_version}\n"
+    assert stderr == ""
+    assert caplog.record_tuples == []
+
+
+def test_cli_list_help(capsys, caplog):
+    with pytest.raises(SystemExit, match="0"):
+        main(["list", "--help"])
+
+    stdout, stderr = capsys.readouterr()
+    assert stdout == (
+        "usage: gather-vision list [-h]\n"
+        "\n"
+        f"{help_phrase_options}\n"
+        "  -h, --help  show this help message and exit\n"
+    )
+    assert stderr == ""
+    assert caplog.record_tuples == []
+
+
 def test_cli_list(capsys, caplog):
     with pytest.raises(SystemExit, match="0"):
         main(["list"])
@@ -54,6 +88,24 @@ def test_cli_list(capsys, caplog):
         ("gather_vision.cli", 20, "Listing 0 plugins."),
         ("gather_vision.cli", 20, "Finished."),
     ]
+
+
+def test_cli_show_help(capsys, caplog):
+    with pytest.raises(SystemExit, match="0"):
+        main(["show", "--help"])
+
+    stdout, stderr = capsys.readouterr()
+    assert stdout == (
+        "usage: gather-vision show [-h] name\n"
+        "\n"
+        "positional arguments:\n"
+        "  name        The name of the group of information to show.\n"
+        "\n"
+        f"{help_phrase_options}\n"
+        "  -h, --help  show this help message and exit\n"
+    )
+    assert stderr == ""
+    assert caplog.record_tuples == []
 
 
 def test_cli_show_not_available(capsys, caplog):
@@ -72,6 +124,24 @@ def test_cli_show_not_available(capsys, caplog):
             "Error: GatherVisionException - Could not find plugin named 'not-available'.",
         ),
     ]
+
+
+def test_cli_update_help(capsys, caplog):
+    with pytest.raises(SystemExit, match="0"):
+        main(["update", "--help"])
+
+    stdout, stderr = capsys.readouterr()
+    assert stdout == (
+        "usage: gather-vision update [-h] name\n"
+        "\n"
+        "positional arguments:\n"
+        "  name        The name of the update to run.\n"
+        "\n"
+        f"{help_phrase_options}\n"
+        "  -h, --help  show this help message and exit\n"
+    )
+    assert stderr == ""
+    assert caplog.record_tuples == []
 
 
 def test_cli_update_not_available(capsys, caplog):

@@ -91,6 +91,7 @@ def main(args: typing.Optional[typing.List[str]] = None) -> int:
     parser = argparse.ArgumentParser(
         prog=utils.get_name_dash(),
         description="Obtain, extract, organise, and store information.",
+        allow_abbrev=False,
     )
     parser.add_argument(
         "--version",
@@ -101,14 +102,15 @@ def main(args: typing.Optional[typing.List[str]] = None) -> int:
         "--log-level",
         default="info",
         choices=["debug", "info", "warning", "error", "critical"],
-        help="the log level: debug, info, warning, error, critical",
+        help="The log level: 'debug', 'info', 'warning', 'error', 'critical'.",
     )
     subparsers = parser.add_subparsers(
         title="Available subcommands",
         description="The actions available for plugins",
         dest="subcommand_action",
         required=False,
-        help="The subcommands available to interact with installed plugins.",
+        help="The subcommands available to interact with "
+        "installed plugins ('list', 'update', 'show').",
         metavar="action",
     )
 

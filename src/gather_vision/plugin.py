@@ -6,7 +6,9 @@ from gather_vision import model
 
 class Entry(abc.ABC):
     """The entry point class for plugins.
-    Compatible plugins must implement this class."""
+
+    Compatible plugins must implement this class.
+    """
 
     @abc.abstractmethod
     def update(self, args: model.UpdateArgs) -> model.UpdateResult:  # noqa: U100

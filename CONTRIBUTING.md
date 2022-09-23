@@ -115,6 +115,9 @@ Test the installed package.
 ```bash
 gather-vision --version
 gather-vision --help
+gather-vision list
+gather-vision show name
+gather-vision update name
 ```
 
 If the package seems to work as expected, upload it to the live PyPI.
