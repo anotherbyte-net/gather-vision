@@ -36,7 +36,7 @@ def test_cli_no_args(capsys, caplog, main_args, exit_code):
         "\n"
         "  action                The subcommands available to interact with "
         "installed\n"
-        "                        plugins ('list', 'update', 'show').\n"
+        "                        plugins ('list', 'update').\n"
     )
 
     stdout, stderr = capsys.readouterr()
@@ -87,42 +87,6 @@ def test_cli_list(capsys, caplog):
         ("gather_vision.cli", 20, "Starting gather-vision."),
         ("gather_vision.cli", 20, "Listing 0 plugins."),
         ("gather_vision.cli", 20, "Finished."),
-    ]
-
-
-def test_cli_show_help(capsys, caplog):
-    with pytest.raises(SystemExit, match="0"):
-        main(["show", "--help"])
-
-    stdout, stderr = capsys.readouterr()
-    assert stdout == (
-        "usage: gather-vision show [-h] name\n"
-        "\n"
-        "positional arguments:\n"
-        "  name        The name of the group of information to show.\n"
-        "\n"
-        f"{help_phrase_options}\n"
-        "  -h, --help  show this help message and exit\n"
-    )
-    assert stderr == ""
-    assert caplog.record_tuples == []
-
-
-def test_cli_show_not_available(capsys, caplog):
-    with pytest.raises(SystemExit, match="1"):
-        main(["show", "not-available"])
-
-    stdout, stderr = capsys.readouterr()
-    assert stdout == ""
-    assert stderr == ""
-    assert caplog.record_tuples == [
-        ("gather_vision.cli", 20, "Starting gather-vision."),
-        ("gather_vision.cli", 20, "Showing 'not-available'."),
-        (
-            "gather_vision.cli",
-            40,
-            "Error: GatherVisionException - Could not find plugin named 'not-available'.",
-        ),
     ]
 
 

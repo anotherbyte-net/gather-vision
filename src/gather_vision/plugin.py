@@ -12,7 +12,7 @@ class Entry(abc.ABC):
 
     @abc.abstractmethod
     def update(self, args: model.UpdateArgs) -> model.UpdateResult:  # noqa: U100
-        """Run the update action.
+        """Update the data sources that match the args.
 
         Args:
             args: The arguments for update.
@@ -23,13 +23,13 @@ class Entry(abc.ABC):
         raise NotImplementedError("Must implement 'update'.")
 
     @abc.abstractmethod
-    def show(self, args: model.ShowArgs) -> model.ShowResult:  # noqa: U100
-        """Run the show action.
+    def list(self, args: model.ListArgs) -> model.ListResult:  # noqa: U100
+        """List the plugins and data sources that match the args.
 
         Args:
-            args: The arguments for show.
+            args: The arguments for list.
 
         Returns:
-            The result of the show action.
+            The result of the list action.
         """
-        raise NotImplementedError("Must implement 'show'.")
+        raise NotImplementedError("Must implement 'list'.")

@@ -27,25 +27,6 @@ def cli_update(args: argparse.Namespace) -> bool:
     return True
 
 
-def cli_show(args: argparse.Namespace) -> bool:
-    """Run the show action from the cli.
-
-    Args:
-        args: The arguments for the show action.
-
-    Returns:
-        True if there were no errors.
-    """
-    logger = logging.getLogger(__name__)
-
-    app_args = model.ShowArgs(name=args.name)
-    main_app = app.App()
-
-    logger.info("Showing '%s'.", args.name)
-    main_app.show(app_args)
-    return True
-
-
 def cli_list(
     args: argparse.Namespace,  # noqa: U100 pylint: disable=unused-argument
 ) -> bool:
@@ -63,9 +44,11 @@ def cli_list(
     main_app = app.App()
     result = main_app.list(app_args)
 
-    logger.info("Listing %s plugins.", len(result.names))
-    for index, name in enumerate(result.names):
-        logger.info("  %s) %s", index + 1, name)
+    logger.info("Listing %s plugins.", len(result.items))
+    for plugin_index, (plugin_name, data_sources) in enumerate(result.items.items()):
+        logger.info("  %s) %s", plugin_index + 1, plugin_name)
+        for data_source_index, data_source_name in enumerate(data_sources):
+            logger.info("    %s) %s", data_source_index + 1, data_source_name)
     return True
 
 
@@ -110,7 +93,7 @@ def main(args: typing.Optional[typing.List[str]] = None) -> int:
         dest="subcommand_action",
         required=False,
         help="The subcommands available to interact with "
-        "installed plugins ('list', 'update', 'show').",
+        "installed plugins ('list', 'update').",
         metavar="action",
     )
 
@@ -121,14 +104,6 @@ def main(args: typing.Optional[typing.List[str]] = None) -> int:
         help="The name of the update to run.",
     )
     parser_update.set_defaults(func=cli_update)
-
-    # create the parser for the "show" command
-    parser_show = subparsers.add_parser("show")
-    parser_show.add_argument(
-        "name",
-        help="The name of the group of information to show.",
-    )
-    parser_show.set_defaults(func=cli_show)
 
     # create the parser for the "list" command
     parser_list = subparsers.add_parser("list")

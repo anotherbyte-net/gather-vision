@@ -63,7 +63,7 @@ class App:
         Returns:
             The result of running the plugin's update process.
         """
-        named_plugin = self.plugins.get(args.name)
+        named_plugin = self.get(args.name)
         if not named_plugin:
             raise utils.GatherVisionException(
                 f"Could not find plugin named '{args.name}'."
@@ -71,26 +71,7 @@ class App:
         result = named_plugin.update(args)
         return result
 
-    def show(self, args: model.ShowArgs) -> model.ShowResult:
-        """Execute the show action for the plugin with the given name.
-
-        Args:
-            args: The show arguments.
-
-        Returns:
-            The details of the plugin.
-        """
-        named_plugin = self.plugins.get(args.name)
-        if not named_plugin:
-            raise utils.GatherVisionException(
-                f"Could not find plugin named '{args.name}'."
-            )
-        result = named_plugin.show(args)
-        return result
-
-    def list(
-        self, args: model.ListArgs  # noqa: U100 pylint: disable=unused-argument
-    ) -> model.ListResult:
+    def list(self, args: model.ListArgs) -> model.ListResult:
         """List all available plugins.
 
         Args:
@@ -99,10 +80,10 @@ class App:
         Returns:
             A list of plugins.
         """
-        names = []
-        for item in self.collect():
-            if not item:
+        items = {}
+        plugins = self.load()
+        for name, plugin_item in plugins.items():
+            if not name or not plugin_item:
                 continue
-            names.append(item.name)
-        result = model.ListResult(sorted(names))
-        return result
+            items.update(plugin_item.list(args).items)
+        return model.ListResult(items)
