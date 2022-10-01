@@ -26,11 +26,15 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/c86aff76dbe698fea1eae9d93c42e65ccfd5ba99/src/gather_vision/model.py#L1-L39" class="git-link">Browse git</a>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/7d45e6f120950d15af3632387da1d30ceaea2a32/src/gather_vision/model.py#L1-L109" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;Models used by other modules.&#34;&#34;&#34;
+import abc
 import dataclasses
 import typing
+import typing_extensions
+
+import parsel
 
 
 @dataclasses.dataclass
@@ -38,6 +42,10 @@ class UpdateArgs:
     &#34;&#34;&#34;The arguments for the update command.&#34;&#34;&#34;
 
     name: str
+    &#34;&#34;&#34;The action name.&#34;&#34;&#34;
+
+    data_source: typing.Optional[str] = None
+    &#34;&#34;&#34;The plugin data source name.&#34;&#34;&#34;
 
 
 @dataclasses.dataclass
@@ -46,27 +54,89 @@ class UpdateResult:
 
 
 @dataclasses.dataclass
-class ShowArgs:
-    &#34;&#34;&#34;The arguments for the show command.&#34;&#34;&#34;
-
-    name: str
-
-
-@dataclasses.dataclass
-class ShowResult:
-    &#34;&#34;&#34;The result from the show command.&#34;&#34;&#34;
-
-
-@dataclasses.dataclass
 class ListArgs:
     &#34;&#34;&#34;The arguments for the list command.&#34;&#34;&#34;
+
+    name: typing.Optional[str] = None
+    &#34;&#34;&#34;The plugin name.&#34;&#34;&#34;
+
+    data_source: typing.Optional[str] = None
+    &#34;&#34;&#34;The plugin data source name.&#34;&#34;&#34;
 
 
 @dataclasses.dataclass
 class ListResult:
     &#34;&#34;&#34;The result from the list command.&#34;&#34;&#34;
 
-    names: typing.List[str]</code></pre>
+    items: typing.Dict[str, typing.List[str]]
+    &#34;&#34;&#34;The map of plugin name and data sources.&#34;&#34;&#34;
+
+
+@dataclasses.dataclass
+class WebDataAvailable:
+    &#34;&#34;&#34;The web data available for providing new urls and/or items.&#34;&#34;&#34;
+
+    request_url: str
+    &#34;&#34;&#34;The requested url.&#34;&#34;&#34;
+
+    request_method: str
+    &#34;&#34;&#34;The method used for the request.&#34;&#34;&#34;
+
+    response_url: str
+    &#34;&#34;&#34;The url that provided the response.&#34;&#34;&#34;
+
+    body_text: str
+    &#34;&#34;&#34;The raw response body text.&#34;&#34;&#34;
+
+    body_data: typing.Optional[typing.List]
+    &#34;&#34;&#34;The structure body data from json or xml.&#34;&#34;&#34;
+
+    selector: typing.Optional[parsel.Selector]
+    &#34;&#34;&#34;The selector for obtaining parts of the body data.&#34;&#34;&#34;
+
+    status: int
+    &#34;&#34;&#34;The response status code.&#34;&#34;&#34;
+
+    headers: dict
+    &#34;&#34;&#34;The response headers.&#34;&#34;&#34;
+
+    meta: typing.Optional[dict] = None
+    &#34;&#34;&#34;The metadata associated with the request and response.&#34;&#34;&#34;
+
+
+class IsDataclass(typing_extensions.Protocol):
+    &#34;&#34;&#34;Allows specifying type to be any dataclass.&#34;&#34;&#34;
+
+    # the &#39;__dataclass_fields__&#39; attribute is currently (as at 3.8)
+    # the most reliable way to determine if something is a dataclass
+    __dataclass_fields__: typing.Dict
+
+
+class WebData(abc.ABC):
+    &#34;&#34;&#34;A class that retrieves web data and converts it into more urls and/or items.&#34;&#34;&#34;
+
+    @abc.abstractmethod
+    def initial_urls(self) -&gt; typing.Iterable[str]:
+        &#34;&#34;&#34;Get the initial urls.
+
+        Returns:
+            A stream of string items.
+        &#34;&#34;&#34;
+        raise NotImplementedError(&#34;Must implement &#39;initial_urls&#39;.&#34;)
+
+    @abc.abstractmethod
+    def parse_response(
+        self, data: WebDataAvailable
+    ) -&gt; typing.Generator[typing.Union[str, IsDataclass], typing.Any, typing.Any]:
+        &#34;&#34;&#34;Parse a web response and provide urls and items.
+
+        Args:
+            data: The web data available for parsing.
+
+        Returns:
+            Yield urls and/or items from the web data.
+        &#34;&#34;&#34;
+        raise NotImplementedError(&#34;Must implement &#39;parse_response&#39;.&#34;)</code></pre>
 </details>
 </section>
 <section>
@@ -78,108 +148,119 @@ class ListResult:
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
+<dt id="gather_vision.model.IsDataclass"><code class="flex name class">
+<span>class <span class="ident">IsDataclass</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Allows specifying type to be any dataclass.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/7d45e6f120950d15af3632387da1d30ceaea2a32/src/gather_vision/model.py#L77-L82" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">class IsDataclass(typing_extensions.Protocol):
+    &#34;&#34;&#34;Allows specifying type to be any dataclass.&#34;&#34;&#34;
+
+    # the &#39;__dataclass_fields__&#39; attribute is currently (as at 3.8)
+    # the most reliable way to determine if something is a dataclass
+    __dataclass_fields__: typing.Dict</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>typing.Protocol</li>
+<li>typing.Generic</li>
+</ul>
+</dd>
 <dt id="gather_vision.model.ListArgs"><code class="flex name class">
 <span>class <span class="ident">ListArgs</span></span>
+<span>(</span><span>name: Optional[str] = None, data_source: Optional[str] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The arguments for the list command.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/c86aff76dbe698fea1eae9d93c42e65ccfd5ba99/src/gather_vision/model.py#L30-L32" class="git-link">Browse git</a>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/7d45e6f120950d15af3632387da1d30ceaea2a32/src/gather_vision/model.py#L26-L34" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">@dataclasses.dataclass
 class ListArgs:
-    &#34;&#34;&#34;The arguments for the list command.&#34;&#34;&#34;</code></pre>
+    &#34;&#34;&#34;The arguments for the list command.&#34;&#34;&#34;
+
+    name: typing.Optional[str] = None
+    &#34;&#34;&#34;The plugin name.&#34;&#34;&#34;
+
+    data_source: typing.Optional[str] = None
+    &#34;&#34;&#34;The plugin data source name.&#34;&#34;&#34;</code></pre>
 </details>
+<h3>Class variables</h3>
+<dl>
+<dt id="gather_vision.model.ListArgs.data_source"><code class="name">var <span class="ident">data_source</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"><p>The plugin data source name.</p></div>
+</dd>
+<dt id="gather_vision.model.ListArgs.name"><code class="name">var <span class="ident">name</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"><p>The plugin name.</p></div>
+</dd>
+</dl>
 </dd>
 <dt id="gather_vision.model.ListResult"><code class="flex name class">
 <span>class <span class="ident">ListResult</span></span>
-<span>(</span><span>names: List[str])</span>
+<span>(</span><span>items: Dict[str, List[str]])</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The result from the list command.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/c86aff76dbe698fea1eae9d93c42e65ccfd5ba99/src/gather_vision/model.py#L35-L39" class="git-link">Browse git</a>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/7d45e6f120950d15af3632387da1d30ceaea2a32/src/gather_vision/model.py#L37-L42" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">@dataclasses.dataclass
 class ListResult:
     &#34;&#34;&#34;The result from the list command.&#34;&#34;&#34;
 
-    names: typing.List[str]</code></pre>
+    items: typing.Dict[str, typing.List[str]]
+    &#34;&#34;&#34;The map of plugin name and data sources.&#34;&#34;&#34;</code></pre>
 </details>
 <h3>Class variables</h3>
 <dl>
-<dt id="gather_vision.model.ListResult.names"><code class="name">var <span class="ident">names</span> : List[str]</code></dt>
+<dt id="gather_vision.model.ListResult.items"><code class="name">var <span class="ident">items</span> : Dict[str, List[str]]</code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>The map of plugin name and data sources.</p></div>
 </dd>
 </dl>
-</dd>
-<dt id="gather_vision.model.ShowArgs"><code class="flex name class">
-<span>class <span class="ident">ShowArgs</span></span>
-<span>(</span><span>name: str)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>The arguments for the show command.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/c86aff76dbe698fea1eae9d93c42e65ccfd5ba99/src/gather_vision/model.py#L18-L22" class="git-link">Browse git</a>
-</summary>
-<pre><code class="python">@dataclasses.dataclass
-class ShowArgs:
-    &#34;&#34;&#34;The arguments for the show command.&#34;&#34;&#34;
-
-    name: str</code></pre>
-</details>
-<h3>Class variables</h3>
-<dl>
-<dt id="gather_vision.model.ShowArgs.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
-</dd>
-<dt id="gather_vision.model.ShowResult"><code class="flex name class">
-<span>class <span class="ident">ShowResult</span></span>
-</code></dt>
-<dd>
-<div class="desc"><p>The result from the show command.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/c86aff76dbe698fea1eae9d93c42e65ccfd5ba99/src/gather_vision/model.py#L25-L27" class="git-link">Browse git</a>
-</summary>
-<pre><code class="python">@dataclasses.dataclass
-class ShowResult:
-    &#34;&#34;&#34;The result from the show command.&#34;&#34;&#34;</code></pre>
-</details>
 </dd>
 <dt id="gather_vision.model.UpdateArgs"><code class="flex name class">
 <span>class <span class="ident">UpdateArgs</span></span>
-<span>(</span><span>name: str)</span>
+<span>(</span><span>name: str, data_source: Optional[str] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The arguments for the update command.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/c86aff76dbe698fea1eae9d93c42e65ccfd5ba99/src/gather_vision/model.py#L6-L10" class="git-link">Browse git</a>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/7d45e6f120950d15af3632387da1d30ceaea2a32/src/gather_vision/model.py#L10-L18" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">@dataclasses.dataclass
 class UpdateArgs:
     &#34;&#34;&#34;The arguments for the update command.&#34;&#34;&#34;
 
-    name: str</code></pre>
+    name: str
+    &#34;&#34;&#34;The action name.&#34;&#34;&#34;
+
+    data_source: typing.Optional[str] = None
+    &#34;&#34;&#34;The plugin data source name.&#34;&#34;&#34;</code></pre>
 </details>
 <h3>Class variables</h3>
 <dl>
+<dt id="gather_vision.model.UpdateArgs.data_source"><code class="name">var <span class="ident">data_source</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"><p>The plugin data source name.</p></div>
+</dd>
 <dt id="gather_vision.model.UpdateArgs.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>The action name.</p></div>
 </dd>
 </dl>
 </dd>
@@ -191,12 +272,192 @@ class UpdateArgs:
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/c86aff76dbe698fea1eae9d93c42e65ccfd5ba99/src/gather_vision/model.py#L13-L15" class="git-link">Browse git</a>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/7d45e6f120950d15af3632387da1d30ceaea2a32/src/gather_vision/model.py#L21-L23" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">@dataclasses.dataclass
 class UpdateResult:
     &#34;&#34;&#34;The result from the update command.&#34;&#34;&#34;</code></pre>
 </details>
+</dd>
+<dt id="gather_vision.model.WebData"><code class="flex name class">
+<span>class <span class="ident">WebData</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>A class that retrieves web data and converts it into more urls and/or items.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/7d45e6f120950d15af3632387da1d30ceaea2a32/src/gather_vision/model.py#L85-L109" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">class WebData(abc.ABC):
+    &#34;&#34;&#34;A class that retrieves web data and converts it into more urls and/or items.&#34;&#34;&#34;
+
+    @abc.abstractmethod
+    def initial_urls(self) -&gt; typing.Iterable[str]:
+        &#34;&#34;&#34;Get the initial urls.
+
+        Returns:
+            A stream of string items.
+        &#34;&#34;&#34;
+        raise NotImplementedError(&#34;Must implement &#39;initial_urls&#39;.&#34;)
+
+    @abc.abstractmethod
+    def parse_response(
+        self, data: WebDataAvailable
+    ) -&gt; typing.Generator[typing.Union[str, IsDataclass], typing.Any, typing.Any]:
+        &#34;&#34;&#34;Parse a web response and provide urls and items.
+
+        Args:
+            data: The web data available for parsing.
+
+        Returns:
+            Yield urls and/or items from the web data.
+        &#34;&#34;&#34;
+        raise NotImplementedError(&#34;Must implement &#39;parse_response&#39;.&#34;)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="gather_vision.model.WebData.initial_urls"><code class="name flex">
+<span>def <span class="ident">initial_urls</span></span>(<span>self) ‑> Iterable[str]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the initial urls.</p>
+<h2 id="returns">Returns</h2>
+<p>A stream of string items.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/7d45e6f120950d15af3632387da1d30ceaea2a32/src/gather_vision/model.py#L88-L95" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">@abc.abstractmethod
+def initial_urls(self) -&gt; typing.Iterable[str]:
+    &#34;&#34;&#34;Get the initial urls.
+
+    Returns:
+        A stream of string items.
+    &#34;&#34;&#34;
+    raise NotImplementedError(&#34;Must implement &#39;initial_urls&#39;.&#34;)</code></pre>
+</details>
+</dd>
+<dt id="gather_vision.model.WebData.parse_response"><code class="name flex">
+<span>def <span class="ident">parse_response</span></span>(<span>self, data: <a title="gather_vision.model.WebDataAvailable" href="#gather_vision.model.WebDataAvailable">WebDataAvailable</a>) ‑> Generator[Union[str, <a title="gather_vision.model.IsDataclass" href="#gather_vision.model.IsDataclass">IsDataclass</a>], Any, Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Parse a web response and provide urls and items.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>data</code></strong></dt>
+<dd>The web data available for parsing.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Yield urls and/or items from the web data.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/7d45e6f120950d15af3632387da1d30ceaea2a32/src/gather_vision/model.py#L97-L109" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">@abc.abstractmethod
+def parse_response(
+    self, data: WebDataAvailable
+) -&gt; typing.Generator[typing.Union[str, IsDataclass], typing.Any, typing.Any]:
+    &#34;&#34;&#34;Parse a web response and provide urls and items.
+
+    Args:
+        data: The web data available for parsing.
+
+    Returns:
+        Yield urls and/or items from the web data.
+    &#34;&#34;&#34;
+    raise NotImplementedError(&#34;Must implement &#39;parse_response&#39;.&#34;)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="gather_vision.model.WebDataAvailable"><code class="flex name class">
+<span>class <span class="ident">WebDataAvailable</span></span>
+<span>(</span><span>request_url: str, request_method: str, response_url: str, body_text: str, body_data: Optional[List], selector: Optional[parsel.selector.Selector], status: int, headers: dict, meta: Optional[dict] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The web data available for providing new urls and/or items.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/7d45e6f120950d15af3632387da1d30ceaea2a32/src/gather_vision/model.py#L45-L74" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">@dataclasses.dataclass
+class WebDataAvailable:
+    &#34;&#34;&#34;The web data available for providing new urls and/or items.&#34;&#34;&#34;
+
+    request_url: str
+    &#34;&#34;&#34;The requested url.&#34;&#34;&#34;
+
+    request_method: str
+    &#34;&#34;&#34;The method used for the request.&#34;&#34;&#34;
+
+    response_url: str
+    &#34;&#34;&#34;The url that provided the response.&#34;&#34;&#34;
+
+    body_text: str
+    &#34;&#34;&#34;The raw response body text.&#34;&#34;&#34;
+
+    body_data: typing.Optional[typing.List]
+    &#34;&#34;&#34;The structure body data from json or xml.&#34;&#34;&#34;
+
+    selector: typing.Optional[parsel.Selector]
+    &#34;&#34;&#34;The selector for obtaining parts of the body data.&#34;&#34;&#34;
+
+    status: int
+    &#34;&#34;&#34;The response status code.&#34;&#34;&#34;
+
+    headers: dict
+    &#34;&#34;&#34;The response headers.&#34;&#34;&#34;
+
+    meta: typing.Optional[dict] = None
+    &#34;&#34;&#34;The metadata associated with the request and response.&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="gather_vision.model.WebDataAvailable.body_data"><code class="name">var <span class="ident">body_data</span> : Optional[List]</code></dt>
+<dd>
+<div class="desc"><p>The structure body data from json or xml.</p></div>
+</dd>
+<dt id="gather_vision.model.WebDataAvailable.body_text"><code class="name">var <span class="ident">body_text</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The raw response body text.</p></div>
+</dd>
+<dt id="gather_vision.model.WebDataAvailable.headers"><code class="name">var <span class="ident">headers</span> : dict</code></dt>
+<dd>
+<div class="desc"><p>The response headers.</p></div>
+</dd>
+<dt id="gather_vision.model.WebDataAvailable.meta"><code class="name">var <span class="ident">meta</span> : Optional[dict]</code></dt>
+<dd>
+<div class="desc"><p>The metadata associated with the request and response.</p></div>
+</dd>
+<dt id="gather_vision.model.WebDataAvailable.request_method"><code class="name">var <span class="ident">request_method</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The method used for the request.</p></div>
+</dd>
+<dt id="gather_vision.model.WebDataAvailable.request_url"><code class="name">var <span class="ident">request_url</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The requested url.</p></div>
+</dd>
+<dt id="gather_vision.model.WebDataAvailable.response_url"><code class="name">var <span class="ident">response_url</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The url that provided the response.</p></div>
+</dd>
+<dt id="gather_vision.model.WebDataAvailable.selector"><code class="name">var <span class="ident">selector</span> : Optional[parsel.selector.Selector]</code></dt>
+<dd>
+<div class="desc"><p>The selector for obtaining parts of the body data.</p></div>
+</dd>
+<dt id="gather_vision.model.WebDataAvailable.status"><code class="name">var <span class="ident">status</span> : int</code></dt>
+<dd>
+<div class="desc"><p>The response status code.</p></div>
+</dd>
+</dl>
 </dd>
 </dl>
 </section>
@@ -261,31 +522,51 @@ setTimeout(() => input.focus(), 100);
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
+<h4><code><a title="gather_vision.model.IsDataclass" href="#gather_vision.model.IsDataclass">IsDataclass</a></code></h4>
+</li>
+<li>
 <h4><code><a title="gather_vision.model.ListArgs" href="#gather_vision.model.ListArgs">ListArgs</a></code></h4>
+<ul class="">
+<li><code><a title="gather_vision.model.ListArgs.data_source" href="#gather_vision.model.ListArgs.data_source">data_source</a></code></li>
+<li><code><a title="gather_vision.model.ListArgs.name" href="#gather_vision.model.ListArgs.name">name</a></code></li>
+</ul>
 </li>
 <li>
 <h4><code><a title="gather_vision.model.ListResult" href="#gather_vision.model.ListResult">ListResult</a></code></h4>
 <ul class="">
-<li><code><a title="gather_vision.model.ListResult.names" href="#gather_vision.model.ListResult.names">names</a></code></li>
+<li><code><a title="gather_vision.model.ListResult.items" href="#gather_vision.model.ListResult.items">items</a></code></li>
 </ul>
-</li>
-<li>
-<h4><code><a title="gather_vision.model.ShowArgs" href="#gather_vision.model.ShowArgs">ShowArgs</a></code></h4>
-<ul class="">
-<li><code><a title="gather_vision.model.ShowArgs.name" href="#gather_vision.model.ShowArgs.name">name</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="gather_vision.model.ShowResult" href="#gather_vision.model.ShowResult">ShowResult</a></code></h4>
 </li>
 <li>
 <h4><code><a title="gather_vision.model.UpdateArgs" href="#gather_vision.model.UpdateArgs">UpdateArgs</a></code></h4>
 <ul class="">
+<li><code><a title="gather_vision.model.UpdateArgs.data_source" href="#gather_vision.model.UpdateArgs.data_source">data_source</a></code></li>
 <li><code><a title="gather_vision.model.UpdateArgs.name" href="#gather_vision.model.UpdateArgs.name">name</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="gather_vision.model.UpdateResult" href="#gather_vision.model.UpdateResult">UpdateResult</a></code></h4>
+</li>
+<li>
+<h4><code><a title="gather_vision.model.WebData" href="#gather_vision.model.WebData">WebData</a></code></h4>
+<ul class="">
+<li><code><a title="gather_vision.model.WebData.initial_urls" href="#gather_vision.model.WebData.initial_urls">initial_urls</a></code></li>
+<li><code><a title="gather_vision.model.WebData.parse_response" href="#gather_vision.model.WebData.parse_response">parse_response</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="gather_vision.model.WebDataAvailable" href="#gather_vision.model.WebDataAvailable">WebDataAvailable</a></code></h4>
+<ul class="two-column">
+<li><code><a title="gather_vision.model.WebDataAvailable.body_data" href="#gather_vision.model.WebDataAvailable.body_data">body_data</a></code></li>
+<li><code><a title="gather_vision.model.WebDataAvailable.body_text" href="#gather_vision.model.WebDataAvailable.body_text">body_text</a></code></li>
+<li><code><a title="gather_vision.model.WebDataAvailable.headers" href="#gather_vision.model.WebDataAvailable.headers">headers</a></code></li>
+<li><code><a title="gather_vision.model.WebDataAvailable.meta" href="#gather_vision.model.WebDataAvailable.meta">meta</a></code></li>
+<li><code><a title="gather_vision.model.WebDataAvailable.request_method" href="#gather_vision.model.WebDataAvailable.request_method">request_method</a></code></li>
+<li><code><a title="gather_vision.model.WebDataAvailable.request_url" href="#gather_vision.model.WebDataAvailable.request_url">request_url</a></code></li>
+<li><code><a title="gather_vision.model.WebDataAvailable.response_url" href="#gather_vision.model.WebDataAvailable.response_url">response_url</a></code></li>
+<li><code><a title="gather_vision.model.WebDataAvailable.selector" href="#gather_vision.model.WebDataAvailable.selector">selector</a></code></li>
+<li><code><a title="gather_vision.model.WebDataAvailable.status" href="#gather_vision.model.WebDataAvailable.status">status</a></code></li>
+</ul>
 </li>
 </ul>
 </li>

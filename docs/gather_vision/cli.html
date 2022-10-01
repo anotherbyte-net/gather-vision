@@ -26,7 +26,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/c86aff76dbe698fea1eae9d93c42e65ccfd5ba99/src/gather_vision/cli.py#L1-L179" class="git-link">Browse git</a>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/7d45e6f120950d15af3632387da1d30ceaea2a32/src/gather_vision/cli.py#L1-L156" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;Command line for gather vision.&#34;&#34;&#34;
 
@@ -57,25 +57,6 @@ def cli_update(args: argparse.Namespace) -&gt; bool:
     return True
 
 
-def cli_show(args: argparse.Namespace) -&gt; bool:
-    &#34;&#34;&#34;Run the show action from the cli.
-
-    Args:
-        args: The arguments for the show action.
-
-    Returns:
-        True if there were no errors.
-    &#34;&#34;&#34;
-    logger = logging.getLogger(__name__)
-
-    app_args = model.ShowArgs(name=args.name)
-    main_app = app.App()
-
-    logger.info(&#34;Showing &#39;%s&#39;.&#34;, args.name)
-    main_app.show(app_args)
-    return True
-
-
 def cli_list(
     args: argparse.Namespace,  # noqa: U100 pylint: disable=unused-argument
 ) -&gt; bool:
@@ -93,9 +74,11 @@ def cli_list(
     main_app = app.App()
     result = main_app.list(app_args)
 
-    logger.info(&#34;Listing %s plugins.&#34;, len(result.names))
-    for index, name in enumerate(result.names):
-        logger.info(&#34;  %s) %s&#34;, index + 1, name)
+    logger.info(&#34;Listing %s plugins.&#34;, len(result.items))
+    for plugin_index, (plugin_name, data_sources) in enumerate(result.items.items()):
+        logger.info(&#34;  %s) %s&#34;, plugin_index + 1, plugin_name)
+        for data_source_index, data_source_name in enumerate(data_sources):
+            logger.info(&#34;    %s) %s&#34;, data_source_index + 1, data_source_name)
     return True
 
 
@@ -121,6 +104,7 @@ def main(args: typing.Optional[typing.List[str]] = None) -&gt; int:
     parser = argparse.ArgumentParser(
         prog=utils.get_name_dash(),
         description=&#34;Obtain, extract, organise, and store information.&#34;,
+        allow_abbrev=False,
     )
     parser.add_argument(
         &#34;--version&#34;,
@@ -131,14 +115,15 @@ def main(args: typing.Optional[typing.List[str]] = None) -&gt; int:
         &#34;--log-level&#34;,
         default=&#34;info&#34;,
         choices=[&#34;debug&#34;, &#34;info&#34;, &#34;warning&#34;, &#34;error&#34;, &#34;critical&#34;],
-        help=&#34;the log level: debug, info, warning, error, critical&#34;,
+        help=&#34;The log level: &#39;debug&#39;, &#39;info&#39;, &#39;warning&#39;, &#39;error&#39;, &#39;critical&#39;.&#34;,
     )
     subparsers = parser.add_subparsers(
         title=&#34;Available subcommands&#34;,
         description=&#34;The actions available for plugins&#34;,
         dest=&#34;subcommand_action&#34;,
         required=False,
-        help=&#34;The subcommands available to interact with installed plugins.&#34;,
+        help=&#34;The subcommands available to interact with &#34;
+        &#34;installed plugins (&#39;list&#39;, &#39;update&#39;).&#34;,
         metavar=&#34;action&#34;,
     )
 
@@ -149,14 +134,6 @@ def main(args: typing.Optional[typing.List[str]] = None) -&gt; int:
         help=&#34;The name of the update to run.&#34;,
     )
     parser_update.set_defaults(func=cli_update)
-
-    # create the parser for the &#34;show&#34; command
-    parser_show = subparsers.add_parser(&#34;show&#34;)
-    parser_show.add_argument(
-        &#34;name&#34;,
-        help=&#34;The name of the group of information to show.&#34;,
-    )
-    parser_show.set_defaults(func=cli_show)
 
     # create the parser for the &#34;list&#34; command
     parser_list = subparsers.add_parser(&#34;list&#34;)
@@ -231,7 +208,7 @@ if __name__ == &#34;__main__&#34;:
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/c86aff76dbe698fea1eae9d93c42e65ccfd5ba99/src/gather_vision/cli.py#L49-L69" class="git-link">Browse git</a>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/7d45e6f120950d15af3632387da1d30ceaea2a32/src/gather_vision/cli.py#L30-L52" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def cli_list(
     args: argparse.Namespace,  # noqa: U100 pylint: disable=unused-argument
@@ -250,45 +227,11 @@ if __name__ == &#34;__main__&#34;:
     main_app = app.App()
     result = main_app.list(app_args)
 
-    logger.info(&#34;Listing %s plugins.&#34;, len(result.names))
-    for index, name in enumerate(result.names):
-        logger.info(&#34;  %s) %s&#34;, index + 1, name)
-    return True</code></pre>
-</details>
-</dd>
-<dt id="gather_vision.cli.cli_show"><code class="name flex">
-<span>def <span class="ident">cli_show</span></span>(<span>args: argparse.Namespace) ‑> bool</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Run the show action from the cli.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>args</code></strong></dt>
-<dd>The arguments for the show action.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<p>True if there were no errors.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/c86aff76dbe698fea1eae9d93c42e65ccfd5ba99/src/gather_vision/cli.py#L30-L46" class="git-link">Browse git</a>
-</summary>
-<pre><code class="python">def cli_show(args: argparse.Namespace) -&gt; bool:
-    &#34;&#34;&#34;Run the show action from the cli.
-
-    Args:
-        args: The arguments for the show action.
-
-    Returns:
-        True if there were no errors.
-    &#34;&#34;&#34;
-    logger = logging.getLogger(__name__)
-
-    app_args = model.ShowArgs(name=args.name)
-    main_app = app.App()
-
-    logger.info(&#34;Showing &#39;%s&#39;.&#34;, args.name)
-    main_app.show(app_args)
+    logger.info(&#34;Listing %s plugins.&#34;, len(result.items))
+    for plugin_index, (plugin_name, data_sources) in enumerate(result.items.items()):
+        logger.info(&#34;  %s) %s&#34;, plugin_index + 1, plugin_name)
+        for data_source_index, data_source_name in enumerate(data_sources):
+            logger.info(&#34;    %s) %s&#34;, data_source_index + 1, data_source_name)
     return True</code></pre>
 </details>
 </dd>
@@ -307,7 +250,7 @@ if __name__ == &#34;__main__&#34;:
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/c86aff76dbe698fea1eae9d93c42e65ccfd5ba99/src/gather_vision/cli.py#L11-L27" class="git-link">Browse git</a>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/7d45e6f120950d15af3632387da1d30ceaea2a32/src/gather_vision/cli.py#L11-L27" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def cli_update(args: argparse.Namespace) -&gt; bool:
     &#34;&#34;&#34;Run the update action from the cli.
@@ -346,7 +289,7 @@ if __name__ == &#34;__main__&#34;:
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/c86aff76dbe698fea1eae9d93c42e65ccfd5ba99/src/gather_vision/cli.py#L72-L175" class="git-link">Browse git</a>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/7d45e6f120950d15af3632387da1d30ceaea2a32/src/gather_vision/cli.py#L55-L152" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def main(args: typing.Optional[typing.List[str]] = None) -&gt; int:
     &#34;&#34;&#34;Run as a command line program.
@@ -370,6 +313,7 @@ if __name__ == &#34;__main__&#34;:
     parser = argparse.ArgumentParser(
         prog=utils.get_name_dash(),
         description=&#34;Obtain, extract, organise, and store information.&#34;,
+        allow_abbrev=False,
     )
     parser.add_argument(
         &#34;--version&#34;,
@@ -380,14 +324,15 @@ if __name__ == &#34;__main__&#34;:
         &#34;--log-level&#34;,
         default=&#34;info&#34;,
         choices=[&#34;debug&#34;, &#34;info&#34;, &#34;warning&#34;, &#34;error&#34;, &#34;critical&#34;],
-        help=&#34;the log level: debug, info, warning, error, critical&#34;,
+        help=&#34;The log level: &#39;debug&#39;, &#39;info&#39;, &#39;warning&#39;, &#39;error&#39;, &#39;critical&#39;.&#34;,
     )
     subparsers = parser.add_subparsers(
         title=&#34;Available subcommands&#34;,
         description=&#34;The actions available for plugins&#34;,
         dest=&#34;subcommand_action&#34;,
         required=False,
-        help=&#34;The subcommands available to interact with installed plugins.&#34;,
+        help=&#34;The subcommands available to interact with &#34;
+        &#34;installed plugins (&#39;list&#39;, &#39;update&#39;).&#34;,
         metavar=&#34;action&#34;,
     )
 
@@ -398,14 +343,6 @@ if __name__ == &#34;__main__&#34;:
         help=&#34;The name of the update to run.&#34;,
     )
     parser_update.set_defaults(func=cli_update)
-
-    # create the parser for the &#34;show&#34; command
-    parser_show = subparsers.add_parser(&#34;show&#34;)
-    parser_show.add_argument(
-        &#34;name&#34;,
-        help=&#34;The name of the group of information to show.&#34;,
-    )
-    parser_show.set_defaults(func=cli_show)
 
     # create the parser for the &#34;list&#34; command
     parser_list = subparsers.add_parser(&#34;list&#34;)
@@ -519,7 +456,6 @@ setTimeout(() => input.focus(), 100);
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="gather_vision.cli.cli_list" href="#gather_vision.cli.cli_list">cli_list</a></code></li>
-<li><code><a title="gather_vision.cli.cli_show" href="#gather_vision.cli.cli_show">cli_show</a></code></li>
 <li><code><a title="gather_vision.cli.cli_update" href="#gather_vision.cli.cli_update">cli_update</a></code></li>
 <li><code><a title="gather_vision.cli.main" href="#gather_vision.cli.main">main</a></code></li>
 </ul>

@@ -10,7 +10,7 @@ INDEX=[
 {
 "ref":"gather_vision",
 "url":0,
-"doc":"Documentation for the leaf focus package.  gather-vision Obtain, extract, organise, and store information.  Install Install from PyPI using pip:   pip install gather-vision   [![PyPI](https: img.shields.io/pypi/v/gather-vision)](https: pypi.org/project/gather-vision/) ![PyPI - Python Version](https: img.shields.io/pypi/pyversions/gather-vision) ![GitHub Workflow Status (branch)](https: img.shields.io/github/workflow/status/anotherbyte-net/gather-vision/Create%20Package/main)  Change log  unreleased "
+"doc":"Documentation for the gather vision package.  gather-vision Obtain, extract, organise, and store information.  Install Install from PyPI using pip:   pip install gather-vision   [![PyPI](https: img.shields.io/pypi/v/gather-vision)](https: pypi.org/project/gather-vision/) ![PyPI - Python Version](https: img.shields.io/pypi/pyversions/gather-vision) [![GitHub Workflow Status (branch)](https: img.shields.io/github/workflow/status/anotherbyte-net/gather-vision/Test%20Package/main)](https: github.com/anotherbyte-net/gather-vision/actions)  Change log  [v0.0.2](https: github.com/anotherbyte-net/gather-vision/compare/v0.0.1 .v0.0.2)  unreleased  [v0.0.1](https: github.com/anotherbyte-net/gather-vision/commits/v0.0.1) - Created initial plugin implementation using [entry points](https: setuptools.pypa.io/en/latest/userguide/entry_point.html entry-points-for-plugins) - Created basic cli using argparse - Created initial tests"
 },
 {
 "ref":"gather_vision.app",
@@ -62,12 +62,6 @@ INDEX=[
 "func":1
 },
 {
-"ref":"gather_vision.app.App.show",
-"url":1,
-"doc":"Execute the show action for the plugin with the given name. Args: args: The show arguments. Returns: The details of the plugin.",
-"func":1
-},
-{
 "ref":"gather_vision.app.App.list",
 "url":1,
 "doc":"List all available plugins. Args: args: The list arguments. Returns: A list of plugins.",
@@ -82,12 +76,6 @@ INDEX=[
 "ref":"gather_vision.cli.cli_update",
 "url":2,
 "doc":"Run the update action from the cli. Args: args: The arguments for the update action. Returns: True if there were no errors.",
-"func":1
-},
-{
-"ref":"gather_vision.cli.cli_show",
-"url":2,
-"doc":"Run the show action from the cli. Args: args: The arguments for the show action. Returns: True if there were no errors.",
 "func":1
 },
 {
@@ -115,7 +103,12 @@ INDEX=[
 {
 "ref":"gather_vision.model.UpdateArgs.name",
 "url":3,
-"doc":""
+"doc":"The action name."
+},
+{
+"ref":"gather_vision.model.UpdateArgs.data_source",
+"url":3,
+"doc":"The plugin data source name."
 },
 {
 "ref":"gather_vision.model.UpdateResult",
@@ -123,24 +116,19 @@ INDEX=[
 "doc":"The result from the update command."
 },
 {
-"ref":"gather_vision.model.ShowArgs",
-"url":3,
-"doc":"The arguments for the show command."
-},
-{
-"ref":"gather_vision.model.ShowArgs.name",
-"url":3,
-"doc":""
-},
-{
-"ref":"gather_vision.model.ShowResult",
-"url":3,
-"doc":"The result from the show command."
-},
-{
 "ref":"gather_vision.model.ListArgs",
 "url":3,
 "doc":"The arguments for the list command."
+},
+{
+"ref":"gather_vision.model.ListArgs.name",
+"url":3,
+"doc":"The plugin name."
+},
+{
+"ref":"gather_vision.model.ListArgs.data_source",
+"url":3,
+"doc":"The plugin data source name."
 },
 {
 "ref":"gather_vision.model.ListResult",
@@ -148,9 +136,81 @@ INDEX=[
 "doc":"The result from the list command."
 },
 {
-"ref":"gather_vision.model.ListResult.names",
+"ref":"gather_vision.model.ListResult.items",
 "url":3,
-"doc":""
+"doc":"The map of plugin name and data sources."
+},
+{
+"ref":"gather_vision.model.WebDataAvailable",
+"url":3,
+"doc":"The web data available for providing new urls and/or items."
+},
+{
+"ref":"gather_vision.model.WebDataAvailable.request_url",
+"url":3,
+"doc":"The requested url."
+},
+{
+"ref":"gather_vision.model.WebDataAvailable.request_method",
+"url":3,
+"doc":"The method used for the request."
+},
+{
+"ref":"gather_vision.model.WebDataAvailable.response_url",
+"url":3,
+"doc":"The url that provided the response."
+},
+{
+"ref":"gather_vision.model.WebDataAvailable.body_text",
+"url":3,
+"doc":"The raw response body text."
+},
+{
+"ref":"gather_vision.model.WebDataAvailable.body_data",
+"url":3,
+"doc":"The structure body data from json or xml."
+},
+{
+"ref":"gather_vision.model.WebDataAvailable.selector",
+"url":3,
+"doc":"The selector for obtaining parts of the body data."
+},
+{
+"ref":"gather_vision.model.WebDataAvailable.status",
+"url":3,
+"doc":"The response status code."
+},
+{
+"ref":"gather_vision.model.WebDataAvailable.headers",
+"url":3,
+"doc":"The response headers."
+},
+{
+"ref":"gather_vision.model.WebDataAvailable.meta",
+"url":3,
+"doc":"The metadata associated with the request and response."
+},
+{
+"ref":"gather_vision.model.IsDataclass",
+"url":3,
+"doc":"Allows specifying type to be any dataclass."
+},
+{
+"ref":"gather_vision.model.WebData",
+"url":3,
+"doc":"A class that retrieves web data and converts it into more urls and/or items."
+},
+{
+"ref":"gather_vision.model.WebData.initial_urls",
+"url":3,
+"doc":"Get the initial urls. Returns: A stream of string items.",
+"func":1
+},
+{
+"ref":"gather_vision.model.WebData.parse_response",
+"url":3,
+"doc":"Parse a web response and provide urls and items. Args: data: The web data available for parsing. Returns: Yield urls and/or items from the web data.",
+"func":1
 },
 {
 "ref":"gather_vision.plugin",
@@ -165,13 +225,13 @@ INDEX=[
 {
 "ref":"gather_vision.plugin.Entry.update",
 "url":4,
-"doc":"Run the update action. Args: args: The arguments for update. Returns: The result of the update action.",
+"doc":"Update the data sources that match the args. Args: args: The arguments for update. Returns: The result of the update action.",
 "func":1
 },
 {
-"ref":"gather_vision.plugin.Entry.show",
+"ref":"gather_vision.plugin.Entry.list",
 "url":4,
-"doc":"Run the show action. Args: args: The arguments for show. Returns: The result of the show action.",
+"doc":"List the plugins and data sources that match the args. Args: args: The arguments for list. Returns: The result of the list action.",
 "func":1
 },
 {

@@ -26,7 +26,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/c86aff76dbe698fea1eae9d93c42e65ccfd5ba99/src/gather_vision/app.py#L1-L108" class="git-link">Browse git</a>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/7d45e6f120950d15af3632387da1d30ceaea2a32/src/gather_vision/app.py#L1-L89" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;The main application features.&#34;&#34;&#34;
 import typing
@@ -93,7 +93,7 @@ class App:
         Returns:
             The result of running the plugin&#39;s update process.
         &#34;&#34;&#34;
-        named_plugin = self.plugins.get(args.name)
+        named_plugin = self.get(args.name)
         if not named_plugin:
             raise utils.GatherVisionException(
                 f&#34;Could not find plugin named &#39;{args.name}&#39;.&#34;
@@ -101,26 +101,7 @@ class App:
         result = named_plugin.update(args)
         return result
 
-    def show(self, args: model.ShowArgs) -&gt; model.ShowResult:
-        &#34;&#34;&#34;Execute the show action for the plugin with the given name.
-
-        Args:
-            args: The show arguments.
-
-        Returns:
-            The details of the plugin.
-        &#34;&#34;&#34;
-        named_plugin = self.plugins.get(args.name)
-        if not named_plugin:
-            raise utils.GatherVisionException(
-                f&#34;Could not find plugin named &#39;{args.name}&#39;.&#34;
-            )
-        result = named_plugin.show(args)
-        return result
-
-    def list(
-        self, args: model.ListArgs  # noqa: U100 pylint: disable=unused-argument
-    ) -&gt; model.ListResult:
+    def list(self, args: model.ListArgs) -&gt; model.ListResult:
         &#34;&#34;&#34;List all available plugins.
 
         Args:
@@ -129,13 +110,13 @@ class App:
         Returns:
             A list of plugins.
         &#34;&#34;&#34;
-        names = []
-        for item in self.collect():
-            if not item:
+        items = {}
+        plugins = self.load()
+        for name, plugin_item in plugins.items():
+            if not name or not plugin_item:
                 continue
-            names.append(item.name)
-        result = model.ListResult(sorted(names))
-        return result</code></pre>
+            items.update(plugin_item.list(args).items)
+        return model.ListResult(items)</code></pre>
 </details>
 </section>
 <section>
@@ -155,7 +136,7 @@ class App:
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/c86aff76dbe698fea1eae9d93c42e65ccfd5ba99/src/gather_vision/app.py#L9-L108" class="git-link">Browse git</a>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/7d45e6f120950d15af3632387da1d30ceaea2a32/src/gather_vision/app.py#L9-L89" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">class App:
     &#34;&#34;&#34;The main application.&#34;&#34;&#34;
@@ -214,7 +195,7 @@ class App:
         Returns:
             The result of running the plugin&#39;s update process.
         &#34;&#34;&#34;
-        named_plugin = self.plugins.get(args.name)
+        named_plugin = self.get(args.name)
         if not named_plugin:
             raise utils.GatherVisionException(
                 f&#34;Could not find plugin named &#39;{args.name}&#39;.&#34;
@@ -222,26 +203,7 @@ class App:
         result = named_plugin.update(args)
         return result
 
-    def show(self, args: model.ShowArgs) -&gt; model.ShowResult:
-        &#34;&#34;&#34;Execute the show action for the plugin with the given name.
-
-        Args:
-            args: The show arguments.
-
-        Returns:
-            The details of the plugin.
-        &#34;&#34;&#34;
-        named_plugin = self.plugins.get(args.name)
-        if not named_plugin:
-            raise utils.GatherVisionException(
-                f&#34;Could not find plugin named &#39;{args.name}&#39;.&#34;
-            )
-        result = named_plugin.show(args)
-        return result
-
-    def list(
-        self, args: model.ListArgs  # noqa: U100 pylint: disable=unused-argument
-    ) -&gt; model.ListResult:
+    def list(self, args: model.ListArgs) -&gt; model.ListResult:
         &#34;&#34;&#34;List all available plugins.
 
         Args:
@@ -250,13 +212,13 @@ class App:
         Returns:
             A list of plugins.
         &#34;&#34;&#34;
-        names = []
-        for item in self.collect():
-            if not item:
+        items = {}
+        plugins = self.load()
+        for name, plugin_item in plugins.items():
+            if not name or not plugin_item:
                 continue
-            names.append(item.name)
-        result = model.ListResult(sorted(names))
-        return result</code></pre>
+            items.update(plugin_item.list(args).items)
+        return model.ListResult(items)</code></pre>
 </details>
 <h3>Class variables</h3>
 <dl>
@@ -285,7 +247,7 @@ class App:
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/c86aff76dbe698fea1eae9d93c42e65ccfd5ba99/src/gather_vision/app.py#L17-L25" class="git-link">Browse git</a>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/7d45e6f120950d15af3632387da1d30ceaea2a32/src/gather_vision/app.py#L17-L25" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def collect(self) -&gt; EntryPoints:
     &#34;&#34;&#34;Collect the available plugins.
@@ -313,7 +275,7 @@ class App:
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/c86aff76dbe698fea1eae9d93c42e65ccfd5ba99/src/gather_vision/app.py#L38-L55" class="git-link">Browse git</a>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/7d45e6f120950d15af3632387da1d30ceaea2a32/src/gather_vision/app.py#L38-L55" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def get(self, name: str) -&gt; typing.Optional[plugin.Entry]:
     &#34;&#34;&#34;Get the class for a plugin.
@@ -350,11 +312,9 @@ class App:
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/c86aff76dbe698fea1eae9d93c42e65ccfd5ba99/src/gather_vision/app.py#L91-L108" class="git-link">Browse git</a>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/7d45e6f120950d15af3632387da1d30ceaea2a32/src/gather_vision/app.py#L74-L89" class="git-link">Browse git</a>
 </summary>
-<pre><code class="python">def list(
-    self, args: model.ListArgs  # noqa: U100 pylint: disable=unused-argument
-) -&gt; model.ListResult:
+<pre><code class="python">def list(self, args: model.ListArgs) -&gt; model.ListResult:
     &#34;&#34;&#34;List all available plugins.
 
     Args:
@@ -363,13 +323,13 @@ class App:
     Returns:
         A list of plugins.
     &#34;&#34;&#34;
-    names = []
-    for item in self.collect():
-        if not item:
+    items = {}
+    plugins = self.load()
+    for name, plugin_item in plugins.items():
+        if not name or not plugin_item:
             continue
-        names.append(item.name)
-    result = model.ListResult(sorted(names))
-    return result</code></pre>
+        items.update(plugin_item.list(args).items)
+    return model.ListResult(items)</code></pre>
 </details>
 </dd>
 <dt id="gather_vision.app.App.load"><code class="name flex">
@@ -382,7 +342,7 @@ class App:
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/c86aff76dbe698fea1eae9d93c42e65ccfd5ba99/src/gather_vision/app.py#L27-L36" class="git-link">Browse git</a>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/7d45e6f120950d15af3632387da1d30ceaea2a32/src/gather_vision/app.py#L27-L36" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def load(self) -&gt; typing.Dict[str, plugin.Entry]:
     &#34;&#34;&#34;Load the plugin class for each plugin.
@@ -394,41 +354,6 @@ class App:
         for entry_point in self.collect():
             self.plugins[entry_point.name] = entry_point.load()
     return self.plugins</code></pre>
-</details>
-</dd>
-<dt id="gather_vision.app.App.show"><code class="name flex">
-<span>def <span class="ident">show</span></span>(<span>self, args: <a title="gather_vision.model.ShowArgs" href="model.html#gather_vision.model.ShowArgs">ShowArgs</a>) ‑> <a title="gather_vision.model.ShowResult" href="model.html#gather_vision.model.ShowResult">ShowResult</a></span>
-</code></dt>
-<dd>
-<div class="desc"><p>Execute the show action for the plugin with the given name.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>args</code></strong></dt>
-<dd>The show arguments.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<p>The details of the plugin.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/c86aff76dbe698fea1eae9d93c42e65ccfd5ba99/src/gather_vision/app.py#L74-L89" class="git-link">Browse git</a>
-</summary>
-<pre><code class="python">def show(self, args: model.ShowArgs) -&gt; model.ShowResult:
-    &#34;&#34;&#34;Execute the show action for the plugin with the given name.
-
-    Args:
-        args: The show arguments.
-
-    Returns:
-        The details of the plugin.
-    &#34;&#34;&#34;
-    named_plugin = self.plugins.get(args.name)
-    if not named_plugin:
-        raise utils.GatherVisionException(
-            f&#34;Could not find plugin named &#39;{args.name}&#39;.&#34;
-        )
-    result = named_plugin.show(args)
-    return result</code></pre>
 </details>
 </dd>
 <dt id="gather_vision.app.App.update"><code class="name flex">
@@ -446,7 +371,7 @@ class App:
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/c86aff76dbe698fea1eae9d93c42e65ccfd5ba99/src/gather_vision/app.py#L57-L72" class="git-link">Browse git</a>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/7d45e6f120950d15af3632387da1d30ceaea2a32/src/gather_vision/app.py#L57-L72" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def update(self, args: model.UpdateArgs) -&gt; model.UpdateResult:
     &#34;&#34;&#34;Execute the update action for the plugin with the given name.
@@ -457,7 +382,7 @@ class App:
     Returns:
         The result of running the plugin&#39;s update process.
     &#34;&#34;&#34;
-    named_plugin = self.plugins.get(args.name)
+    named_plugin = self.get(args.name)
     if not named_plugin:
         raise utils.GatherVisionException(
             f&#34;Could not find plugin named &#39;{args.name}&#39;.&#34;
@@ -540,7 +465,6 @@ setTimeout(() => input.focus(), 100);
 <li><code><a title="gather_vision.app.App.list" href="#gather_vision.app.App.list">list</a></code></li>
 <li><code><a title="gather_vision.app.App.load" href="#gather_vision.app.App.load">load</a></code></li>
 <li><code><a title="gather_vision.app.App.plugins" href="#gather_vision.app.App.plugins">plugins</a></code></li>
-<li><code><a title="gather_vision.app.App.show" href="#gather_vision.app.App.show">show</a></code></li>
 <li><code><a title="gather_vision.app.App.update" href="#gather_vision.app.App.update">update</a></code></li>
 </ul>
 </li>

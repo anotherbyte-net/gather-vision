@@ -26,7 +26,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/c86aff76dbe698fea1eae9d93c42e65ccfd5ba99/src/gather_vision/plugin.py#L1-L33" class="git-link">Browse git</a>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/7d45e6f120950d15af3632387da1d30ceaea2a32/src/gather_vision/plugin.py#L1-L35" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;Available to plugins.&#34;&#34;&#34;
 import abc
@@ -36,11 +36,13 @@ from gather_vision import model
 
 class Entry(abc.ABC):
     &#34;&#34;&#34;The entry point class for plugins.
-    Compatible plugins must implement this class.&#34;&#34;&#34;
+
+    Compatible plugins must implement this class.
+    &#34;&#34;&#34;
 
     @abc.abstractmethod
     def update(self, args: model.UpdateArgs) -&gt; model.UpdateResult:  # noqa: U100
-        &#34;&#34;&#34;Run the update action.
+        &#34;&#34;&#34;Update the data sources that match the args.
 
         Args:
             args: The arguments for update.
@@ -51,16 +53,16 @@ class Entry(abc.ABC):
         raise NotImplementedError(&#34;Must implement &#39;update&#39;.&#34;)
 
     @abc.abstractmethod
-    def show(self, args: model.ShowArgs) -&gt; model.ShowResult:  # noqa: U100
-        &#34;&#34;&#34;Run the show action.
+    def list(self, args: model.ListArgs) -&gt; model.ListResult:  # noqa: U100
+        &#34;&#34;&#34;List the plugins and data sources that match the args.
 
         Args:
-            args: The arguments for show.
+            args: The arguments for list.
 
         Returns:
-            The result of the show action.
+            The result of the list action.
         &#34;&#34;&#34;
-        raise NotImplementedError(&#34;Must implement &#39;show&#39;.&#34;)</code></pre>
+        raise NotImplementedError(&#34;Must implement &#39;list&#39;.&#34;)</code></pre>
 </details>
 </section>
 <section>
@@ -76,20 +78,22 @@ class Entry(abc.ABC):
 <span>class <span class="ident">Entry</span></span>
 </code></dt>
 <dd>
-<div class="desc"><p>The entry point class for plugins.
-Compatible plugins must implement this class.</p></div>
+<div class="desc"><p>The entry point class for plugins.</p>
+<p>Compatible plugins must implement this class.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/c86aff76dbe698fea1eae9d93c42e65ccfd5ba99/src/gather_vision/plugin.py#L7-L33" class="git-link">Browse git</a>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/7d45e6f120950d15af3632387da1d30ceaea2a32/src/gather_vision/plugin.py#L7-L35" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">class Entry(abc.ABC):
     &#34;&#34;&#34;The entry point class for plugins.
-    Compatible plugins must implement this class.&#34;&#34;&#34;
+
+    Compatible plugins must implement this class.
+    &#34;&#34;&#34;
 
     @abc.abstractmethod
     def update(self, args: model.UpdateArgs) -&gt; model.UpdateResult:  # noqa: U100
-        &#34;&#34;&#34;Run the update action.
+        &#34;&#34;&#34;Update the data sources that match the args.
 
         Args:
             args: The arguments for update.
@@ -100,16 +104,16 @@ Compatible plugins must implement this class.</p></div>
         raise NotImplementedError(&#34;Must implement &#39;update&#39;.&#34;)
 
     @abc.abstractmethod
-    def show(self, args: model.ShowArgs) -&gt; model.ShowResult:  # noqa: U100
-        &#34;&#34;&#34;Run the show action.
+    def list(self, args: model.ListArgs) -&gt; model.ListResult:  # noqa: U100
+        &#34;&#34;&#34;List the plugins and data sources that match the args.
 
         Args:
-            args: The arguments for show.
+            args: The arguments for list.
 
         Returns:
-            The result of the show action.
+            The result of the list action.
         &#34;&#34;&#34;
-        raise NotImplementedError(&#34;Must implement &#39;show&#39;.&#34;)</code></pre>
+        raise NotImplementedError(&#34;Must implement &#39;list&#39;.&#34;)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -117,41 +121,41 @@ Compatible plugins must implement this class.</p></div>
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="gather_vision.plugin.Entry.show"><code class="name flex">
-<span>def <span class="ident">show</span></span>(<span>self, args: <a title="gather_vision.model.ShowArgs" href="model.html#gather_vision.model.ShowArgs">ShowArgs</a>) ‑> <a title="gather_vision.model.ShowResult" href="model.html#gather_vision.model.ShowResult">ShowResult</a></span>
+<dt id="gather_vision.plugin.Entry.list"><code class="name flex">
+<span>def <span class="ident">list</span></span>(<span>self, args: <a title="gather_vision.model.ListArgs" href="model.html#gather_vision.model.ListArgs">ListArgs</a>) ‑> <a title="gather_vision.model.ListResult" href="model.html#gather_vision.model.ListResult">ListResult</a></span>
 </code></dt>
 <dd>
-<div class="desc"><p>Run the show action.</p>
+<div class="desc"><p>List the plugins and data sources that match the args.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>args</code></strong></dt>
-<dd>The arguments for show.</dd>
+<dd>The arguments for list.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
-<p>The result of the show action.</p></div>
+<p>The result of the list action.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/c86aff76dbe698fea1eae9d93c42e65ccfd5ba99/src/gather_vision/plugin.py#L23-L33" class="git-link">Browse git</a>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/7d45e6f120950d15af3632387da1d30ceaea2a32/src/gather_vision/plugin.py#L25-L35" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">@abc.abstractmethod
-def show(self, args: model.ShowArgs) -&gt; model.ShowResult:  # noqa: U100
-    &#34;&#34;&#34;Run the show action.
+def list(self, args: model.ListArgs) -&gt; model.ListResult:  # noqa: U100
+    &#34;&#34;&#34;List the plugins and data sources that match the args.
 
     Args:
-        args: The arguments for show.
+        args: The arguments for list.
 
     Returns:
-        The result of the show action.
+        The result of the list action.
     &#34;&#34;&#34;
-    raise NotImplementedError(&#34;Must implement &#39;show&#39;.&#34;)</code></pre>
+    raise NotImplementedError(&#34;Must implement &#39;list&#39;.&#34;)</code></pre>
 </details>
 </dd>
 <dt id="gather_vision.plugin.Entry.update"><code class="name flex">
 <span>def <span class="ident">update</span></span>(<span>self, args: <a title="gather_vision.model.UpdateArgs" href="model.html#gather_vision.model.UpdateArgs">UpdateArgs</a>) ‑> <a title="gather_vision.model.UpdateResult" href="model.html#gather_vision.model.UpdateResult">UpdateResult</a></span>
 </code></dt>
 <dd>
-<div class="desc"><p>Run the update action.</p>
+<div class="desc"><p>Update the data sources that match the args.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>args</code></strong></dt>
@@ -162,11 +166,11 @@ def show(self, args: model.ShowArgs) -&gt; model.ShowResult:  # noqa: U100
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/c86aff76dbe698fea1eae9d93c42e65ccfd5ba99/src/gather_vision/plugin.py#L11-L21" class="git-link">Browse git</a>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/7d45e6f120950d15af3632387da1d30ceaea2a32/src/gather_vision/plugin.py#L13-L23" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">@abc.abstractmethod
 def update(self, args: model.UpdateArgs) -&gt; model.UpdateResult:  # noqa: U100
-    &#34;&#34;&#34;Run the update action.
+    &#34;&#34;&#34;Update the data sources that match the args.
 
     Args:
         args: The arguments for update.
@@ -244,7 +248,7 @@ setTimeout(() => input.focus(), 100);
 <li>
 <h4><code><a title="gather_vision.plugin.Entry" href="#gather_vision.plugin.Entry">Entry</a></code></h4>
 <ul class="">
-<li><code><a title="gather_vision.plugin.Entry.show" href="#gather_vision.plugin.Entry.show">show</a></code></li>
+<li><code><a title="gather_vision.plugin.Entry.list" href="#gather_vision.plugin.Entry.list">list</a></code></li>
 <li><code><a title="gather_vision.plugin.Entry.update" href="#gather_vision.plugin.Entry.update">update</a></code></li>
 </ul>
 </li>
