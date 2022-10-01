@@ -103,7 +103,11 @@ allowlist_externals =
     echo
 commands =
     echo "::group::Show app help"
+    gather-vision --version
     gather-vision --help
+    echo "::endgroup::"
+    echo "::group::Outdated deps"
+    -pip list --outdated
     echo "::endgroup::"
     echo "::group::Test coverage"
     python -X dev -m coverage run -m pytest --tb=line --doctest-modules

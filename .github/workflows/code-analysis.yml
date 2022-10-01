@@ -42,6 +42,7 @@ jobs:
           echo "::group::Pip dependencies"
           python -m pip install --upgrade pip setuptools wheel
           python -m pip install --upgrade -r requirements-dev.txt -r requirements.txt
+          python -m pip install .
           echo "::endgroup::"
 
       - name: Initialize CodeQL
@@ -79,3 +80,8 @@ jobs:
         with:
           sarif_file: snyk-requirements-dev-${{ matrix.python-version }}.sarif
           category: requirements-dev-${{ matrix.python-version }}
+
+      - name: Run pip audit
+        uses: pypa/gh-action-pip-audit@v1.0.0
+        with:
+          inputs: requirements.txt requirements-dev.txt
