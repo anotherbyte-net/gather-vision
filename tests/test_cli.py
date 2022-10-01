@@ -4,7 +4,7 @@ import pytest
 
 from gather_vision.cli import main
 
-expected_version = "0.0.1"
+expected_version = "0.0.2"
 
 if sys.version_info.minor >= 10:
     help_phrase_options = "options:"
