@@ -95,13 +95,46 @@ isolated_build = True
 envlist = py37,py38,py39,py310,py311
 
 [testenv]
-# recreate = true
+recreate = true
 deps =
     -r requirements.txt
     -r requirements-dev.txt
+allowlist_externals =
+    echo
 commands =
+    echo "::group::Show app help"
     gather-vision --help
-    python -X dev -m pytest --doctest-modules --junitxml=pytest-coverage.xml.cover --cov-report=term-missing:skip-covered --cov=src/ tests/
+    echo "::endgroup::"
+    echo "::group::Test coverage"
+    python -X dev -m coverage run -m pytest --tb=line --doctest-modules
+    echo "::endgroup::"
+    echo "::group::Coverage report"
+    -python -X dev -m coverage report
+    echo "::endgroup::"
+    echo "::group::Linter - mypy"
+    -python -X dev -m mypy src
+    echo "::endgroup::"
+    echo "::group::Linter - black"
+    -python -X dev -m black --check src
+    echo "::endgroup::"
+    echo "::group::Linter - pylint"
+    -python -X dev -m pylint src
+    echo "::endgroup::"
+    echo "::group::Linter - pydocstyle"
+    -python -X dev -m pydocstyle src
+    echo "::endgroup::"
+    echo "::group::Linter - pyright"
+    -python -X dev -m pyright src
+    echo "::endgroup::"
+    echo "::group::Linter - flake8"
+    -python -X dev -m flake8 src --count --show-source --statistics --exit-zero
+    echo "::endgroup::"
+    echo "::group::Linter - pytype"
+    -python -X dev -m pytype -j auto
+    echo "::endgroup::"
+    echo "::group::Build"
+    python -m build --sdist --wheel --outdir dist/ .
+    echo "::endgroup::"
 """
 
 [tool.pydocstyle]

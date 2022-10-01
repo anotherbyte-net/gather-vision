@@ -1,0 +1,62 @@
+name: Test Package
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test_lint:
+    name: Test and lint
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [ "3.7", "3.8", "3.9", "3.10", "3.11-dev" ]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          echo "::group::Pip dependencies"
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install --upgrade -r requirements-dev.txt -r requirements.txt
+          echo "::endgroup::"
+
+      - name: Run pytest coverage
+        if: matrix.python-version == '3.9'
+        run: |
+          echo "::group::Tests - Run tests with coverage"
+          (
+            set -o pipefail
+            python -X dev -m pytest --doctest-modules \
+              --junitxml=artifact-pytest-coverage.xml \
+              --cov-report=term-missing:skip-covered --cov=src/ tests/ | tee artifact-pytest-coverage.txt
+          )
+          echo "::endgroup::"
+
+      - name: Create pytest coverage comment
+        if: matrix.python-version == '3.9'
+        uses: MishaKav/pytest-coverage-comment@v1.1.35
+        with:
+          pytest-coverage-path: ./artifact-pytest-coverage.txt
+          junitxml-path: ./artifact-pytest-coverage.xml
+
+      # run tests using tox
+      # https://tox.wiki/en/latest/config.html#conf-basepython
+      # https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python#running-tests-with-tox
+      - name: Run tox
+        run: |
+          python -X dev -m tox -e py

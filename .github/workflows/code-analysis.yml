@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ "main" ]
   schedule:
-    - cron: '40 0 * * 1'
+    - cron: '05 1 * * 3'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -25,7 +25,7 @@ jobs:
       fail-fast: false
       matrix:
         language: [ "python" ]
-        python-version: [ "3.7", "3.8", "3.9", "3.10", "3.11.0-rc.1" ]
+        python-version: [ "3.7", "3.8", "3.9", "3.10", "3.11-dev" ]
 
     steps:
       - name: Checkout repository
@@ -57,7 +57,7 @@ jobs:
         uses: snyk/actions/setup@master
 
       - name: Run Snyk over the runtime dependencies
-        run: snyk test --sarif-file-output=snyk-requirements-${{ matrix.language }}.sarif --command=python --file=requirements.txt --package-manager=pip --skip-unresolved
+        run: snyk test --sarif-file-output=snyk-requirements-${{ matrix.python-version }}.sarif --command=python --file=requirements.txt --package-manager=pip --skip-unresolved
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
@@ -65,11 +65,11 @@ jobs:
       - name: Upload Snyk runtime dependencies scan result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: snyk-requirements-${{ matrix.language }}.sarif
-          category: requirements-runtime-${{ matrix.language }}
+          sarif_file: snyk-requirements-${{ matrix.python-version }}.sarif
+          category: requirements-runtime-${{ matrix.python-version }}
 
       - name: Run Snyk over the development dependencies
-        run: snyk test --sarif-file-output=snyk-requirements-dev-${{ matrix.language }}.sarif --command=python --file=requirements-dev.txt --package-manager=pip --skip-unresolved
+        run: snyk test --sarif-file-output=snyk-requirements-dev-${{ matrix.python-version }}.sarif --command=python --file=requirements-dev.txt --package-manager=pip --skip-unresolved
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
@@ -77,5 +77,5 @@ jobs:
       - name: Upload Snyk development dependencies scan result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: snyk-requirements-dev-${{ matrix.language }}.sarif
-          category: requirements-dev-${{ matrix.language }}
+          sarif_file: snyk-requirements-dev-${{ matrix.python-version }}.sarif
+          category: requirements-dev-${{ matrix.python-version }}
