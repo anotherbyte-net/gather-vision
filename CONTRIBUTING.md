@@ -95,7 +95,6 @@ Test the installed package.
 gather-vision --version
 gather-vision --help
 gather-vision list
-gather-vision show name
 gather-vision update name
 ```
 

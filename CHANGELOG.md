@@ -2,7 +2,8 @@
 
 ## [v0.0.2](https://github.com/anotherbyte-net/gather-vision/compare/v0.0.1...v0.0.2)
 
-*unreleased*
+- Added WebData base class
+- Changed CI to run via tox and not release to PyPI
 
 ## [v0.0.1](https://github.com/anotherbyte-net/gather-vision/commits/v0.0.1)
 
