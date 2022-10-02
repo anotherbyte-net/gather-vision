@@ -96,7 +96,7 @@ class WebData(abc.ABC):
 
     @abc.abstractmethod
     def parse_response(
-        self, data: WebDataAvailable
+        self, data: WebDataAvailable  # noqa: U100
     ) -> typing.Generator[typing.Union[str, IsDataclass], typing.Any, typing.Any]:
         """Parse a web response and provide urls and items.
 

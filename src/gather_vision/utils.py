@@ -26,7 +26,8 @@ def get_version() -> typing.Optional[str]:
 
     try:
         with as_file(files(get_name_under()).joinpath("cli.py")) as file_path:
-            return (file_path.parent.parent.parent / "VERSION").read_text().strip()
+            version_path = file_path.parent.parent.parent / "VERSION"
+            return version_path.read_text(encoding="utf-8").strip()
     except FileNotFoundError:
         pass
 

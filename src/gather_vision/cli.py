@@ -46,9 +46,11 @@ def cli_list(
 
     logger.info("Listing %s plugins.", len(result.items))
     for plugin_index, (plugin_name, data_sources) in enumerate(result.items.items()):
+        plugin_num = plugin_index + 1
         logger.info("  %s) %s", plugin_index + 1, plugin_name)
         for data_source_index, data_source_name in enumerate(data_sources):
-            logger.info("    %s) %s", data_source_index + 1, data_source_name)
+            data_source_num = data_source_index + 1
+            logger.info("    %s.%s) %s", plugin_num, data_source_num, data_source_name)
     return True
 
 
