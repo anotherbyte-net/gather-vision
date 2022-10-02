@@ -26,14 +26,24 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/1fa42a08998ca33b6c39300ff984a7b27297bc1d/src/gather_vision/app.py#L1-L89" class="git-link">Browse git</a>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/03caac1d9ec44ed4df9fad3cb22c6178450a29eb/src/gather_vision/app.py#L1-L90" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;The main application features.&#34;&#34;&#34;
+import dataclasses
 import typing
 
-from importlib_metadata import EntryPoints, entry_points
+import importlib_metadata as import_metadata
 
 from gather_vision import model, plugin, utils
+
+
+@dataclasses.dataclass
+class PluginItem:
+    &#34;&#34;&#34;Information about a plugin.&#34;&#34;&#34;
+
+    entry_point: import_metadata.EntryPoint
+    entry_class: typing.Type[plugin.Entry]
+    entry_instance: plugin.Entry
 
 
 class App:
@@ -41,48 +51,22 @@ class App:
 
     group = &#34;gather_vision.plugin&#34;
 
-    entry_points: typing.Optional[EntryPoints] = None
-    plugins: typing.Dict[str, plugin.Entry] = {}
+    _available: typing.List[PluginItem] = []
 
-    def collect(self) -&gt; EntryPoints:
+    def load(self) -&gt; typing.List[PluginItem]:
         &#34;&#34;&#34;Collect the available plugins.
 
-        Returns:
-            A collection of EntryPoints.
-        &#34;&#34;&#34;
-        if self.entry_points is None:
-            self.entry_points = entry_points(group=self.group)
-        return self.entry_points
-
-    def load(self) -&gt; typing.Dict[str, plugin.Entry]:
-        &#34;&#34;&#34;Load the plugin class for each plugin.
+        Load the plugin information.
 
         Returns:
-            A list of
+            A list of plugins.
         &#34;&#34;&#34;
-        if not self.plugins:
-            for entry_point in self.collect():
-                self.plugins[entry_point.name] = entry_point.load()
-        return self.plugins
-
-    def get(self, name: str) -&gt; typing.Optional[plugin.Entry]:
-        &#34;&#34;&#34;Get the class for a plugin.
-
-        Args:
-            name: The name of the plugin.
-
-        Returns:
-            The plugin entry class.
-        &#34;&#34;&#34;
-        if name in self.plugins:
-            return self.plugins[name]
-
-        entry_pts = entry_points(group=self.group, name=name)
-        if entry_pts and len(entry_pts) == 1:
-            entry_point = entry_pts[0]
-            self.plugins[entry_point.name] = entry_point.load()
-
-        return self.plugins.get(name)
+        if not self._available:
+            entry_points = self._get_entry_points(self.group)
+            for entry_point in entry_points:
+                item = self._build_plugin_item(entry_point)
+                self._available.append(item)
+        return self._available
 
     def update(self, args: model.UpdateArgs) -&gt; model.UpdateResult:
         &#34;&#34;&#34;Execute the update action for the plugin with the given name.
@@ -93,13 +77,20 @@ class App:
         Returns:
             The result of running the plugin&#39;s update process.
         &#34;&#34;&#34;
-        named_plugin = self.get(args.name)
-        if not named_plugin:
+        named_plugins = [i for i in self.load() if i.entry_point.name == args.name]
+
+        if len(named_plugins) == 1:
+            result = named_plugins[0].entry_instance.update(args)
+            return result
+
+        if len(named_plugins) == 0:
             raise utils.GatherVisionException(
                 f&#34;Could not find plugin named &#39;{args.name}&#39;.&#34;
             )
-        result = named_plugin.update(args)
-        return result
+
+        raise utils.GatherVisionException(
+            f&#34;Found multiple plugins named &#39;{args.name}&#39;.&#34;
+        )
 
     def list(self, args: model.ListArgs) -&gt; model.ListResult:
         &#34;&#34;&#34;List all available plugins.
@@ -111,12 +102,22 @@ class App:
             A list of plugins.
         &#34;&#34;&#34;
         items = {}
-        plugins = self.load()
-        for name, plugin_item in plugins.items():
-            if not name or not plugin_item:
-                continue
-            items.update(plugin_item.list(args).items)
-        return model.ListResult(items)</code></pre>
+        for plugin_item in self.load():
+            result = plugin_item.entry_instance.list(args)
+            items.update(result.items)
+        return model.ListResult(items)
+
+    def _get_entry_points(self, group: str):
+        return import_metadata.entry_points(group=group)
+
+    def _build_plugin_item(self, entry_point: import_metadata.EntryPoint) -&gt; PluginItem:
+        entry_class = entry_point.load()
+        item = PluginItem(
+            entry_point=entry_point,
+            entry_class=entry_class,
+            entry_instance=entry_class(),
+        )
+        return item</code></pre>
 </details>
 </section>
 <section>
@@ -136,55 +137,29 @@ class App:
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/1fa42a08998ca33b6c39300ff984a7b27297bc1d/src/gather_vision/app.py#L9-L89" class="git-link">Browse git</a>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/03caac1d9ec44ed4df9fad3cb22c6178450a29eb/src/gather_vision/app.py#L19-L90" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">class App:
     &#34;&#34;&#34;The main application.&#34;&#34;&#34;
 
     group = &#34;gather_vision.plugin&#34;
 
-    entry_points: typing.Optional[EntryPoints] = None
-    plugins: typing.Dict[str, plugin.Entry] = {}
+    _available: typing.List[PluginItem] = []
 
-    def collect(self) -&gt; EntryPoints:
+    def load(self) -&gt; typing.List[PluginItem]:
         &#34;&#34;&#34;Collect the available plugins.
 
-        Returns:
-            A collection of EntryPoints.
-        &#34;&#34;&#34;
-        if self.entry_points is None:
-            self.entry_points = entry_points(group=self.group)
-        return self.entry_points
-
-    def load(self) -&gt; typing.Dict[str, plugin.Entry]:
-        &#34;&#34;&#34;Load the plugin class for each plugin.
+        Load the plugin information.
 
         Returns:
-            A list of
+            A list of plugins.
         &#34;&#34;&#34;
-        if not self.plugins:
-            for entry_point in self.collect():
-                self.plugins[entry_point.name] = entry_point.load()
-        return self.plugins
-
-    def get(self, name: str) -&gt; typing.Optional[plugin.Entry]:
-        &#34;&#34;&#34;Get the class for a plugin.
-
-        Args:
-            name: The name of the plugin.
-
-        Returns:
-            The plugin entry class.
-        &#34;&#34;&#34;
-        if name in self.plugins:
-            return self.plugins[name]
-
-        entry_pts = entry_points(group=self.group, name=name)
-        if entry_pts and len(entry_pts) == 1:
-            entry_point = entry_pts[0]
-            self.plugins[entry_point.name] = entry_point.load()
-
-        return self.plugins.get(name)
+        if not self._available:
+            entry_points = self._get_entry_points(self.group)
+            for entry_point in entry_points:
+                item = self._build_plugin_item(entry_point)
+                self._available.append(item)
+        return self._available
 
     def update(self, args: model.UpdateArgs) -&gt; model.UpdateResult:
         &#34;&#34;&#34;Execute the update action for the plugin with the given name.
@@ -195,13 +170,20 @@ class App:
         Returns:
             The result of running the plugin&#39;s update process.
         &#34;&#34;&#34;
-        named_plugin = self.get(args.name)
-        if not named_plugin:
+        named_plugins = [i for i in self.load() if i.entry_point.name == args.name]
+
+        if len(named_plugins) == 1:
+            result = named_plugins[0].entry_instance.update(args)
+            return result
+
+        if len(named_plugins) == 0:
             raise utils.GatherVisionException(
                 f&#34;Could not find plugin named &#39;{args.name}&#39;.&#34;
             )
-        result = named_plugin.update(args)
-        return result
+
+        raise utils.GatherVisionException(
+            f&#34;Found multiple plugins named &#39;{args.name}&#39;.&#34;
+        )
 
     def list(self, args: model.ListArgs) -&gt; model.ListResult:
         &#34;&#34;&#34;List all available plugins.
@@ -213,90 +195,32 @@ class App:
             A list of plugins.
         &#34;&#34;&#34;
         items = {}
-        plugins = self.load()
-        for name, plugin_item in plugins.items():
-            if not name or not plugin_item:
-                continue
-            items.update(plugin_item.list(args).items)
-        return model.ListResult(items)</code></pre>
+        for plugin_item in self.load():
+            result = plugin_item.entry_instance.list(args)
+            items.update(result.items)
+        return model.ListResult(items)
+
+    def _get_entry_points(self, group: str):
+        return import_metadata.entry_points(group=group)
+
+    def _build_plugin_item(self, entry_point: import_metadata.EntryPoint) -&gt; PluginItem:
+        entry_class = entry_point.load()
+        item = PluginItem(
+            entry_point=entry_point,
+            entry_class=entry_class,
+            entry_instance=entry_class(),
+        )
+        return item</code></pre>
 </details>
 <h3>Class variables</h3>
 <dl>
-<dt id="gather_vision.app.App.entry_points"><code class="name">var <span class="ident">entry_points</span> : Optional[importlib_metadata.EntryPoints]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 <dt id="gather_vision.app.App.group"><code class="name">var <span class="ident">group</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="gather_vision.app.App.plugins"><code class="name">var <span class="ident">plugins</span> : Dict[str, <a title="gather_vision.plugin.Entry" href="plugin.html#gather_vision.plugin.Entry">Entry</a>]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="gather_vision.app.App.collect"><code class="name flex">
-<span>def <span class="ident">collect</span></span>(<span>self) ‑> importlib_metadata.EntryPoints</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Collect the available plugins.</p>
-<h2 id="returns">Returns</h2>
-<p>A collection of EntryPoints.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/1fa42a08998ca33b6c39300ff984a7b27297bc1d/src/gather_vision/app.py#L17-L25" class="git-link">Browse git</a>
-</summary>
-<pre><code class="python">def collect(self) -&gt; EntryPoints:
-    &#34;&#34;&#34;Collect the available plugins.
-
-    Returns:
-        A collection of EntryPoints.
-    &#34;&#34;&#34;
-    if self.entry_points is None:
-        self.entry_points = entry_points(group=self.group)
-    return self.entry_points</code></pre>
-</details>
-</dd>
-<dt id="gather_vision.app.App.get"><code class="name flex">
-<span>def <span class="ident">get</span></span>(<span>self, name: str) ‑> Optional[<a title="gather_vision.plugin.Entry" href="plugin.html#gather_vision.plugin.Entry">Entry</a>]</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Get the class for a plugin.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>name</code></strong></dt>
-<dd>The name of the plugin.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<p>The plugin entry class.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/1fa42a08998ca33b6c39300ff984a7b27297bc1d/src/gather_vision/app.py#L38-L55" class="git-link">Browse git</a>
-</summary>
-<pre><code class="python">def get(self, name: str) -&gt; typing.Optional[plugin.Entry]:
-    &#34;&#34;&#34;Get the class for a plugin.
-
-    Args:
-        name: The name of the plugin.
-
-    Returns:
-        The plugin entry class.
-    &#34;&#34;&#34;
-    if name in self.plugins:
-        return self.plugins[name]
-
-    entry_pts = entry_points(group=self.group, name=name)
-    if entry_pts and len(entry_pts) == 1:
-        entry_point = entry_pts[0]
-        self.plugins[entry_point.name] = entry_point.load()
-
-    return self.plugins.get(name)</code></pre>
-</details>
-</dd>
 <dt id="gather_vision.app.App.list"><code class="name flex">
 <span>def <span class="ident">list</span></span>(<span>self, args: <a title="gather_vision.model.ListArgs" href="model.html#gather_vision.model.ListArgs">ListArgs</a>) ‑> <a title="gather_vision.model.ListResult" href="model.html#gather_vision.model.ListResult">ListResult</a></span>
 </code></dt>
@@ -312,7 +236,7 @@ class App:
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/1fa42a08998ca33b6c39300ff984a7b27297bc1d/src/gather_vision/app.py#L74-L89" class="git-link">Browse git</a>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/03caac1d9ec44ed4df9fad3cb22c6178450a29eb/src/gather_vision/app.py#L65-L78" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def list(self, args: model.ListArgs) -&gt; model.ListResult:
     &#34;&#34;&#34;List all available plugins.
@@ -324,36 +248,39 @@ class App:
         A list of plugins.
     &#34;&#34;&#34;
     items = {}
-    plugins = self.load()
-    for name, plugin_item in plugins.items():
-        if not name or not plugin_item:
-            continue
-        items.update(plugin_item.list(args).items)
+    for plugin_item in self.load():
+        result = plugin_item.entry_instance.list(args)
+        items.update(result.items)
     return model.ListResult(items)</code></pre>
 </details>
 </dd>
 <dt id="gather_vision.app.App.load"><code class="name flex">
-<span>def <span class="ident">load</span></span>(<span>self) ‑> Dict[str, <a title="gather_vision.plugin.Entry" href="plugin.html#gather_vision.plugin.Entry">Entry</a>]</span>
+<span>def <span class="ident">load</span></span>(<span>self) ‑> List[<a title="gather_vision.app.PluginItem" href="#gather_vision.app.PluginItem">PluginItem</a>]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Load the plugin class for each plugin.</p>
+<div class="desc"><p>Collect the available plugins.</p>
+<p>Load the plugin information.</p>
 <h2 id="returns">Returns</h2>
-<p>A list of</p></div>
+<p>A list of plugins.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/1fa42a08998ca33b6c39300ff984a7b27297bc1d/src/gather_vision/app.py#L27-L36" class="git-link">Browse git</a>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/03caac1d9ec44ed4df9fad3cb22c6178450a29eb/src/gather_vision/app.py#L26-L39" class="git-link">Browse git</a>
 </summary>
-<pre><code class="python">def load(self) -&gt; typing.Dict[str, plugin.Entry]:
-    &#34;&#34;&#34;Load the plugin class for each plugin.
+<pre><code class="python">def load(self) -&gt; typing.List[PluginItem]:
+    &#34;&#34;&#34;Collect the available plugins.
+
+    Load the plugin information.
 
     Returns:
-        A list of
+        A list of plugins.
     &#34;&#34;&#34;
-    if not self.plugins:
-        for entry_point in self.collect():
-            self.plugins[entry_point.name] = entry_point.load()
-    return self.plugins</code></pre>
+    if not self._available:
+        entry_points = self._get_entry_points(self.group)
+        for entry_point in entry_points:
+            item = self._build_plugin_item(entry_point)
+            self._available.append(item)
+    return self._available</code></pre>
 </details>
 </dd>
 <dt id="gather_vision.app.App.update"><code class="name flex">
@@ -371,7 +298,7 @@ class App:
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/1fa42a08998ca33b6c39300ff984a7b27297bc1d/src/gather_vision/app.py#L57-L72" class="git-link">Browse git</a>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/03caac1d9ec44ed4df9fad3cb22c6178450a29eb/src/gather_vision/app.py#L41-L63" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def update(self, args: model.UpdateArgs) -&gt; model.UpdateResult:
     &#34;&#34;&#34;Execute the update action for the plugin with the given name.
@@ -382,14 +309,56 @@ class App:
     Returns:
         The result of running the plugin&#39;s update process.
     &#34;&#34;&#34;
-    named_plugin = self.get(args.name)
-    if not named_plugin:
+    named_plugins = [i for i in self.load() if i.entry_point.name == args.name]
+
+    if len(named_plugins) == 1:
+        result = named_plugins[0].entry_instance.update(args)
+        return result
+
+    if len(named_plugins) == 0:
         raise utils.GatherVisionException(
             f&#34;Could not find plugin named &#39;{args.name}&#39;.&#34;
         )
-    result = named_plugin.update(args)
-    return result</code></pre>
+
+    raise utils.GatherVisionException(
+        f&#34;Found multiple plugins named &#39;{args.name}&#39;.&#34;
+    )</code></pre>
 </details>
+</dd>
+</dl>
+</dd>
+<dt id="gather_vision.app.PluginItem"><code class="flex name class">
+<span>class <span class="ident">PluginItem</span></span>
+<span>(</span><span>entry_point: importlib_metadata.EntryPoint, entry_class: Type[<a title="gather_vision.plugin.Entry" href="plugin.html#gather_vision.plugin.Entry">Entry</a>], entry_instance: <a title="gather_vision.plugin.Entry" href="plugin.html#gather_vision.plugin.Entry">Entry</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Information about a plugin.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/03caac1d9ec44ed4df9fad3cb22c6178450a29eb/src/gather_vision/app.py#L10-L16" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">@dataclasses.dataclass
+class PluginItem:
+    &#34;&#34;&#34;Information about a plugin.&#34;&#34;&#34;
+
+    entry_point: import_metadata.EntryPoint
+    entry_class: typing.Type[plugin.Entry]
+    entry_instance: plugin.Entry</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="gather_vision.app.PluginItem.entry_class"><code class="name">var <span class="ident">entry_class</span> : Type[<a title="gather_vision.plugin.Entry" href="plugin.html#gather_vision.plugin.Entry">Entry</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="gather_vision.app.PluginItem.entry_instance"><code class="name">var <span class="ident">entry_instance</span> : <a title="gather_vision.plugin.Entry" href="plugin.html#gather_vision.plugin.Entry">Entry</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="gather_vision.app.PluginItem.entry_point"><code class="name">var <span class="ident">entry_point</span> : importlib_metadata.EntryPoint</code></dt>
+<dd>
+<div class="desc"></div>
 </dd>
 </dl>
 </dd>
@@ -457,15 +426,19 @@ setTimeout(() => input.focus(), 100);
 <ul>
 <li>
 <h4><code><a title="gather_vision.app.App" href="#gather_vision.app.App">App</a></code></h4>
-<ul class="two-column">
-<li><code><a title="gather_vision.app.App.collect" href="#gather_vision.app.App.collect">collect</a></code></li>
-<li><code><a title="gather_vision.app.App.entry_points" href="#gather_vision.app.App.entry_points">entry_points</a></code></li>
-<li><code><a title="gather_vision.app.App.get" href="#gather_vision.app.App.get">get</a></code></li>
+<ul class="">
 <li><code><a title="gather_vision.app.App.group" href="#gather_vision.app.App.group">group</a></code></li>
 <li><code><a title="gather_vision.app.App.list" href="#gather_vision.app.App.list">list</a></code></li>
 <li><code><a title="gather_vision.app.App.load" href="#gather_vision.app.App.load">load</a></code></li>
-<li><code><a title="gather_vision.app.App.plugins" href="#gather_vision.app.App.plugins">plugins</a></code></li>
 <li><code><a title="gather_vision.app.App.update" href="#gather_vision.app.App.update">update</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="gather_vision.app.PluginItem" href="#gather_vision.app.PluginItem">PluginItem</a></code></h4>
+<ul class="">
+<li><code><a title="gather_vision.app.PluginItem.entry_class" href="#gather_vision.app.PluginItem.entry_class">entry_class</a></code></li>
+<li><code><a title="gather_vision.app.PluginItem.entry_instance" href="#gather_vision.app.PluginItem.entry_instance">entry_instance</a></code></li>
+<li><code><a title="gather_vision.app.PluginItem.entry_point" href="#gather_vision.app.PluginItem.entry_point">entry_point</a></code></li>
 </ul>
 </li>
 </ul>

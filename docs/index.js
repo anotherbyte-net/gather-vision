@@ -10,12 +10,32 @@ INDEX=[
 {
 "ref":"gather_vision",
 "url":0,
-"doc":"Documentation for the gather vision package.  gather-vision Obtain, extract, organise, and store information.  Install Install from PyPI using pip:   pip install gather-vision   [![PyPI](https: img.shields.io/pypi/v/gather-vision)](https: pypi.org/project/gather-vision/) ![PyPI - Python Version](https: img.shields.io/pypi/pyversions/gather-vision) [![GitHub Workflow Status (branch)](https: img.shields.io/github/workflow/status/anotherbyte-net/gather-vision/Test%20Package/main)](https: github.com/anotherbyte-net/gather-vision/actions)  Change log  [v0.0.2](https: github.com/anotherbyte-net/gather-vision/compare/v0.0.1 .v0.0.2) - Added WebData base class - Changed CI to run via tox and not release to PyPI  [v0.0.1](https: github.com/anotherbyte-net/gather-vision/commits/v0.0.1) - Created initial plugin implementation using [entry points](https: setuptools.pypa.io/en/latest/userguide/entry_point.html entry-points-for-plugins) - Created basic cli using argparse - Created initial tests"
+"doc":"Documentation for the gather vision package.  gather-vision Obtain, extract, organise, and store information.  Install Install from PyPI using pip:   pip install gather-vision   [![PyPI](https: img.shields.io/pypi/v/gather-vision)](https: pypi.org/project/gather-vision/) ![PyPI - Python Version](https: img.shields.io/pypi/pyversions/gather-vision) [![GitHub Workflow Status (branch)](https: img.shields.io/github/workflow/status/anotherbyte-net/gather-vision/Test%20Package/main)](https: github.com/anotherbyte-net/gather-vision/actions)  Change log  [v0.0.3](https: github.com/anotherbyte-net/gather-vision/compare/v0.0.2 .v0.0.3) - improve plugin api, listing, and tests ( 11) - Change dependencies to use pip requirements compatibility format.  [v0.0.2](https: github.com/anotherbyte-net/gather-vision/compare/v0.0.1 .v0.0.2) - Added WebData base class - Changed CI to run via tox and not release to PyPI  [v0.0.1](https: github.com/anotherbyte-net/gather-vision/commits/v0.0.1) - Created initial plugin implementation using [entry points](https: setuptools.pypa.io/en/latest/userguide/entry_point.html entry-points-for-plugins) - Created basic cli using argparse - Created initial tests"
 },
 {
 "ref":"gather_vision.app",
 "url":1,
 "doc":"The main application features."
+},
+{
+"ref":"gather_vision.app.PluginItem",
+"url":1,
+"doc":"Information about a plugin."
+},
+{
+"ref":"gather_vision.app.PluginItem.entry_point",
+"url":1,
+"doc":""
+},
+{
+"ref":"gather_vision.app.PluginItem.entry_class",
+"url":1,
+"doc":""
+},
+{
+"ref":"gather_vision.app.PluginItem.entry_instance",
+"url":1,
+"doc":""
 },
 {
 "ref":"gather_vision.app.App",
@@ -28,31 +48,9 @@ INDEX=[
 "doc":""
 },
 {
-"ref":"gather_vision.app.App.entry_points",
-"url":1,
-"doc":""
-},
-{
-"ref":"gather_vision.app.App.plugins",
-"url":1,
-"doc":""
-},
-{
-"ref":"gather_vision.app.App.collect",
-"url":1,
-"doc":"Collect the available plugins. Returns: A collection of EntryPoints.",
-"func":1
-},
-{
 "ref":"gather_vision.app.App.load",
 "url":1,
-"doc":"Load the plugin class for each plugin. Returns: A list of",
-"func":1
-},
-{
-"ref":"gather_vision.app.App.get",
-"url":1,
-"doc":"Get the class for a plugin. Args: name: The name of the plugin. Returns: The plugin entry class.",
+"doc":"Collect the available plugins. Load the plugin information. Returns: A list of plugins.",
 "func":1
 },
 {

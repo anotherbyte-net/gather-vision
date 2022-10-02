@@ -26,7 +26,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/1fa42a08998ca33b6c39300ff984a7b27297bc1d/src/gather_vision/cli.py#L1-L156" class="git-link">Browse git</a>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/03caac1d9ec44ed4df9fad3cb22c6178450a29eb/src/gather_vision/cli.py#L1-L158" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;Command line for gather vision.&#34;&#34;&#34;
 
@@ -76,9 +76,11 @@ def cli_list(
 
     logger.info(&#34;Listing %s plugins.&#34;, len(result.items))
     for plugin_index, (plugin_name, data_sources) in enumerate(result.items.items()):
+        plugin_num = plugin_index + 1
         logger.info(&#34;  %s) %s&#34;, plugin_index + 1, plugin_name)
         for data_source_index, data_source_name in enumerate(data_sources):
-            logger.info(&#34;    %s) %s&#34;, data_source_index + 1, data_source_name)
+            data_source_num = data_source_index + 1
+            logger.info(&#34;    %s.%s) %s&#34;, plugin_num, data_source_num, data_source_name)
     return True
 
 
@@ -208,7 +210,7 @@ if __name__ == &#34;__main__&#34;:
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/1fa42a08998ca33b6c39300ff984a7b27297bc1d/src/gather_vision/cli.py#L30-L52" class="git-link">Browse git</a>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/03caac1d9ec44ed4df9fad3cb22c6178450a29eb/src/gather_vision/cli.py#L30-L54" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def cli_list(
     args: argparse.Namespace,  # noqa: U100 pylint: disable=unused-argument
@@ -229,9 +231,11 @@ if __name__ == &#34;__main__&#34;:
 
     logger.info(&#34;Listing %s plugins.&#34;, len(result.items))
     for plugin_index, (plugin_name, data_sources) in enumerate(result.items.items()):
+        plugin_num = plugin_index + 1
         logger.info(&#34;  %s) %s&#34;, plugin_index + 1, plugin_name)
         for data_source_index, data_source_name in enumerate(data_sources):
-            logger.info(&#34;    %s) %s&#34;, data_source_index + 1, data_source_name)
+            data_source_num = data_source_index + 1
+            logger.info(&#34;    %s.%s) %s&#34;, plugin_num, data_source_num, data_source_name)
     return True</code></pre>
 </details>
 </dd>
@@ -250,7 +254,7 @@ if __name__ == &#34;__main__&#34;:
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/1fa42a08998ca33b6c39300ff984a7b27297bc1d/src/gather_vision/cli.py#L11-L27" class="git-link">Browse git</a>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/03caac1d9ec44ed4df9fad3cb22c6178450a29eb/src/gather_vision/cli.py#L11-L27" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def cli_update(args: argparse.Namespace) -&gt; bool:
     &#34;&#34;&#34;Run the update action from the cli.
@@ -289,7 +293,7 @@ if __name__ == &#34;__main__&#34;:
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/anotherbyte-net/gather-vision/blob/1fa42a08998ca33b6c39300ff984a7b27297bc1d/src/gather_vision/cli.py#L55-L152" class="git-link">Browse git</a>
+<a href="https://github.com/anotherbyte-net/gather-vision/blob/03caac1d9ec44ed4df9fad3cb22c6178450a29eb/src/gather_vision/cli.py#L57-L154" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def main(args: typing.Optional[typing.List[str]] = None) -&gt; int:
     &#34;&#34;&#34;Run as a command line program.
