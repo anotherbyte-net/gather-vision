@@ -1,10 +1,10 @@
 # Python version support
-importlib_metadata==4.2.0;python_version<"3.8"
-importlib_metadata==4.12.0;python_version>="3.8"
-importlib_resources==5.9.0
-typing_inspect==0.8.0;python_version<"3.8"
-typing_extensions==4.3.0
+importlib_metadata~=4.2;python_version<"3.8"
+importlib_metadata~=5.0;python_version>="3.8"
+importlib_resources~=5.9
+typing_inspect~=0.8;python_version<"3.8"
+typing_extensions~=4.3
 
 # working with data
-Scrapy==2.6.3
-parsel==1.6.0
+Scrapy~=2.6
+parsel~=1.6
