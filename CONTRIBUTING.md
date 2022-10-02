@@ -49,9 +49,11 @@ python -X dev -m tox -e py
 Generate the docs using pdoc3:
 
 ```bash
-pdoc --html --output-dir docs src/gather_vision --force \
-  --config "lunr_search={'fuzziness': 1, 'index_docstrings': True}" \
-  --config "git_link_template='https://github.com/anotherbyte-net/gather-vision/blob/{commit}/{path}#L{start_line}-L{end_line}'"
+pdoc --docformat google \
+  --edit-url gather_vision=https://github.com/anotherbyte-net/gather-vision/blob/main/src/gather_vision/ \
+  --search --show-source \
+  --output-directory docs \
+  ./src/gather_vision
 ```
 
 ## Create and upload release
