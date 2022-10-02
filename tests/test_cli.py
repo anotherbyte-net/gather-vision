@@ -7,7 +7,7 @@ from gather_vision.app import PluginItem
 from gather_vision.cli import main
 from helpers import ExamplePlugin
 
-expected_version = "0.0.2"
+expected_version = "0.0.3"
 
 if sys.version_info.minor >= 10:
     help_phrase_options = "options:"

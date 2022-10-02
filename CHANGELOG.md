@@ -1,5 +1,10 @@
 # Change log
 
+## [v0.0.3](https://github.com/anotherbyte-net/gather-vision/compare/v0.0.2...v0.0.3)
+
+- improve plugin api, listing, and tests (#11)
+- Change dependencies to use pip requirements compatibility format.
+
 ## [v0.0.2](https://github.com/anotherbyte-net/gather-vision/compare/v0.0.1...v0.0.2)
 
 - Added WebData base class
