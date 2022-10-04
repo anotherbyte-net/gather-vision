@@ -11,7 +11,7 @@ pytest~=7.1
 pytest-mock~=3.9
 pytest-cov~=4.0
 tblib~=1.7
-tox~=3.0
+tox~=3.26
 coverage~=6.0
 hypothesis~=6.0
 
@@ -26,7 +26,7 @@ flake8-unused-arguments~=0.0.11
 flake8-requirements~=1.7
 
 # type checking
-mypy~=0.981
+mypy~=0.982
 pylint~=2.0
 pydocstyle[toml]~=6.0
 pyright~=1.1
@@ -39,4 +39,4 @@ pytype~=2022.8;python_version<="3.10" and platform_system != "Windows"
 pyre-check~=0.9; platform_system != "Windows"
 
 # docs
-pdoc~=12.0
+pdoc~=12.2

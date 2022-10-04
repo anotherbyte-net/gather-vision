@@ -1,10 +1,6 @@
 name: Code Analysis
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
   schedule:
     - cron: '05 1 * * 3'
 
