@@ -3,7 +3,7 @@ importlib_metadata~=4.2;python_version<"3.8"
 importlib_metadata~=5.0;python_version>="3.8"
 importlib_resources~=5.9
 typing_inspect~=0.8;python_version<"3.8"
-typing_extensions~=4.3
+typing_extensions~=4.4
 
 # working with data
 Scrapy~=2.6
