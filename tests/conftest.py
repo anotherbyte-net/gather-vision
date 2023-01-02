@@ -2,7 +2,7 @@ from importlib_metadata import EntryPoints
 
 import pytest
 
-from helpers import ExamplePlugin
+from example_plugin import ExamplePlugin
 
 
 @pytest.fixture(autouse=True)

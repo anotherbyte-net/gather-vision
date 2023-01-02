@@ -128,21 +128,18 @@ class App:
                         f"file:///{feed_path_setting}": {"format": "pickle_raw"},
                     },
                     "WEB_DATA_ITEMS": web_data,
+                    "LOG_ENABLED": True,
+                    "LOG_FILE": None,
+                    "LOG_STDOUT": False,
+                    "LOG_LEVEL": "ERROR",
                 },
-                install_root_handler=False,
+                install_root_handler=True,
             )
 
             process.crawl(WebDataFetch)
 
-            # set the scrapy log level
-            # log_level = logging.getLevelName(logging.getLogger().getEffectiveLevel())
-
-            for name in logging.root.manager.loggerDict:
-                if not name.startswith("scrapy"):
-                    continue
-
-                a_logger = logging.getLogger(name)
-                a_logger.setLevel(logging.NOTSET)
+            logging.getLogger("scrapy").setLevel("ERROR")
+            logging.getLogger("py.warnings").setLevel("CRITICAL")
 
             # the script will block here until the crawling is finished
             process.start()

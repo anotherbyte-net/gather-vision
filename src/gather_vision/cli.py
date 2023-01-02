@@ -4,6 +4,7 @@ import argparse
 import logging
 import sys
 import typing
+from logging.config import dictConfig
 
 from gather_vision import app, utils
 from gather_vision.plugin import entry as plugin_entry
@@ -71,6 +72,8 @@ def main(args: typing.Optional[typing.List[str]] = None) -> int:
     logging.basicConfig(
         format="%(asctime)s [%(levelname)-8s] %(message)s", level=logging.INFO
     )
+    logging.root.setLevel(logging.ERROR)
+
     logger = logging.getLogger(__name__)
 
     # create the top-level parser
@@ -116,7 +119,8 @@ def main(args: typing.Optional[typing.List[str]] = None) -> int:
     try:
         parsed_args = parser.parse_args(args)
 
-        logging.getLogger().setLevel((parsed_args.log_level or "info").upper())
+        log_level = (parsed_args.log_level or "info").upper()
+        logging.getLogger("gather_vision").setLevel(log_level)
 
         if not parsed_args.subcommand_action:
             parser.print_help(file=sys.stderr)

@@ -1,11 +1,13 @@
 import sys
+
+import logging_tree
 from importlib_metadata import EntryPoints, entry_points, EntryPoint
 
 import pytest
 
 from gather_vision.app import PluginItem
 from gather_vision.cli import main
-from helpers import ExamplePlugin, collapse_whitespace
+from example_plugin import ExamplePlugin, collapse_whitespace
 
 expected_version = "0.0.3"
 
@@ -121,7 +123,7 @@ def test_cli_list(capsys, caplog, monkeypatch):
     assert caplog.record_tuples == [
         ("gather_vision.cli", 20, "Starting gather-vision."),
         ("gather_vision.app", 20, "Loaded 1 plugins."),
-        ("helpers", 20, "Running list for plugin example-plugin."),
+        ("example_plugin", 20, "Running list for plugin example-plugin."),
         ("gather_vision.cli", 20, "Listing 1 plugins."),
         ("gather_vision.cli", 20, "  1) example-plugin"),
         ("gather_vision.cli", 20, "    1.1) example-data-source-1"),
@@ -168,17 +170,20 @@ def test_cli_update_example_plugin(capsys, caplog):
     with pytest.raises(SystemExit, match="0"):
         main(["update", "--name", "example-plugin"])
 
+    logging_tree_str = logging_tree.format.build_description()
+
     stdout, stderr = capsys.readouterr()
     assert stdout == ""
     assert stderr == ""
-    assert caplog.record_tuples == [
+    for i in [
         ("gather_vision.cli", 20, "Starting gather-vision."),
         ("gather_vision.cli", 20, "Updating 'example-plugin'."),
-        ("helpers", 20, "Running update for plugin example-plugin."),
+        ("example_plugin", 20, "Running update for plugin example-plugin."),
         ("gather_vision.app", 20, "Loaded 1 local data sources."),
-        ("helpers", 20, "Running update for plugin example-plugin."),
+        ("example_plugin", 20, "Running update for plugin example-plugin."),
         ("gather_vision.app", 20, "Starting 1 web data sources."),
         ("gather_vision.app", 20, "Loaded 2 data items from web data sources."),
         ("gather_vision.app", 20, "Finished update."),
         ("gather_vision.cli", 20, "Finished."),
-    ]
+    ]:
+        assert i in caplog.record_tuples

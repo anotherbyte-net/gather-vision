@@ -7,10 +7,12 @@ from gather_vision.plugin import data as plugin_data, entry as plugin_entry
 
 logger = logging.getLogger(__name__)
 
+logging.getLogger("example_plugin").setLevel("INFO")
+
 
 class ExamplePlugin(plugin_entry.Entry):
     plugin_name = "example-plugin"
-    plugin_value = "helpers.ExamplePlugin"
+    plugin_value = "example_plugin.ExamplePlugin"
     _data_source_1 = "example-data-source-1"
     _data_source_2 = "example-data-source-2"
     _data_source_names = [_data_source_1, _data_source_2]
