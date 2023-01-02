@@ -1,6 +1,6 @@
 # working with data
 Scrapy~=2.7
-parsel~=1.6
+parsel~=1.7
 
 # compatibility
 importlib_resources~=5.10
