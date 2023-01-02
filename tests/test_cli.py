@@ -1,11 +1,11 @@
 import sys
+from importlib_metadata import EntryPoints, entry_points, EntryPoint
 
 import pytest
-import importlib_metadata as import_metadata
 
 from gather_vision.app import PluginItem
 from gather_vision.cli import main
-from helpers import ExamplePlugin
+from helpers import ExamplePlugin, collapse_whitespace
 
 expected_version = "0.0.3"
 
@@ -44,13 +44,13 @@ def test_cli_no_args(capsys, caplog, main_args, exit_code):
 
     stdout, stderr = capsys.readouterr()
     if main_args == ["--help"]:
-        assert stdout == prog_help
+        assert collapse_whitespace(stdout) == collapse_whitespace(prog_help)
         assert stderr == ""
         assert caplog.record_tuples == []
 
     if main_args == []:
         assert stdout == ""
-        assert stderr == prog_help
+        assert collapse_whitespace(stderr) == collapse_whitespace(prog_help)
         assert caplog.record_tuples == []
 
 
@@ -87,10 +87,10 @@ def test_cli_list(capsys, caplog, monkeypatch):
         orig_build_plugin_item = App._build_plugin_item
 
         def get_entry_points(self, group):
-            result = import_metadata.EntryPoints(
-                [i for i in import_metadata.entry_points(group=group)]
+            result = EntryPoints(
+                [i for i in entry_points(group=group)]
                 + [
-                    import_metadata.EntryPoint(
+                    EntryPoint(
                         group=App.group,
                         name=ExamplePlugin.plugin_name,
                         value=ExamplePlugin.plugin_value,
@@ -120,6 +120,7 @@ def test_cli_list(capsys, caplog, monkeypatch):
     assert stderr == ""
     assert caplog.record_tuples == [
         ("gather_vision.cli", 20, "Starting gather-vision."),
+        ("gather_vision.app", 20, "Loaded 1 plugins."),
         ("helpers", 20, "Running list for plugin example-plugin."),
         ("gather_vision.cli", 20, "Listing 1 plugins."),
         ("gather_vision.cli", 20, "  1) example-plugin"),
@@ -131,17 +132,15 @@ def test_cli_list(capsys, caplog, monkeypatch):
 
 def test_cli_update_help(capsys, caplog):
     with pytest.raises(SystemExit, match="0"):
-        main(["update", "--help"])
+        main(["--log-level", "debug", "update", "--help"])
 
     stdout, stderr = capsys.readouterr()
     assert stdout == (
-        "usage: gather-vision update [-h] name\n"
-        "\n"
-        "positional arguments:\n"
-        "  name        The name of the update to run.\n"
+        "usage: gather-vision update [-h] [--name NAME]\n"
         "\n"
         f"{help_phrase_options}\n"
-        "  -h, --help  show this help message and exit\n"
+        "  -h, --help   show this help message and exit\n"
+        "  --name NAME  The name of the update to run.\n"
     )
     assert stderr == ""
     assert caplog.record_tuples == []
@@ -149,7 +148,7 @@ def test_cli_update_help(capsys, caplog):
 
 def test_cli_update_not_available(capsys, caplog):
     with pytest.raises(SystemExit, match="1"):
-        main(["update", "not-available"])
+        main(["update", "--name", "not-available"])
 
     stdout, stderr = capsys.readouterr()
     assert stdout == ""
@@ -162,4 +161,24 @@ def test_cli_update_not_available(capsys, caplog):
             40,
             "Error: GatherVisionException - Could not find plugin named 'not-available'.",
         ),
+    ]
+
+
+def test_cli_update_example_plugin(capsys, caplog):
+    with pytest.raises(SystemExit, match="0"):
+        main(["update", "--name", "example-plugin"])
+
+    stdout, stderr = capsys.readouterr()
+    assert stdout == ""
+    assert stderr == ""
+    assert caplog.record_tuples == [
+        ("gather_vision.cli", 20, "Starting gather-vision."),
+        ("gather_vision.cli", 20, "Updating 'example-plugin'."),
+        ("helpers", 20, "Running update for plugin example-plugin."),
+        ("gather_vision.app", 20, "Loaded 1 local data sources."),
+        ("helpers", 20, "Running update for plugin example-plugin."),
+        ("gather_vision.app", 20, "Starting 1 web data sources."),
+        ("gather_vision.app", 20, "Loaded 2 data items from web data sources."),
+        ("gather_vision.app", 20, "Finished update."),
+        ("gather_vision.cli", 20, "Finished."),
     ]

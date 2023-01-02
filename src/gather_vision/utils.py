@@ -1,8 +1,7 @@
 """Small utility functions."""
 import pathlib
 import typing
-
-from importlib_metadata import PackageNotFoundError, distribution
+from importlib_metadata import distribution, PackageNotFoundError
 from importlib_resources import as_file, files
 
 

@@ -5,7 +5,8 @@ import logging
 import sys
 import typing
 
-from gather_vision import app, model, utils
+from gather_vision import app, utils
+from gather_vision.plugin import entry as plugin_entry
 
 
 def cli_update(args: argparse.Namespace) -> bool:
@@ -19,7 +20,7 @@ def cli_update(args: argparse.Namespace) -> bool:
     """
     logger = logging.getLogger(__name__)
 
-    app_args = model.UpdateArgs(name=args.name)
+    app_args = plugin_entry.UpdateArgs(name=args.name)
     main_app = app.App()
 
     logger.info("Updating '%s'.", args.name)
@@ -40,7 +41,7 @@ def cli_list(
     """
     logger = logging.getLogger(__name__)
 
-    app_args = model.ListArgs()
+    app_args = plugin_entry.ListArgs()
     main_app = app.App()
     result = main_app.list(app_args)
 
@@ -68,7 +69,7 @@ def main(args: typing.Optional[typing.List[str]] = None) -> int:
 
     # configure logging
     logging.basicConfig(
-        format="%(asctime)s [%(levelname)-8s] %(message)s", level=logging.DEBUG
+        format="%(asctime)s [%(levelname)-8s] %(message)s", level=logging.INFO
     )
     logger = logging.getLogger(__name__)
 
@@ -102,7 +103,8 @@ def main(args: typing.Optional[typing.List[str]] = None) -> int:
     # create the parser for the "update" command
     parser_update = subparsers.add_parser("update")
     parser_update.add_argument(
-        "name",
+        "--name",
+        default=None,
         help="The name of the update to run.",
     )
     parser_update.set_defaults(func=cli_update)
