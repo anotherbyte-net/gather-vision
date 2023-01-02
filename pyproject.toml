@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 name = "gather-vision"
 description = "Obtain, extract, organise, and store information. "
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "License :: OSI Approved :: Apache Software License",
@@ -18,7 +18,6 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -101,7 +100,7 @@ src_paths = [
 legacy_tox_ini = """
 [tox]
 isolated_build = True
-envlist = py37,py38,py39,py310,py311
+envlist = py38,py39,py310,py311
 
 [testenv]
 recreate = true
@@ -119,7 +118,7 @@ commands =
     -pip list --outdated
     echo "::endgroup::"
     echo "::group::Test coverage"
-    python -X dev -m coverage run -m pytest --tb=line --doctest-modules
+    python -X dev -m coverage run -m pytest --doctest-modules
     echo "::endgroup::"
     echo "::group::Coverage report"
     -python -X dev -m coverage report
@@ -136,14 +135,8 @@ commands =
     echo "::group::Linter - pydocstyle"
     -python -X dev -m pydocstyle src
     echo "::endgroup::"
-    echo "::group::Linter - pyright"
-    -python -X dev -m pyright src
-    echo "::endgroup::"
     echo "::group::Linter - flake8"
     -python -X dev -m flake8 src --count --show-source --statistics --exit-zero
-    echo "::endgroup::"
-    echo "::group::Linter - pytype"
-    -python -X dev -m pytype -j auto
     echo "::endgroup::"
     echo "::group::Build"
     python -m build --sdist --wheel --outdir dist/ .

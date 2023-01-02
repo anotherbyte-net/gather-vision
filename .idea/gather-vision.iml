@@ -12,6 +12,8 @@
       <excludeFolder url="file://$MODULE_DIR$/.venv-test" />
       <excludeFolder url="file://$MODULE_DIR$/dist" />
       <excludeFolder url="file://$MODULE_DIR$/build" />
+      <excludeFolder url="file://$MODULE_DIR$/tests/.scrapy" />
+      <excludeFolder url="file://$MODULE_DIR$/.tox" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

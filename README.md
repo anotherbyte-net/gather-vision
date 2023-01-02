@@ -12,4 +12,4 @@ pip install gather-vision
 
 [![PyPI](https://img.shields.io/pypi/v/gather-vision)](https://pypi.org/project/gather-vision/)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/gather-vision)
-[![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/anotherbyte-net/gather-vision/Test%20Package/main)](https://github.com/anotherbyte-net/gather-vision/actions)
+[![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/anotherbyte-net/gather-vision/test-package.yml?branch=main)](https://github.com/anotherbyte-net/gather-vision/actions)

@@ -46,7 +46,7 @@ python -X dev -m tox -e py
 
 ## Generate docs
 
-Generate the docs using pdoc3:
+Generate the docs using pdoc:
 
 ```bash
 pdoc --docformat google \
