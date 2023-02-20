@@ -3,5 +3,5 @@ Scrapy~=2.7
 parsel~=1.7
 
 # compatibility
-importlib_resources~=5.10
+importlib_resources~=5.12
 importlib_metadata~=6.0
