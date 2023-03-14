@@ -4,7 +4,6 @@ import argparse
 import logging
 import sys
 import typing
-from logging.config import dictConfig
 
 from gather_vision import app, utils
 from gather_vision.plugin import entry as plugin_entry
@@ -25,7 +24,10 @@ def cli_update(args: argparse.Namespace) -> bool:
     main_app = app.App()
 
     logger.info("Updating '%s'.", args.name)
-    main_app.update(app_args)
+    result = main_app.update(app_args)
+
+    # TODO: save result
+
     return True
 
 

@@ -113,14 +113,21 @@ class App:
             feed_path = pathlib.Path(temp_dir, "feed_%(name)s_%(time)s.pickle")
             feed_path_setting = str(feed_path).replace("\\", "/")
 
+            files_path = pathlib.Path(temp_dir, "feed_%(name)s_%(time)s.files")
+            files_path_setting = str(files_path).replace("\\", "/")
+
             process = CrawlerProcess(
                 settings={
+                    "USER_AGENT": "gather-vision (+https://github.com/anotherbyte-net/gather-vision)",
+                    # http cache
                     "HTTPCACHE_ENABLED": True,
                     "HTTPCACHE_DIR": ".httpcache",
-                    "HTTPCACHE_POLICY": "scrapy.extensions.httpcache.RFC2616Policy",
+                    "HTTPCACHE_POLICY": "scrapy.extensions.httpcache.DummyPolicy",
+                    "HTTPCACHE_STORAGE": "scrapy.extensions.httpcache.FilesystemCacheStorage",
                     "EXTENSIONS": {
                         "scrapy.extensions.telnet.TelnetConsole": None,
                     },
+                    # feed
                     "FEED_EXPORTERS": {
                         "pickle_raw": "gather_vision.app.AppPickleItemExporter",
                     },
@@ -128,10 +135,27 @@ class App:
                         f"file:///{feed_path_setting}": {"format": "pickle_raw"},
                     },
                     "WEB_DATA_ITEMS": web_data,
+                    # logs
                     "LOG_ENABLED": True,
                     "LOG_FILE": None,
                     "LOG_STDOUT": False,
                     "LOG_LEVEL": "ERROR",
+                    # throttling requests
+                    "DOWNLOAD_DELAY": 3,
+                    "AUTOTHROTTLE_ENABLED": True,
+                    "AUTOTHROTTLE_START_DELAY": 3,
+                    "AUTOTHROTTLE_MAX_DELAY": 60,
+                    "AUTOTHROTTLE_TARGET_CONCURRENCY": 1.0,
+                    # pipelines
+                    "ITEM_PIPELINES": {
+                        "scrapy.pipelines.files.FilesPipeline": 1,
+                    },
+                    "FILES_STORE": files_path_setting,
+                    "MEDIA_ALLOW_REDIRECTS": True,
+                    # Set settings whose default value is deprecated to a future-proof value
+                    "REQUEST_FINGERPRINTER_IMPLEMENTATION": "2.7",
+                    "TWISTED_REACTOR": "twisted.internet.asyncioreactor.AsyncioSelectorReactor",
+                    "FEED_EXPORT_ENCODING": "utf-8",
                 },
                 install_root_handler=True,
             )
@@ -166,6 +190,10 @@ class App:
 
         logger.info("Loaded %s data items from web data sources.", len(feed_items))
         logger.info("Finished update.")
+
+        # TODO: still need to do something with the feed_items?
+
+        # TODO: save results?
 
         return plugin_entry.UpdateResult(web_data=web_data, local_data=local_data)
 
@@ -209,11 +237,11 @@ class WebDataFetch(scrapy.Spider):
                 yield scrapy.Request(
                     url=initial_url,
                     callback=self.parse,
-                    meta={"web_data_item": web_data_item},
+                    cb_kwargs={"web_data_item": web_data_item},
                 )
 
     def parse(self, response: Response, **kwargs):
-        web_data_item: plugin_data.WebData = response.meta["web_data_item"]
+        web_data_item: plugin_data.WebData = response.cb_kwargs.get("web_data_item")
 
         is_json = "json" in response.headers["Content-Type"].decode("utf-8").lower()
 
@@ -233,12 +261,14 @@ class WebDataFetch(scrapy.Spider):
             selector=selector,
             status=response.status,
             headers=response.headers,
-            meta=response.meta,
+            meta=response.cb_kwargs,
         )
         for i in web_data_item.parse_response(data):
             if isinstance(i, str):
                 yield scrapy.Request(
-                    url=i, callback=self.parse, meta={"web_data_item": web_data_item}
+                    url=i,
+                    callback=self.parse,
+                    cb_kwargs={"web_data_item": web_data_item},
                 )
             else:
                 yield i
