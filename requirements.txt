@@ -1,5 +1,5 @@
 # working with data
-Scrapy~=2.7
+Scrapy~=2.8
 parsel~=1.7
 
 # compatibility
