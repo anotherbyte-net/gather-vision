@@ -85,7 +85,7 @@ source .venv-test/bin/activate
 python -m pip install --upgrade pip setuptools wheel
 python -m pip install --upgrade -r requirements.txt
 
-GATHER_VISION_VERSION='0.0.3'
+GATHER_VISION_VERSION='0.0.4'
 pip install --index-url https://test.pypi.org/simple/ --no-deps gather-vision==$GATHER_VISION_VERSION
 # or
 pip install dist/gather_vision-$GATHER_VISION_VERSION-py3-none-any.whl

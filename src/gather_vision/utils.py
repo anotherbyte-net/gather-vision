@@ -1,8 +1,9 @@
 """Small utility functions."""
+
 import pathlib
 import typing
-from importlib_metadata import distribution, PackageNotFoundError
-from importlib_resources import as_file, files
+import importlib_metadata
+import importlib_resources
 
 
 def get_name_dash() -> str:
@@ -18,13 +19,15 @@ def get_name_under() -> str:
 def get_version() -> typing.Optional[str]:
     """Get the package version."""
     try:
-        dist = distribution(get_name_dash())
+        dist = importlib_metadata.distribution(get_name_dash())
         return dist.version
-    except PackageNotFoundError:
+    except importlib_metadata.PackageNotFoundError:
         pass
 
     try:
-        with as_file(files(get_name_under()).joinpath("cli.py")) as file_path:
+        with importlib_resources.as_file(
+            importlib_resources.files(get_name_under()).joinpath("cli.py")
+        ) as file_path:
             version_path = file_path.parent.parent.parent / "VERSION"
             return version_path.read_text(encoding="utf-8").strip()
     except FileNotFoundError:
@@ -62,3 +65,5 @@ def validate_path(
 
 class GatherVisionException(Exception):
     """A gather vision error."""
+
+    pass

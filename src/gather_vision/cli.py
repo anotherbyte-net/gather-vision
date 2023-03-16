@@ -2,11 +2,12 @@
 
 import argparse
 import logging
+import pathlib
 import sys
 import typing
 
 from gather_vision import app, utils
-from gather_vision.plugin import entry as plugin_entry
+from gather_vision.plugin import entry
 
 
 def cli_update(args: argparse.Namespace) -> bool:
@@ -20,13 +21,31 @@ def cli_update(args: argparse.Namespace) -> bool:
     """
     logger = logging.getLogger(__name__)
 
-    app_args = plugin_entry.UpdateArgs(name=args.name)
+    app_args = entry.UpdateArgs(name=args.name, data_path=args.data_path)
     main_app = app.App()
 
     logger.info("Updating '%s'.", args.name)
     result = main_app.update(app_args)
 
-    # TODO: save result
+    # cli just logs the plugins and count of data items
+    available = {
+        "local": result.local_data,
+        "web": result.web_data,
+    }
+    for group, data_items in available.items():
+        logger.info("Updated %s %s data items.", len(data_items), group)
+        for item_index, data_item in enumerate(data_items):
+            item_num = item_index + 1
+            name = data_item.plugin_name
+            source = data_item.plugin_data_source
+            count = len(data_item.data)
+            logger.info(
+                "  %s) plugin '%s' data source '%s' with %s items",
+                item_num,
+                name,
+                source,
+                count,
+            )
 
     return True
 
@@ -44,10 +63,11 @@ def cli_list(
     """
     logger = logging.getLogger(__name__)
 
-    app_args = plugin_entry.ListArgs()
+    app_args = entry.ListArgs()
     main_app = app.App()
     result = main_app.list(app_args)
 
+    # cli just logs the plugins and data sources
     logger.info("Listing %s plugins.", len(result.items))
     for plugin_index, (plugin_name, data_sources) in enumerate(result.items.items()):
         plugin_num = plugin_index + 1
@@ -55,6 +75,7 @@ def cli_list(
         for data_source_index, data_source_name in enumerate(data_sources):
             data_source_num = data_source_index + 1
             logger.info("    %s.%s) %s", plugin_num, data_source_num, data_source_name)
+
     return True
 
 
@@ -111,6 +132,11 @@ def main(args: typing.Optional[typing.List[str]] = None) -> int:
         "--name",
         default=None,
         help="The name of the update to run.",
+    )
+    parser_update.add_argument(
+        "--data-path",
+        type=pathlib.Path,
+        help="The path to the data directory for downloads, cache, files.",
     )
     parser_update.set_defaults(func=cli_update)
 

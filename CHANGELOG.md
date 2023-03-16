@@ -1,5 +1,12 @@
 # Change log
 
+## [v0.0.4](https://github.com/anotherbyte-net/gather-vision/releases/tag/v0.0.4)
+
+[full change log](https://github.com/anotherbyte-net/gather-vision/compare/v0.0.3...v0.0.4)
+
+- allow providing data storage path
+- improve scrapy web data gathering
+
 ## [v0.0.3](https://github.com/anotherbyte-net/gather-vision/releases/tag/v0.0.3)
 
 [full change log](https://github.com/anotherbyte-net/gather-vision/compare/v0.0.2...v0.0.3)

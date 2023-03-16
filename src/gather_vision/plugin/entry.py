@@ -1,9 +1,11 @@
 """Public api for plugin entry point."""
+
 import abc
 import dataclasses
+import pathlib
 import typing
 
-from gather_vision.plugin.data import LocalData, WebData
+from gather_vision.plugin import data
 
 
 @dataclasses.dataclass
@@ -16,13 +18,15 @@ class UpdateArgs:
     data_source: typing.Optional[str] = None
     """The plugin data source name."""
 
+    data_path: typing.Optional[pathlib.Path] = None
+
 
 @dataclasses.dataclass
 class UpdateResult:
     """The result from the update command."""
 
-    web_data: typing.List["WebData"]
-    local_data: typing.List["LocalData"]
+    web_data: typing.List["data.WebData"]
+    local_data: typing.List["data.LocalData"]
 
 
 @dataclasses.dataclass
