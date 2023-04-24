@@ -4,4 +4,4 @@ parsel~=1.7
 
 # compatibility
 importlib_resources~=5.12
-importlib_metadata~=6.0
+importlib_metadata~=6.6
