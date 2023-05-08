@@ -78,7 +78,7 @@ jobs:
           category: requirements-dev-${{ matrix.python-version }}
 
       - name: Run pip audit
-        uses: pypa/gh-action-pip-audit@v1.0.6
+        uses: pypa/gh-action-pip-audit@v1.0.7
         continue-on-error: true
         with:
           inputs: requirements.txt requirements-dev.txt
