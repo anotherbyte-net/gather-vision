@@ -1,0 +1,251 @@
+{% extends "explore/layout.html" %}
+{% load gather_vision_extras %}
+{% load static %}
+
+{% block page_title %}{% view_attr 'page_title' %}{% endblock %}
+
+{% block page_body %}
+    {% bs_breadcrumb 'vision:home-index' 'vision:about-index' %}
+
+    <h3>About</h3>
+
+    <p class="lead">About the website and the legal notices.</p>
+
+    <hr>
+
+    <h5 id="purpose">Purpose</h5>
+    <p class="lead">What are we doing?</p>
+    <p>
+        This website gathers data and tries to
+        provide a new vision and insights from the data.
+    </p>
+
+    <hr>
+
+    <h5 id="contact">Contact</h5>
+    <p class="lead">Let's chat!</p>
+    <p>
+        Get in touch with the creators of this website on
+        <a href="https://twitter.com/cofiem">Twitter</a> or
+        <a href="https://github.com/cofiem">Github</a>.
+    </p>
+    <p>
+        If you find a problem with the website, missing or incorrect data,
+        or something else isn't right, please
+        <a href="https://github.com/anotherbyte-net/gather-vision/issues">let us know</a>.
+    </p>
+
+    <hr>
+    <h5 id="feedback">Feedback</h5>
+    <p class="lead">We welcome feedback and suggestions.</p>
+    <p>
+        All types of feedback are welcome &ndash;
+        corrections, feature suggestions, questions, criticisms.
+    </p>
+    <p>You can contact the creators of this website
+        using the methods in the Contact section of this page.
+    </p>
+
+    <hr>
+
+    <h5 id="copyright">Copyright</h5>
+    <p class="lead">The website code and the data.</p>
+    <p>
+        This website uses data from other websites.
+        That data remains the copyright of the source website.
+    </p>
+    <p>
+        The
+        <a href="https://github.com/anotherbyte-net/gather-vision">source code</a>
+        is available under the
+        <a href="https://github.com/anotherbyte-net/gather-vision/blob/main/LICENSE">Apache License 2.0</a>.
+    </p>
+    <p>
+        The website icon is the 'sparkle' emoji image by
+        <a href="https://github.com/twitter/twemoji">Twitter Emoji</a> (CC-BY).
+    </p>
+
+
+    <hr>
+    <h5 id="privacy">Privacy</h5>
+    <p class="lead">This website collects information about your browser.</p>
+    <p>
+        This website collects information about your web browser and computer
+        and pages you visit on this website.
+        This information must be collected to be able to serve the website.
+        Any information collected will not be shared unless required by law.
+    </p>
+    <p>
+        Please note that browsers may have built-in or add-on
+        functionality that can access webpages and send information
+        to remote locations. This is not under our control.
+    </p>
+    <p>
+        This website may use local browser storage mechanisms,
+        including but not limited to
+        <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies">cookies</a>
+        and
+        <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API">local storage</a>.
+    </p>
+    <p>
+        This website may use third-party tools to
+        monitor errors and analyse website usage.
+        These tools have their own privacy statements.
+    </p>
+    <p>
+        This website uses
+        <a href="https://www.honeybadger.io/privacy/">Honeybadger</a>
+        to monitor the website and address errors.
+    </p>
+
+    <hr>
+
+    <h5 id="terms">Terms of Service</h5>
+    <p class="lead">This website is maintained as a hobby project.</p>
+    <p>There are no guarantees of future updates or continuing support.</p>
+    <p>
+        Your use of this website and other data, content, or source code from
+        this website does not create or imply a relationship between you and us.
+    </p>
+    <p>
+        Essentially, this website aims to be useful and helpful,
+        but this website is maintained in spare time.
+        So, please take it easy.
+    </p>
+
+    <hr>
+
+    <h5 id="disclaimer">Disclaimer</h5>
+    <p class="lead">
+        This website aims to contain relevant and up-to-date information,
+        however some content or links may be out of date or incorrect.
+    </p>
+    <p>
+        The data, content, and source code on the website is provided "as is",
+        without warranties of any kind, to the extent permitted by law.
+    </p>
+    <p>
+        Your use of the information on this website is at your own discretion and risk.
+    </p>
+    <p>
+        Please consult any relevant official information to ensure
+        your decisions are based on reliable information.
+    </p>
+
+    <hr>
+    <h5 id="datasources">Data Sources and APIs</h5>
+    <p class="lead">Where is the data sourced from and sent to?</p>
+    <p>
+        This website uses data and APIs from various places.
+        Please consult these places directly to obtain up-to-date information.
+    </p>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Type of data</th>
+            <th scope="col">Website</th>
+            <th scope="col">Links</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <th scope="row">Playlist</th>
+            <td>
+                <a href="https://www.spotify.com">
+                    Spotify
+                </a>
+            </td>
+            <td>
+                <a href="https://developer.spotify.com/">
+                    API
+                </a>
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">Playlist</th>
+            <td>
+                <a href="https://music.youtube.com/">
+                    YouTube Music
+                </a>
+            </td>
+            <td>
+                <a href="https://github.com/sigma67/ytmusicapi">
+                    ytmusic library
+                </a>
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">Outages</th>
+            <td>
+                <a href="https://www.energex.com.au/">
+                    Energex
+                </a>
+            </td>
+            <td>
+                <a href="https://www.energex.com.au/home/power-outages/outage-finder/emergency-outages-text-view/">
+                    Emergency outages
+                </a>
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">Petitions</th>
+            <td>
+                <a href="https://www.brisbane.qld.gov.au/">
+                    Brisbane City Council
+                </a>
+            </td>
+            <td>
+                <a href="https://epetitions.brisbane.qld.gov.au/">
+                    Brisbane City Council Petitions
+                </a>
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">Petitions</th>
+            <td>
+                <a href="https://www.qld.gov.au/">
+                    Queensland Government
+                </a>
+            </td>
+            <td>
+                <a href="https://www.parliament.qld.gov.au/Work-of-the-Assembly/Petitions">
+                    Queensland Government Petitions
+                </a>
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">Transport</th>
+            <td>
+                <a href="https://www.queenslandrail.com.au/">
+                    Queensland Rail
+                </a>
+            </td>
+            <td>
+                <a href="https://www.queenslandrail.com.au/Customers/Pages/closures.aspx">
+                    Queensland Rail Track Closures
+                </a>
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">Transport</th>
+            <td>
+                <a href="https://translink.com.au/">
+                    Translink
+                </a>
+            </td>
+            <td>
+                <a href="https://translink.com.au/service-updates">
+                    Translink Service Updates
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <hr>
+
+{% endblock %}
+
+
+

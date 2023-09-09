@@ -1,10 +1,14 @@
 from django.db import models
 
-from gather_vision.models.abstract_base import AbstractBase
-from gather_vision.models.information_source import InformationSource
+from gather_vision.obtain.core import base
 
 
-class WaterQualitySite(AbstractBase):
+class WaterQualitySite(
+    base.ModelDescriptionUrlMixin,
+    base.ModelDescriptionUrlMixin,
+    base.ModelNameTitleMixin,
+    AbstractBase,
+):
     """A location used to obtain water quality samples."""
 
     source = models.ForeignKey(
@@ -15,13 +19,6 @@ class WaterQualitySite(AbstractBase):
     code = models.CharField(
         max_length=10,
         help_text="The site reference code.",
-    )
-    title = models.CharField(
-        max_length=100,
-        help_text="The title of the site.",
-    )
-    description = models.TextField(
-        help_text="The description of the site.",
     )
     latitude = models.DecimalField(
         max_digits=7,

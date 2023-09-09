@@ -1,10 +1,12 @@
 import re
-
 import importlib_metadata
-
 import pytest
-
 import example_plugin
+import logging
+
+logging.basicConfig(
+    format="%(asctime)s [%(levelname)-8s] %(message)s", level=logging.DEBUG
+)
 
 
 @pytest.fixture(autouse=True)

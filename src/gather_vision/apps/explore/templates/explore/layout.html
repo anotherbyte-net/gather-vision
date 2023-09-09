@@ -1,0 +1,81 @@
+{% load gather_vision_extras %}
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'gather_vision/apple-touch-icon.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'gather_vision/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'gather_vision/favicon-16x16.png' %}">
+    <link rel="manifest" href="{% static 'gather_vision/site.webmanifest' %}">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+
+    {% block page_links %}{% endblock %}
+
+    <title>{% block page_title %}Page{% endblock %} | Vision</title>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-md navbar-dark mb-4" style="background-color: #004000;">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/gather_vision/static">
+            <img width="24" height="24" class="d-inline-block align-text-top"
+                 src="{% static 'gather_vision/favicon-16x16.png' %}" alt="brand image">
+            Vision
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
+                aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                <li class="nav-item">
+                    {% bs_nav_link 'vision:transport-filter' transport_filter='all' %}
+                </li>
+                <li class="nav-item">
+                    {% bs_nav_link 'vision:playlists-index' %}
+                </li>
+                <li class="nav-item">
+                    {% bs_nav_link 'vision:petitions-index' %}
+                </li>
+                <li class="nav-item">
+                    {% bs_nav_link 'vision:outages-index' %}
+                </li>
+                <li class="nav-item">
+                    {% bs_nav_link 'vision:contact-tracing-index' %}
+                </li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    {% bs_nav_link 'vision:about-index' 'About' %}
+                </li>
+                <li class="nav-item">
+                    {% bs_nav_link 'admin:index' 'Admin' %}
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<main class="container">
+    {% block page_body %}Vision{% endblock %}
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.7.0/plotly.min.js"
+        integrity="sha512-q1rEpUTtSAFUKUj3xwFbDe0iRHWgr0dLH1jiA6KGE0RefHyH4Te2lQ3Xk2y1PC5LpAXTVe+wKusQ16WXbvxykA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+{% block page_scripts %}{% endblock %}
+
+</body>
+</html>

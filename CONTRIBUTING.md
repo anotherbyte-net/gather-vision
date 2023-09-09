@@ -17,6 +17,9 @@ Install runtime dependencies and development dependencies:
 # Linux
 source .venv/bin/activate
 
+# Windows MINGW64
+source .venv/Scripts/activate
+
 # install dependencies
 python -m pip install --upgrade pip setuptools wheel
 python -m pip install --upgrade -r requirements-dev.txt -r requirements.txt
@@ -25,23 +28,24 @@ python -m pip install --upgrade -r requirements-dev.txt -r requirements.txt
 pip list --outdated
 ```
 
-## Run tests and linters
-
-Run the tests and linters with multiple python versions using tox.
-
-If the pip dependencies have changed, it might be necessary to 
-(un)comment `recreate = true` in the tox section in `pyproject.toml`.
-
-To run using all available python versions:
+Run linters:
 
 ```bash
-python -X dev -m tox
+python -X dev black --check .
+python -X dev ruff .
 ```
 
-To run using the active python:
+Run tests:
 
 ```bash
-python -X dev -m tox -e py
+python -X dev coverage run -m pytest
+```
+
+# Create database
+python -X dev manage.py migrate
+python -X dev manage.py createcachetable
+python -X dev manage.py createsuperuser
+
 ```
 
 ## Generate docs

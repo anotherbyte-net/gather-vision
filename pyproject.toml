@@ -148,3 +148,30 @@ convention = 'google'
 
 [tool.mypy]
 ignore_missing_imports = true
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+show-fixes = true
+src = [
+    ".",
+]
+extend-exclude = [
+    ".venv",
+    "tests",
+    "**/migrations",
+]
+select = [
+    "ALL",
+]
+ignore = [
+    "ANN101", # Missing type annotation for `self` in method
+    "ANN102", # Missing type annotation for `cls` in classmethod
+    "ERA001", # commented-out-code
+    "RET504", # Unnecessary variable assignment before `return` statement
+    "TD002", # Missing author in TODO; try: `# TODO(<author_name>): ...`
+    "TD003", # Missing issue link on the line following this TODO
+]
+
+[tool.ruff.pydocstyle]
+convention = "google"

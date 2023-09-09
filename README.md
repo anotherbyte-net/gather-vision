@@ -1,6 +1,6 @@
 # gather-vision
 
-Obtain, extract, organise, and store information. 
+Obtain, extract, organise, and store information.
 
 ## Install
 

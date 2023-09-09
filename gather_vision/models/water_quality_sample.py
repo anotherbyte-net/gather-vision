@@ -4,7 +4,7 @@ from gather_vision.models.abstract_base import AbstractBase
 from gather_vision.models.water_quality_site import WaterQualitySite
 
 
-class WaterQualitySample(AbstractBase):
+class WaterQualitySample(base.ModelRetrievedMixin, AbstractBase):
     """A water quality sample obtained from a site."""
 
     VALID = "valid"
@@ -22,9 +22,6 @@ class WaterQualitySample(AbstractBase):
         on_delete=models.CASCADE,
         related_name="samples",
         help_text="The sample site.",
-    )
-    retrieved_date = models.DateTimeField(
-        help_text="The date this item was retrieved from the source.",
     )
     sample_date = models.DateField(
         help_text="The date this sample was conducted.",

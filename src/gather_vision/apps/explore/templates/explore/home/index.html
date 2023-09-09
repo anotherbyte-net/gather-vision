@@ -1,0 +1,76 @@
+{% extends "explore/layout.html" %}
+{% load gather_vision_extras %}
+
+{% block page_title %}{% view_attr 'page_title' %}{% endblock %}
+
+{% block page_body %}
+    {% bs_breadcrumb 'vision:home-index' %}
+
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-header">Transport</div>
+                <div class="card-body">
+                    <h5 class="card-title">Public transport notices</h5>
+                    <p class="card-text">
+                        Notices collected from the agencies that operate the services.
+                        Options to filter by category.
+                    </p>
+                    <p class="card-text">
+                        Provided in iCalendar (ics), web page, csv, and json api formats.
+                    </p>
+                    <a href="{% url 'vision:transport-index' %}" class="card-link">
+                        Check the notices
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-header">Petitions</div>
+                <div class="card-body">
+                    <h5 class="card-title">Online petitions</h5>
+                    <p class="card-text">
+                        Keeps track of the number of signatures for petitions over time.
+                        Can reveal the growth pattern of signature counts.
+                    </p>
+                    <a href="{% url 'vision:petitions-index' %}" class="card-link">
+                        Follow the signature counts
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-header">Outages</div>
+
+                <div class="card-body">
+                    <h5 class="card-title">Electricity outages</h5>
+                    <p class="card-text">
+                        A log of the electricity outages over time.
+                        Shows how long outages lasted for and
+                        any changes in the number of customers affected.
+                    </p>
+                    <a href="{% url 'vision:outages-index' %}" class="card-link">
+                        Have a look at the outages
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-header">Playlists</div>
+                <div class="card-body">
+                    <h5 class="card-title">Music playlists</h5>
+                    <p class="card-text">
+                        Builds music playlists for music streaming services
+                        from a number of online music charts.
+                    </p>
+                    <a href="{% url 'vision:playlists-index' %}" class="card-link">
+                        See which tracks are on the playlists
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

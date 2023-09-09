@@ -2,39 +2,27 @@
 pip
 setuptools
 wheel
-build
-twine
 pip-audit
+
+# local dev
+django-debug-toolbar
 
 # tests
 pytest
 pytest-mock
 pytest-cov
-tblib
-tox
 coverage
-hypothesis
-logging_tree
+hypothesis[django]
+hypofuzz
 
 # linters
 black
-flake8
-flake8-annotations-coverage
-flake8-black
-flake8-bugbear
-flake8-comprehensions
-flake8-unused-arguments
-flake8-requirements
+ruff
 
 # type checking
 mypy
-pylint
-pydocstyle[toml]
 types-dateparser
 types-PyYAML
 types-requests
 types-backports
 types-urllib3
-
-# docs
-pdoc

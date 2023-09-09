@@ -39,9 +39,9 @@ jobs:
           python -m pip install --upgrade -r requirements-dev.txt -r requirements.txt
           echo "::endgroup::"
 
-      # run tests using tox
-      # https://tox.wiki/en/latest/config.html#conf-basepython
-      # https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python#running-tests-with-tox
-      - name: Run tox
-        run: |
-          python -X dev -m tox -e py
+#      # run tests using tox
+#      # https://tox.wiki/en/latest/config.html#conf-basepython
+#      # https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python#running-tests-with-tox
+#      - name: Run tox
+#        run: |
+#          python -X dev -m tox -e py

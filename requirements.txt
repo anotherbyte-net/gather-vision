@@ -1,7 +1,10 @@
 # working with data
-Scrapy~=2.8
-parsel~=1.7
+Scrapy~=2.10.1
+parsel~=1.8.1
+
+# website
+django~=4.2.5
 
 # compatibility
-importlib_resources~=5.12
-importlib_metadata~=6.6
+importlib_resources
+importlib_metadata
