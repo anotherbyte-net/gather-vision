@@ -1,5 +1,15 @@
 # gather-vision
-A collection of data and ideas related to society and government in Queensland, Australia.
 
-[![Test and build](https://github.com/anotherbyte-net/gather-vision/actions/workflows/app-tests.yml/badge.svg?branch=main)](https://github.com/anotherbyte-net/gather-vision/actions/workflows/app-tests.yml)
-[![CodeQL](https://github.com/anotherbyte-net/gather-vision/actions/workflows/codeql-analysis.yml/badge.svg?branch=main)](https://github.com/anotherbyte-net/gather-vision/actions/workflows/codeql-analysis.yml)
+Obtain, extract, organise, and store information. 
+
+## Install
+
+Install from PyPI using pip:
+
+```bash
+pip install gather-vision
+```
+
+[![PyPI](https://img.shields.io/pypi/v/gather-vision)](https://pypi.org/project/gather-vision/)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/gather-vision)
+[![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/anotherbyte-net/gather-vision/test-package.yml?branch=main)](https://github.com/anotherbyte-net/gather-vision/actions)

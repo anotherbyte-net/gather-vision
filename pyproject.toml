@@ -1,90 +1,87 @@
-[tool.poetry]
-name = "gather-vision"
-version = "0.2.0"
-description = "A collection of data and ideas related to society and government in Queensland, Australia."
-license = "Apache-2.0"
-authors = [
-    "Mark Cottman-Fields <cofiem@gmail.com>"
-]
-readme = "README.md"
-homepage = "https://github.com/anotherbyte-net/gather-vision"
-repository = "https://github.com/anotherbyte-net/gather-vision"
-documentation = "https://github.com/anotherbyte-net/gather-vision"
-classifiers = [
-    "Development Status :: 4 - Beta",
-    "Framework :: Django",
-]
-
-
-[tool.poetry.dependencies]
-python = "^3.9"
-
-# general
-Django = "^4.0"
-docutils = "^0.18"
-requests = "^2.26.0"
-requests-cache = "^0.8.1"
-django-environ = "^0.8.1"
-
-# calendar
-ics = "^0.7"
-icalendar = "^4.0.9"
-
-# music
-ytmusicapi = "^0.19.4"
-xmltodict = "^0.12.0"
-
-# data input
-openpyxl = "^3.0.9"
-lxml = "^4.6.4"
-
-[tool.poetry.dev-dependencies]
-black = "^21.10b0"
-flake8 = "^3.9.2"
-requests-mock = "^1.9.3"
-coverage = "^6.2"
-django-coverage-plugin = "^2.0.2"
-pytest = "^6.2.5"
-flake8-django = "^1.1.2"
-flake8-bugbear = "^21.9.2"
-tblib = "^1.7.0"
-django-debug-toolbar = "^3.2.2"
-
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = [
+    "setuptools>=63.0.0",
+]
+build-backend = "setuptools.build_meta"
 
-[tool.poetry.scripts]
-gather-vision = "manage:main"
+[project]
+name = "gather-vision"
+description = "Obtain, extract, organise, and store information. "
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Microsoft :: Windows",
+    "Environment :: Console",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Utilities",
+]
+dynamic = [
+    "version",
+    "dependencies",
+    "optional-dependencies",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/anotherbyte-net/gather-vision"
+"Changelog" = "https://github.com/anotherbyte-net/gather-vision/blob/main/CHANGELOG.md"
+"Source" = "https://github.com/anotherbyte-net/gather-vision"
+"Tracker" = "https://github.com/anotherbyte-net/gather-vision/issues"
+
+[project.scripts]
+gather-vision = 'gather_vision.cli:main'
+
+[tool.setuptools.packages.find]
+where = [
+    "src",
+]
+# include and exclude accept strings representing glob patterns.
+include = [
+    "gather_vision*",
+]
+
+[tool.setuptools.dynamic]
+version = { file = [
+    "VERSION",
+] }
+dependencies = { file = [
+    "requirements.txt",
+] }
+
+[tool.setuptools.dynamic.optional-dependencies]
+dev = { file = [
+    "requirements-dev.txt",
+] }
 
 [tool.pytest.ini_options]
-minversion = "6.0"
+minversion = "7.0"
 addopts = "-ra --quiet"
+pythonpath = [
+    "src",
+]
 testpaths = [
-    "gather_vision/tests",
+    "tests",
 ]
-python_files = [
-    'tests.py',
-    'test_*.py',
-    '*_tests.py',
-]
-DJANGO_SETTINGS_MODULE = 'gather_vision_proj.settings'
 
 [tool.coverage.run]
 # "Specifying the source option enables coverage.py to report on unexecuted files,
 # since it can search the source tree for files that haven’t been measured at all."
 source = [
-    "gather_vision",
-    "gather_vision_proj",
-    "templates",
+    'src',
 ]
 omit = [
-    "*/site-packages/*",
-    "*/tests/*",
-    "gather_vision/migrations/",
-]
-plugins = [
-    "django_coverage_plugin",
+    '*/site-packages/*',
+    'tests/*',
 ]
 
 [tool.coverage.report]
@@ -93,15 +90,61 @@ skip_empty = true
 [tool.coverage.html]
 directory = "coverage-html"
 
-[tool.black]
-line-length = 88
-target-version = [
-    "py38",
-    "py39",
-    "py310",
+[tool.isort]
+profile = "black"
+src_paths = [
+    "src",
 ]
-extend-exclude = """
-# Exclude files in addition to the defaults.
-# A regex preceded with ^/ will apply only to files and directories in the root of the project.
-gather_vision/migrations
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+isolated_build = True
+envlist = py38,py39,py310,py311
+
+[testenv]
+recreate = true
+deps =
+    -r requirements.txt
+    -r requirements-dev.txt
+allowlist_externals =
+    echo
+commands =
+    echo "::group::Show app help"
+    gather-vision --version
+    gather-vision --help
+    echo "::endgroup::"
+    echo "::group::Outdated deps"
+    -pip list --outdated
+    echo "::endgroup::"
+    echo "::group::Test coverage"
+    python -X dev -m coverage run -m pytest --doctest-modules
+    echo "::endgroup::"
+    echo "::group::Coverage report"
+    -python -X dev -m coverage report
+    echo "::endgroup::"
+    echo "::group::Linter - mypy"
+    -python -X dev -m mypy src
+    echo "::endgroup::"
+    echo "::group::Linter - black"
+    -python -X dev -m black --check src
+    echo "::endgroup::"
+    echo "::group::Linter - pylint"
+    -python -X dev -m pylint src
+    echo "::endgroup::"
+    echo "::group::Linter - pydocstyle"
+    -python -X dev -m pydocstyle src
+    echo "::endgroup::"
+    echo "::group::Linter - flake8"
+    -python -X dev -m flake8 src --count --show-source --statistics --exit-zero
+    echo "::endgroup::"
+    echo "::group::Build"
+    python -m build --sdist --wheel --outdir dist/ .
+    echo "::endgroup::"
 """
+
+[tool.pydocstyle]
+convention = 'google'
+
+[tool.mypy]
+ignore_missing_imports = true
