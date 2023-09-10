@@ -42,10 +42,9 @@ python -X dev coverage run -m pytest
 ```
 
 # Create database
-python -X dev manage.py migrate
-python -X dev manage.py createcachetable
-python -X dev manage.py createsuperuser
-
+python -X dev src/manage.py migrate
+python -X dev src/manage.py createcachetable
+python -X dev src/manage.py createsuperuser
 ```
 
 ## Generate docs

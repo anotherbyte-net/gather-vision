@@ -7,17 +7,29 @@ import importlib_resources
 
 
 def get_name_dash() -> str:
-    """Get the package name with word separated by dashes."""
+    """Get the package name with word separated by dashes.
+
+    Returns:
+        The package name with dashes.
+    """
     return "gather-vision"
 
 
 def get_name_under() -> str:
-    """Get the package name with word separated by underscores."""
+    """Get the package name with word separated by underscores.
+
+    Returns:
+        The package name with underscores.
+    """
     return "gather_vision"
 
 
 def get_version() -> typing.Optional[str]:
-    """Get the package version."""
+    """Get the package version.
+
+    Returns:
+        The version if found, otherwise None.
+    """
     try:
         dist = importlib_metadata.distribution(get_name_dash())
         return dist.version
@@ -37,7 +49,17 @@ def get_version() -> typing.Optional[str]:
 
 
 def validate(name: str, value, expected: typing.List) -> None:
-    """Validate that a value is one of the expected values."""
+    """Validate that a value is one of the expected values.
+    Raises an error if the value is not an expected value.
+
+    Args:
+        name: The name of the variable or collection.
+        value: The value to validate.
+        expected: The valid values.
+
+    Returns:
+        None
+    """
     if value is not None and value not in expected:
         opts = ", ".join(sorted([str(i) for i in expected]))
         raise GatherVisionException(
@@ -48,7 +70,17 @@ def validate(name: str, value, expected: typing.List) -> None:
 def validate_path(
     name: str, value: pathlib.Path, must_exist: bool = False
 ) -> pathlib.Path:
-    """Validate a path."""
+    """Validate a path.
+    Raises an error if the validation fails.
+
+    Args:
+        name: The name of the path.
+        value: The path value to validate.
+        must_exist: Whether the provided path value must exist or not.
+
+    Returns:
+        A pathlib.Path instance if the validation passes, raises an error otherwise.
+    """
     if not value:
         raise GatherVisionException(f"Must provide path {name}.")
 

@@ -1,15 +1,26 @@
 import dataclasses
 import typing
 
-from gather_vision.obtain.core.plugin import data
+from gather_vision.obtain.core import data
 
 
 @dataclasses.dataclass
-class BrisbaneCityCouncilPetitionItem:
+class BrisbaneCityCouncilPetitionItem(data.GatherDataItem):
     pass
 
 
 class BrisbaneCityCouncilPetitions(data.WebData):
+    @property
+    def tags(self) -> dict[str, str]:
+        return {
+            "country": "Australia",
+            "region": "Queensland",
+            "district": "Brisbane City Council",
+            "locality": "City of Brisbane",
+            "data_source_location": "web",
+            "data_source_category": "petition",
+        }
+
     list_url = "https://www.epetitions.brisbane.qld.gov.au"
     # table.petitions
     # tbody.tr.th (headers)
@@ -27,9 +38,9 @@ class BrisbaneCityCouncilPetitions(data.WebData):
     def initial_urls(self) -> typing.Iterable[str]:
         return [self.list_url]
 
-    def parse_response(
-        self, data: data.WebDataAvailable
-    ) -> typing.Generator[typing.Union[str, data.IsDataclass], typing.Any, typing.Any]:
+    def web_resources(
+        self, web_data: data.WebDataAvailable
+    ) -> typing.Iterable[typing.Union[str, data.GatherDataItem]]:
         pass
 
         # Options (pick one):

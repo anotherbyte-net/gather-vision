@@ -1,6 +1,8 @@
 # working with data
 Scrapy~=2.10.1
 parsel~=1.8.1
+defusedxml~=0.7.1
+lxml~=4.9.3
 
 # website
 django~=4.2.5

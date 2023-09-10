@@ -10,20 +10,22 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
-from importlib.resources import path
+from importlib import resources
 from django.utils.translation import gettext_lazy as _
 from gather_vision.proj import DjangoCustomSettings
 
 # Check the deployment checklist
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
-with path("gather_vision.proj", "settings.py") as p:
+with resources.as_file(resources.files("gather_vision.proj") / "settings.py") as p:
     # Build paths inside the project like this: BASE_DIR / 'subdir'.
-    BASE_DIR = p.parent.parent
+    BASE_DIR = p.parent.parent.parent.parent
+
+LOCAL_DIR = BASE_DIR / ".local"
 
 # Load settings from a config file
 env = DjangoCustomSettings(prefix="GATHER_VISION")
-env.load_file(BASE_DIR / ".local" / ".env")
+env.load_file(LOCAL_DIR / ".env")
 env.load_env(name="ENV_PATH")
 
 # Set debug or default to false.
@@ -43,12 +45,17 @@ INTERNAL_IPS = env.get_list(key="INTERNAL_IPS", default=["127.0.0.1"])
 INSTALLED_APPS = [
     "django.contrib.admindocs",
     "django.contrib.admin.apps.SimpleAdminConfig",
-    "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "gather_vision.apps.explore.apps.ExploreAppConfig",
+    "gather_vision.apps.electricity.apps.ElectricityAppConfig",
+    "gather_vision.apps.legislatures.apps.LegislaturesAppConfig",
+    "gather_vision.apps.music.apps.MusicAppConfig",
+    "gather_vision.apps.transport.apps.TransportAppConfig",
+    "gather_vision.apps.water.apps.WaterAppConfig",
 ]
 
 if DEBUG is True:
@@ -103,7 +110,7 @@ WSGI_APPLICATION = "gather_vision.proj.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / ".local" / "gather_vision.sqlite3",
+        "NAME": LOCAL_DIR / "gather_vision.sqlite3",
     }
 }
 

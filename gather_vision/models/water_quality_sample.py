@@ -3,8 +3,12 @@ from django.db import models
 from gather_vision.models.abstract_base import AbstractBase
 from gather_vision.models.water_quality_site import WaterQualitySite
 
+import gather_vision.obtain.core.models
 
-class WaterQualitySample(base.ModelRetrievedMixin, AbstractBase):
+
+class WaterQualitySample(
+    gather_vision.obtain.core.models.RetrievedModelBase, AbstractBase
+):
     """A water quality sample obtained from a site."""
 
     VALID = "valid"

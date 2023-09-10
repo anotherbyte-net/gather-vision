@@ -1,11 +1,11 @@
 import dataclasses
 import typing
 
-from gather_vision.plugin import data
+from gather_vision.obtain.core import data
 
 
 @dataclasses.dataclass
-class QueenslandGovernmentPetitionItem:
+class QueenslandGovernmentPetitionItem(data.GatherDataItem):
     pass
 
 
@@ -33,10 +33,19 @@ class QueenslandGovernmentPetitions(data.WebData):
     # posting date: .petition-details__prop
     # closing date: .petition-details__prop
 
+    @property
+    def tags(self) -> dict[str, str]:
+        return {
+            "country": "Australia",
+            "region": "Queensland",
+            "data_source_location": "web",
+            "data_source_category": "petition",
+        }
+
     def initial_urls(self) -> typing.Iterable[str]:
         return [self.list_url]
 
-    def parse_response(
-        self, data: data.WebDataAvailable
-    ) -> typing.Generator[typing.Union[str, data.IsDataclass], typing.Any, typing.Any]:
+    def web_resources(
+        self, web_data: data.WebDataAvailable
+    ) -> typing.Iterable[typing.Union[str, data.GatherDataItem]]:
         pass

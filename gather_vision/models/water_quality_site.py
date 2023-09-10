@@ -1,12 +1,12 @@
 from django.db import models
 
-from gather_vision.obtain.core import base
+import gather_vision.obtain.core.models
 
 
 class WaterQualitySite(
-    base.ModelDescriptionUrlMixin,
-    base.ModelDescriptionUrlMixin,
-    base.ModelNameTitleMixin,
+    gather_vision.obtain.core.models.DescriptionUrlModelBase,
+    gather_vision.obtain.core.models.DescriptionUrlModelBase,
+    gather_vision.obtain.core.models.NameTitleModelBase,
     AbstractBase,
 ):
     """A location used to obtain water quality samples."""

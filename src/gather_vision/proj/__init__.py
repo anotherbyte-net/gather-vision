@@ -1,6 +1,9 @@
 import configparser
+import logging
 import os
 import pathlib
+
+logger = logging.getLogger(__name__)
 
 
 class DjangoCustomSettings:
@@ -14,11 +17,9 @@ class DjangoCustomSettings:
     def load_env(self, name: str) -> None:
         name = self._prefixed_key(name)
         value = os.environ.get(name)
-        if not value:
-            msg = f"Env var '{name}' is not set."
-            raise ValueError(msg)
-
-        self.load_file(pathlib.Path(value))
+        if value:
+            logger.warning(f"Loading settings from '{name}'.")
+            self.load_file(pathlib.Path(value))
 
     def load_file(self, path: pathlib.Path) -> None:
         self._config_parser = configparser.ConfigParser()
@@ -32,11 +33,11 @@ class DjangoCustomSettings:
         value = self._config_parser.getboolean(self._section, key, fallback=default)
         return value
 
-    def get_int(self, key: str, default: bool | None = None) -> bool:
+    def get_int(self, key: str, default: int | None = None) -> bool:
         value = self._config_parser.getint(self._section, key, fallback=default)
         return value
 
-    def get_float(self, key: str, default: bool | None = None) -> bool:
+    def get_float(self, key: str, default: float | None = None) -> bool:
         value = self._config_parser.getfloat(self._section, key, fallback=default)
         return value
 
@@ -46,8 +47,8 @@ class DjangoCustomSettings:
         sep: str = ",",
         default: list | None = None,
     ) -> list:
-        value = self._config_parser.get(self._section, key, fallback=default or "")
-        items = value.split(sep)
+        value = self._config_parser.get(self._section, key, fallback=None)
+        items = value.split(sep) if value is not None else (default or [])
         return items
 
     def get_dict(

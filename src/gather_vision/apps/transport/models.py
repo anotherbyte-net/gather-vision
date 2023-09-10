@@ -1,20 +1,19 @@
-from django.db import models
+from django.db import models as db_models
 
 
-from gather_vision.apps.explore.models import Origin, Coordinate, Area
-from gather_vision.obtain.core import base
-from gather_vision.obtain.core.base import ModelChangedMixin
+from gather_vision.apps.explore import models as explore_models
+from gather_vision.obtain.core import models as core_models
 
 
-class GroupManager(models.Manager):
+class GroupManager(db_models.Manager):
     def get_by_natural_key(self, name, category):
         return self.get(name=name, category=category)
 
 
 class Group(
-    base.ModelChangedMixin,
-    base.ModelNameTitleMixin,
-    base.ModelBase,
+    core_models.ChangedModelBase,
+    core_models.NameTitleModelBase,
+    core_models.ModelBase,
 ):
     """A transport event."""
 
@@ -29,7 +28,7 @@ class Group(
         (TRAM, "Tram"),
     ]
 
-    category = models.CharField(
+    category = db_models.CharField(
         max_length=20,
         choices=CATEGORY_CHOICES,
         help_text="The type of transport.",
@@ -38,7 +37,7 @@ class Group(
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(
+            db_models.UniqueConstraint(
                 fields=["name", "category"],
                 name="transport_group_unique_name_category",
             )
@@ -51,18 +50,18 @@ class Group(
         return f"transport group {self.title} - {self.category} ({self.name})"
 
 
-class EventManager(models.Manager):
+class EventManager(db_models.Manager):
     def get_by_natural_key(self, name, origin):
         return self.get(name=name, origin=origin)
 
 
 class Event(
-    base.ModelChangedMixin,
-    base.ModelNameTitleMixin,
-    base.ModelRetrievedMixin,
-    base.ModelIssuedOccurredMixin,
-    base.ModelDescriptionUrlMixin,
-    base.ModelBase,
+    core_models.ChangedModelBase,
+    core_models.NameTitleModelBase,
+    core_models.RetrievedModelBase,
+    core_models.IssuedOccurredModelBase,
+    core_models.DescriptionUrlModelBase,
+    core_models.ModelBase,
 ):
     """A transport event."""
 
@@ -88,44 +87,44 @@ class Event(
         (MAJOR, "Major"),
     ]
 
-    origin = models.ForeignKey(
-        Origin,
+    origin = db_models.ForeignKey(
+        explore_models.Origin,
         related_name="transport_events",
-        on_delete=models.CASCADE,
+        on_delete=db_models.CASCADE,
     )
-    area = models.ForeignKey(
-        Area,
+    area = db_models.ForeignKey(
+        explore_models.Area,
         blank=True,
         null=True,
         related_name="transport_events",
-        on_delete=models.PROTECT,
+        on_delete=db_models.PROTECT,
     )
-    groups = models.ManyToManyField(
+    groups = db_models.ManyToManyField(
         Group,
         related_name="events",
         help_text="The groups involved in this event.",
     )
-    start_date = models.DateTimeField(
+    start_date = db_models.DateTimeField(
         blank=True,
         null=True,
         help_text="The date this event started.",
     )
-    stop_date = models.DateField(
+    stop_date = db_models.DateField(
         blank=True,
         null=True,
         help_text="The date this event stopped.",
     )
-    category = models.CharField(
+    category = db_models.CharField(
         max_length=20,
         choices=CATEGORY_CHOICES,
         help_text="The infrastructure affected by the event.",
     )
-    severity = models.CharField(
+    severity = db_models.CharField(
         max_length=20,
         choices=SEVERITY_CHOICES,
         help_text="The severity of the event.",
     )
-    locations = models.CharField(
+    locations = db_models.CharField(
         blank=True,
         max_length=500,
         help_text="The locations covered by the event.",
@@ -135,7 +134,7 @@ class Event(
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(
+            db_models.UniqueConstraint(
                 fields=["origin", "name"],
                 name="transport_event_unique_origin_name",
             )

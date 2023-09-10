@@ -5,7 +5,7 @@ import dataclasses
 import pathlib
 import typing
 
-from gather_vision.plugin import data
+from gather_vision.obtain.core import data
 
 
 @dataclasses.dataclass
@@ -25,8 +25,8 @@ class UpdateArgs:
 class UpdateResult:
     """The result from the update command."""
 
-    web_data: typing.List["data.WebData"]
-    local_data: typing.List["data.LocalData"]
+    web_data: typing.List[data.WebData]
+    local_data: typing.List[data.LocalData]
 
 
 @dataclasses.dataclass

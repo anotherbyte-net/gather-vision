@@ -8,9 +8,9 @@ import typing
 import scrapy
 import importlib_metadata
 from scrapy import crawler, exporters, http
+from defusedxml.ElementTree import parse
 
-from gather_vision import utils
-from gather_vision.plugin import data, entry
+from gather_vision.obtain.core import data, entry, utils
 
 logger = logging.getLogger(__name__)
 
@@ -101,7 +101,7 @@ class App:
 
             # load data from local sources
             for local_data_item in plugin_update_result.local_data:
-                local_data_item.data = list(local_data_item.load_resources())
+                local_data_item.data = list(local_data_item.local_resources())
             local_data.extend(plugin_update_result.local_data)
 
             # get the web data sources
@@ -254,11 +254,15 @@ class WebDataFetch(scrapy.Spider):
 
     def parse(self, response: http.Response, **kwargs):
         web_data_item: data.WebData = response.cb_kwargs.get("web_data_item")
-
-        is_json = "json" in response.headers["Content-Type"].decode("utf-8").lower()
+        content_type_header = response.headers["Content-Type"].decode("utf-8").lower()
 
         if isinstance(response, http.TextResponse):
-            body_data = response.json() if is_json else None
+            if "json" in content_type_header:
+                body_data = response.json()
+            elif "xml" in content_type_header:
+                body_data = parse(response.text)
+            else:
+                body_data = None
             selector = response.selector
         else:
             body_data = None
@@ -275,7 +279,7 @@ class WebDataFetch(scrapy.Spider):
             headers=response.headers,
             meta=response.cb_kwargs,
         )
-        for i in web_data_item.parse_response(web_data):
+        for i in web_data_item.web_resources(web_data):
             if isinstance(i, str):
                 yield scrapy.Request(
                     url=i,

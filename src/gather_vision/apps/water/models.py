@@ -1,47 +1,48 @@
-from django.db import models
-
-from gather_vision.apps.explore.models import Origin, Coordinate, Area
-from gather_vision.obtain.core import base
+from django.db import models as db_models
 
 
-class StationManager(models.Manager):
+from gather_vision.apps.explore import models as explore_models
+from gather_vision.obtain.core import models as core_models
+
+
+class StationManager(db_models.Manager):
     def get_by_natural_key(self, name, origin):
         return self.get(name=name, origin=origin)
 
 
 class Station(
-    base.ModelChangedMixin,
-    base.ModelNameTitleMixin,
-    base.ModelDescriptionUrlMixin,
-    base.ModelBase,
+    core_models.ChangedModelBase,
+    core_models.NameTitleModelBase,
+    core_models.DescriptionUrlModelBase,
+    core_models.ModelBase,
 ):
     """A water measurement station."""
 
-    origin = models.ForeignKey(
-        Origin,
+    origin = db_models.ForeignKey(
+        explore_models.Origin,
         related_name="water_stations",
-        on_delete=models.CASCADE,
+        on_delete=db_models.CASCADE,
     )
-    area = models.ForeignKey(
-        Area,
+    area = db_models.ForeignKey(
+        explore_models.Area,
         blank=True,
         null=True,
         related_name="water_stations",
-        on_delete=models.PROTECT,
+        on_delete=db_models.PROTECT,
     )
-    coordinate = models.ForeignKey(
-        Coordinate,
+    coordinate = db_models.ForeignKey(
+        explore_models.Coordinate,
         blank=True,
         null=True,
         related_name="water_stations",
-        on_delete=models.PROTECT,
+        on_delete=db_models.PROTECT,
     )
 
     objects = StationManager()
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(
+            db_models.UniqueConstraint(
                 fields=["origin", "name"],
                 name="water_station_unique_origin_name",
             )
@@ -56,15 +57,15 @@ class Station(
         return f"water station {self.title} ({self.name})"
 
 
-class GroupManager(models.Manager):
+class GroupManager(db_models.Manager):
     def get_by_natural_key(self, name):
         return self.get(name=name)
 
 
 class Group(
-    base.ModelChangedMixin,
-    base.ModelNameTitleMixin,
-    base.ModelBase,
+    core_models.ChangedModelBase,
+    core_models.NameTitleModelBase,
+    core_models.ModelBase,
 ):
     """A named collection of measurements."""
 
@@ -72,7 +73,7 @@ class Group(
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(
+            db_models.UniqueConstraint(
                 fields=["name"],
                 name="water_group_unique_name",
             )
@@ -87,16 +88,16 @@ class Group(
         return f"group {self.title} ({self.name})"
 
 
-class MeasureManager(models.Manager):
+class MeasureManager(db_models.Manager):
     def get_by_natural_key(self, issued_date, station):
         return self.get(issued_date=issued_date, station=station)
 
 
 class Measure(
-    base.ModelChangedMixin,
-    base.ModelRetrievedMixin,
-    base.ModelIssuedOccurredMixin,
-    base.ModelBase,
+    core_models.ChangedModelBase,
+    core_models.RetrievedModelBase,
+    core_models.IssuedOccurredModelBase,
+    core_models.ModelBase,
 ):
     """A measure at a station."""
 
@@ -126,29 +127,29 @@ class Measure(
         (QUALITY_WARN_MAJOR, "Major warning"),
     ]
 
-    station = models.ForeignKey(
+    station = db_models.ForeignKey(
         Station,
         related_name="measurements",
-        on_delete=models.CASCADE,
+        on_delete=db_models.CASCADE,
     )
-    group = models.ForeignKey(
+    group = db_models.ForeignKey(
         Group,
         blank=True,
         null=True,
         related_name="measurements",
-        on_delete=models.PROTECT,
+        on_delete=db_models.PROTECT,
     )
-    level = models.FloatField(
+    level = db_models.FloatField(
         blank=True,
         null=True,
         help_text="The value of the measurement.",
     )
-    category = models.CharField(
+    category = db_models.CharField(
         max_length=20,
         choices=CATEGORY_CHOICES,
         help_text="The measure type.",
     )
-    quality = models.CharField(
+    quality = db_models.CharField(
         max_length=20,
         choices=QUALITY_CHOICES,
         help_text="The measure quality or status.",
@@ -158,7 +159,7 @@ class Measure(
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(
+            db_models.UniqueConstraint(
                 fields=["occurred_date", "station"],
                 name="water_measure_unique_occurred_date_station",
             )

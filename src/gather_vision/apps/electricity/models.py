@@ -1,43 +1,44 @@
-from django.db import models
-
-from gather_vision.apps.explore.models import Origin, Area
-from gather_vision.obtain.core import base
+from django.db import models as db_models
 
 
-class EventManager(models.Manager):
+from gather_vision.apps.explore import models as explore_models
+from gather_vision.obtain.core import models as core_models
+
+
+class EventManager(db_models.Manager):
     def get_by_natural_key(self, name, origin):
         return self.get(name=name, origin=origin)
 
 
 class Event(
-    base.ModelChangedMixin,
-    base.ModelNameTitleMixin,
-    base.ModelDescriptionUrlMixin,
-    base.ModelBase,
+    core_models.ChangedModelBase,
+    core_models.NameTitleModelBase,
+    core_models.DescriptionUrlModelBase,
+    core_models.ModelBase,
 ):
     """An electricity network event."""
 
-    origin = models.ForeignKey(
-        Origin,
+    origin = db_models.ForeignKey(
+        explore_models.Origin,
         related_name="electricity_events",
-        on_delete=models.CASCADE,
+        on_delete=db_models.CASCADE,
     )
-    area = models.ForeignKey(
-        Area,
+    area = db_models.ForeignKey(
+        explore_models.Area,
         related_name="electricity_event_areas",
-        on_delete=models.PROTECT,
+        on_delete=db_models.PROTECT,
     )
-    start_date = models.DateTimeField(
+    start_date = db_models.DateTimeField(
         blank=True,
         null=True,
         help_text="The date this event started.",
     )
-    stop_date = models.DateField(
+    stop_date = db_models.DateField(
         blank=True,
         null=True,
         help_text="The date this event stopped.",
     )
-    locations = models.CharField(
+    locations = db_models.CharField(
         blank=True,
         max_length=600,
         help_text="The name of the locations and streets involved in the event.",
@@ -47,7 +48,7 @@ class Event(
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(
+            db_models.UniqueConstraint(
                 fields=["name", "origin"],
                 name="electricity_event_unique_name_origin",
             )
@@ -66,25 +67,25 @@ class Event(
         return self.title
 
 
-class ProgressManager(models.Manager):
+class ProgressManager(db_models.Manager):
     def get_by_natural_key(self, occurred_date, event):
         return self.get(occurred_date=occurred_date, event=event)
 
 
 class Progress(
-    base.ModelChangedMixin,
-    base.ModelRetrievedMixin,
-    base.ModelIssuedOccurredMixin,
-    base.ModelBase,
+    core_models.ChangedModelBase,
+    core_models.RetrievedModelBase,
+    core_models.IssuedOccurredModelBase,
+    core_models.ModelBase,
 ):
     """Information about an event at a point in time."""
 
-    event = models.ForeignKey(
+    event = db_models.ForeignKey(
         Event,
         related_name="progression",
-        on_delete=models.CASCADE,
+        on_delete=db_models.CASCADE,
     )
-    affected = models.PositiveIntegerField(
+    affected = db_models.PositiveIntegerField(
         help_text="The number of customers or other entities affected by the event.",
     )
 
@@ -92,7 +93,7 @@ class Progress(
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(
+            db_models.UniqueConstraint(
                 fields=["occurred_date", "event"],
                 name="electricity_progress_unique_occurred_date_event",
             )
@@ -107,32 +108,32 @@ class Progress(
         return f"affects {self.affected} at {self.occurred_date}"
 
 
-class UsageManager(models.Manager):
+class UsageManager(db_models.Manager):
     def get_by_natural_key(self, occurred_date, origin):
         return self.get(occurred_date=occurred_date, origin=origin)
 
 
 class Usage(
-    base.ModelChangedMixin,
-    base.ModelRetrievedMixin,
-    base.ModelIssuedOccurredMixin,
-    base.ModelBase,
+    core_models.ChangedModelBase,
+    core_models.RetrievedModelBase,
+    core_models.IssuedOccurredModelBase,
+    core_models.ModelBase,
 ):
     """Information about electricity usage at a point in time."""
 
     # usage: id, origin_id, created_date, modified_date, issued_date, retrieved_date, demand, rating, affected (pos int)
-    origin = models.ForeignKey(
-        Origin,
+    origin = db_models.ForeignKey(
+        explore_models.Origin,
         related_name="electricity_usages",
-        on_delete=models.CASCADE,
+        on_delete=db_models.CASCADE,
     )
-    demand = models.PositiveIntegerField(
+    demand = db_models.PositiveIntegerField(
         help_text="The measure of electricity demand in megawatts.",
     )
-    rating = models.PositiveIntegerField(
+    rating = db_models.PositiveIntegerField(
         help_text="The rating of the demand level.",
     )
-    customers = models.PositiveIntegerField(
+    customers = db_models.PositiveIntegerField(
         help_text="The number of customers or other entities causing the demand.",
     )
 
@@ -140,7 +141,7 @@ class Usage(
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(
+            db_models.UniqueConstraint(
                 fields=["occurred_date", "origin"],
                 name="electricity_usage_unique_issued_date_origin",
             )

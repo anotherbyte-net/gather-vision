@@ -1,8 +1,12 @@
 import re
+import typing
 from zoneinfo import ZoneInfo
 
+from gather_vision.obtain.core import data
+from gather_vision.obtain.core.data import WebDataAvailable, GatherDataItem
 
-class BrisbaneTranslinkNotices:
+
+class BrisbaneTranslinkNotices(data.WebData):
     # from https://translink.com.au/about-translink/open-data
     # see also https://translink.com.au/service-updates
     notice_url = "https://translink.com.au/service-updates/rss"
@@ -10,16 +14,20 @@ class BrisbaneTranslinkNotices:
 
     summary_patterns = [
         re.compile(
-            r"^\((?P<type>[^)]+)\)\s*(?P<description>.+)\.\s*Starts\s*affecting:\s*(?P<date_start>.+)\s*Finishes affecting:\s*(?P<date_stop>.+)$"  # noqa: E501
+            r"^\((?P<type>[^)]+)\)\s*(?P<description>.+)\.\s*"
+            r"Starts\s*affecting:\s*(?P<date_start>.+)\s*Finishes affecting:\s*(?P<date_stop>.+)$"
         ),
         re.compile(
-            r"^Start\s*date:\s*(?P<date_start>[^a-z]+),\s*End\s*date:\s*(?P<date_stop>[^a-z]+),\s*Services:\s*(?P<services>.+)$"  # noqa: E501
+            r"^Start\s*date:\s*(?P<date_start>[^a-z]+),\s*"
+            r"End\s*date:\s*(?P<date_stop>[^a-z]+),\s*Services:\s*(?P<services>.+)$"
         ),
         re.compile(
-            r"^\((?P<type>[^)]+)\)\s*(?P<description>.+)\.\s*Starts\s*affecting:\s*(?P<date_start>.+)$"  # noqa: E501
+            r"^\((?P<type>[^)]+)\)\s*(?P<description>.+)\.\s*"
+            r"Starts\s*affecting:\s*(?P<date_start>.+)$"
         ),
         re.compile(
-            r"^Start\s*date:\s*(?P<date_start>[^a-z]+),\s*Services:\s*(?P<services>.+)$"
+            r"^Start\s*date:\s*(?P<date_start>[^a-z]+),\s*"
+            r"Services:\s*(?P<services>.+)$"
         ),
     ]
 
@@ -43,33 +51,26 @@ class BrisbaneTranslinkNotices:
         "Informative": "EventType",
     }
 
-    def __init__(
-        self,
-        logger: Logger,
-        http_client: HttpClient,
-        normalise: Normalise,
-        tz: ZoneInfo,
-    ):
-        self._logger = logger
-        self._http_client = http_client
-        self._normalise = normalise
-        self._tz = tz
+    @property
+    def tags(self) -> dict[str, str]:
+        return {}
 
-    def fetch(self):
-        items = self.get_data()
-        for item in items.get("rss", {}).get("channel", {}).get("item", []):
-            event = self.get_event(item)
+    def initial_urls(self) -> typing.Iterable[str]:
+        return [self.notice_url]
 
-            # ignore events where the lines are all numbers
-            lines = event.lines
-            if lines and all(i[-1].isnumeric() for i in lines):
-                continue
-            yield event
+    def web_resources(
+        self, web_data: WebDataAvailable
+    ) -> typing.Iterable[typing.Union[str, GatherDataItem]]:
+        items = web_data.body_data
+        for raw_item in items:
+            for item in raw_item.get("rss", {}).get("channel", {}).get("item", []):
+                event = self.get_event(item)
 
-    def get_data(self):
-        r = self._http_client.get(self.notice_url)
-        data = xmltodict.parse(r.content)
-        return data
+                # ignore events where the lines are all numbers
+                lines = event.lines
+                if lines and all(i[-1].isnumeric() for i in lines):
+                    continue
+                yield event
 
     def get_event(self, item: dict) -> TransportEvent:
         tz = self._tz
