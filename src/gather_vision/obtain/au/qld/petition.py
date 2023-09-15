@@ -9,7 +9,7 @@ class QueenslandGovernmentPetitionItem(data.GatherDataItem):
     pass
 
 
-class QueenslandGovernmentPetitions(data.WebData):
+class QueenslandGovernmentPetitionsWebData(data.WebData):
     base_url = "https://www.parliament.qld.gov.au/Work-of-the-Assembly/Petitions"
     list_url = f"{base_url}/Current-EPetitions"
 
@@ -48,4 +48,4 @@ class QueenslandGovernmentPetitions(data.WebData):
     def web_resources(
         self, web_data: data.WebDataAvailable
     ) -> typing.Iterable[typing.Union[str, data.GatherDataItem]]:
-        pass
+        yield None

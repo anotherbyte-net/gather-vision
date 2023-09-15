@@ -6,9 +6,6 @@ import pathlib
 import sys
 import typing
 
-from gather_vision import app, utils
-from gather_vision.plugin import entry
-
 
 def cli_update(args: argparse.Namespace) -> bool:
     """Run the update action from the cli.

@@ -2,7 +2,6 @@ import dataclasses
 import logging
 import typing
 
-from gather_vision.plugin import data, entry
 
 logger = logging.getLogger(__name__)
 

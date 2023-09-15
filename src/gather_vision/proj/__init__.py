@@ -30,16 +30,28 @@ class DjangoCustomSettings:
         return value
 
     def get_bool(self, key: str, default: bool | None = None) -> bool:
-        value = self._config_parser.getboolean(self._section, key, fallback=default)
-        return value
+        value = self._config_parser.getboolean(self._section, key, fallback=None)
+        if value is not None:
+            return value
+        if default is not None:
+            return default
+        return False
 
-    def get_int(self, key: str, default: int | None = None) -> bool:
-        value = self._config_parser.getint(self._section, key, fallback=default)
-        return value
+    def get_int(self, key: str, default: int | None = None) -> int:
+        value = self._config_parser.getint(self._section, key, fallback=None)
+        if value is not None:
+            return value
+        if default is not None:
+            return default
+        return False
 
-    def get_float(self, key: str, default: float | None = None) -> bool:
-        value = self._config_parser.getfloat(self._section, key, fallback=default)
-        return value
+    def get_float(self, key: str, default: float | None = None) -> float:
+        value = self._config_parser.getfloat(self._section, key, fallback=None)
+        if value is not None:
+            return value
+        if default is not None:
+            return default
+        return 0.0
 
     def get_list(
         self,
@@ -58,7 +70,10 @@ class DjangoCustomSettings:
         sep_key_pair: str = "=",
         default: dict | None = None,
     ) -> dict:
-        value = self._config_parser.get(self._section, key, fallback=default or "")
+        value = self._config_parser.get(self._section, key, fallback="")
+        if not value and default:
+            return default
+
         items = value.split(sep_items)
         key_pairs = [i.split(sep_key_pair, maxsplit=1) for i in items]
         key_pairs = [i for i in key_pairs if i and i[0] and len(i) == 2]

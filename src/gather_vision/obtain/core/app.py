@@ -5,10 +5,8 @@ import logging
 import pickle
 import typing
 
-import scrapy
 import importlib_metadata
-from scrapy import crawler, exporters, http
-from defusedxml.ElementTree import parse
+from scrapy import crawler
 
 from gather_vision.obtain.core import data, entry, utils
 
@@ -22,17 +20,6 @@ class PluginItem:
     entry_point: importlib_metadata.EntryPoint
     entry_class: typing.Type[entry.Entry]
     entry_instance: entry.Entry
-
-
-class AppPickleItemExporter(exporters.BaseItemExporter):
-    def __init__(self, file, protocol=4, **kwargs):
-        super().__init__(**kwargs)
-        self.file = file
-        self.protocol = protocol
-
-    def export_item(self, item):
-        d = item
-        pickle.dump(d, self.file, self.protocol)
 
 
 class App:
@@ -148,7 +135,7 @@ class App:
                 "FEEDS": {
                     f"file:///{feed_path_setting}": {"format": "pickle_raw"},
                 },
-                "WEB_DATA_ITEMS": web_data,
+                "WEB_DATA_SOURCES": web_data,
                 # logs
                 "LOG_ENABLED": True,
                 "LOG_FILE": None,
@@ -237,54 +224,3 @@ class App:
 
     def _data_item_id(self, item) -> str:
         return "-".join([item.plugin_name, item.plugin_data_source])
-
-
-class WebDataFetch(scrapy.Spider):
-    name = "web-data"
-
-    def start_requests(self):
-        web_data_items: typing.List[data.WebData] = self.settings.get("WEB_DATA_ITEMS")
-        for web_data_item in web_data_items:
-            for initial_url in web_data_item.initial_urls():
-                yield scrapy.Request(
-                    url=initial_url,
-                    callback=self.parse,
-                    cb_kwargs={"web_data_item": web_data_item},
-                )
-
-    def parse(self, response: http.Response, **kwargs):
-        web_data_item: data.WebData = response.cb_kwargs.get("web_data_item")
-        content_type_header = response.headers["Content-Type"].decode("utf-8").lower()
-
-        if isinstance(response, http.TextResponse):
-            if "json" in content_type_header:
-                body_data = response.json()
-            elif "xml" in content_type_header:
-                body_data = parse(response.text)
-            else:
-                body_data = None
-            selector = response.selector
-        else:
-            body_data = None
-            selector = None
-
-        web_data = data.WebDataAvailable(
-            request_url=response.request.url,
-            request_method=response.request.method,
-            response_url=response.url,
-            body_text=response.text,
-            body_data=body_data,
-            selector=selector,
-            status=response.status,
-            headers=response.headers,
-            meta=response.cb_kwargs,
-        )
-        for i in web_data_item.web_resources(web_data):
-            if isinstance(i, str):
-                yield scrapy.Request(
-                    url=i,
-                    callback=self.parse,
-                    cb_kwargs={"web_data_item": web_data_item},
-                )
-            else:
-                yield i

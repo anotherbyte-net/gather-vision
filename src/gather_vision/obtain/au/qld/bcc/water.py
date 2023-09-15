@@ -14,7 +14,7 @@ class BrisbaneCityCouncilWaterLevelItem(data.GatherDataItem):
     pass
 
 
-class BrisbaneCityCouncilWater(data.WebData):
+class BrisbaneCityCouncilWaterWebData(data.WebData):
     # water quality
     water_url = "https://www.brisbane.qld.gov.au/clean-and-green/natural-environment-and-water/water/water-quality-monitoring"
 
@@ -36,4 +36,4 @@ class BrisbaneCityCouncilWater(data.WebData):
     def web_resources(
         self, web_data: data.WebDataAvailable
     ) -> typing.Iterable[typing.Union[str, data.GatherDataItem]]:
-        pass
+        yield None

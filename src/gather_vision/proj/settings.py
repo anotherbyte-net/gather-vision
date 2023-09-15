@@ -25,7 +25,7 @@ LOCAL_DIR = BASE_DIR / ".local"
 
 # Load settings from a config file
 env = DjangoCustomSettings(prefix="GATHER_VISION")
-env.load_file(LOCAL_DIR / ".env")
+env.load_file(LOCAL_DIR / "gather_vision.ini")
 env.load_env(name="ENV_PATH")
 
 # Set debug or default to false.
@@ -179,7 +179,7 @@ AUTH_USER_MODEL = "explore.CustomUser"
 LOGGING_LEVEL = env.get_str(key="LOG_LEVEL", default="INFO")
 LOGGING = {
     "version": 1,
-    "disable_existing_loggers": False,
+    "disable_existing_loggers": True,
     "formatters": {
         "gather_vision.console.verbose": {
             "format": "{asctime} [{name}] [{levelname}] "
@@ -203,10 +203,6 @@ LOGGING = {
         "level": LOGGING_LEVEL,
     },
     "loggers": {
-        "gather_vision": {
-            "handlers": ["gather_vision.console"],
-            "level": LOGGING_LEVEL,
-        },
         "": {
             "handlers": ["gather_vision.console"],
             "level": LOGGING_LEVEL,

@@ -28,7 +28,7 @@ class BrisbaneCityCouncilGovernmentMeetingVoteItem(data.GatherDataItem):
     pass
 
 
-class BrisbaneCityCouncilGovernmentInfo(data.WebData):
+class BrisbaneCityCouncilGovernmentWebData(data.WebData):
     list_url = ""
 
     @property
@@ -48,4 +48,4 @@ class BrisbaneCityCouncilGovernmentInfo(data.WebData):
     def web_resources(
         self, web_data: data.WebDataAvailable
     ) -> typing.Iterable[typing.Union[str, data.GatherDataItem]]:
-        pass
+        yield None

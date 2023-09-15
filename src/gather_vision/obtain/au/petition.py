@@ -1,7 +1,8 @@
 import dataclasses
 import typing
 
-from gather_vision.plugin import data
+from gather_vision.obtain.core import data
+from gather_vision.obtain.core.data import WebDataAvailable, GatherDataItem
 
 
 @dataclasses.dataclass
@@ -9,7 +10,16 @@ class AustralianGovernmentPetitionItem:
     pass
 
 
-class AustralianGovernmentPetitions(data.WebData):
+class AustralianGovernmentPetitionsWebData(data.WebData):
+    def web_resources(
+        self, web_data: data.WebDataAvailable
+    ) -> typing.Iterable[typing.Union[str, data.GatherDataItem]]:
+        yield None
+
+    @property
+    def tags(self) -> dict[str, str]:
+        return {}
+
     list_url = "https://www.aph.gov.au/e-petitions"
     item_url = f"{list_url}/petition/${{item_id}}"
 

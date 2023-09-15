@@ -9,7 +9,7 @@ class BrisbaneCityCouncilPetitionItem(data.GatherDataItem):
     pass
 
 
-class BrisbaneCityCouncilPetitions(data.WebData):
+class BrisbaneCityCouncilPetitionsWebData(data.WebData):
     @property
     def tags(self) -> dict[str, str]:
         return {
@@ -41,7 +41,7 @@ class BrisbaneCityCouncilPetitions(data.WebData):
     def web_resources(
         self, web_data: data.WebDataAvailable
     ) -> typing.Iterable[typing.Union[str, data.GatherDataItem]]:
-        pass
+        yield None
 
         # Options (pick one):
         # - return BrisbaneCityCouncilPetitionItem

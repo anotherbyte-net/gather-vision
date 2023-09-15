@@ -1,9 +1,3 @@
-from gather_vision import app
-from gather_vision.plugin import entry
-
-from gather_vision_gov_au_plugin.plugin import PluginEntry
-
-
 def test_list(capsys, caplog):
     app_args = entry.ListArgs()
     main_app = app.App()

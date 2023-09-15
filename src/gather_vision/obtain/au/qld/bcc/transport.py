@@ -6,7 +6,7 @@ from gather_vision.obtain.core import data
 from gather_vision.obtain.core.data import WebDataAvailable, GatherDataItem
 
 
-class BrisbaneTranslinkNotices(data.WebData):
+class BrisbaneTranslinkNoticesWebData(data.WebData):
     # from https://translink.com.au/about-translink/open-data
     # see also https://translink.com.au/service-updates
     notice_url = "https://translink.com.au/service-updates/rss"
@@ -72,7 +72,7 @@ class BrisbaneTranslinkNotices(data.WebData):
                     continue
                 yield event
 
-    def get_event(self, item: dict) -> TransportEvent:
+    def get_event(self, item: dict) -> "TransportEvent":
         tz = self._tz
 
         tags = []

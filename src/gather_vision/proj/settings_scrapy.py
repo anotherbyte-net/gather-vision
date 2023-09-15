@@ -1,20 +1,28 @@
 """
 The Scrapy settings for the project.
 """
-
+import pathlib
 from importlib.resources import path
 from gather_vision.proj import DjangoCustomSettings
+
+
+def make_scrapy_path(path: pathlib.Path) -> str:
+    return str(path).replace("\\", "/")
+
 
 with path("gather_vision.proj", "settings_scrapy.py") as p:
     # Build paths inside the project like this: BASE_DIR / 'subdir'.
     BASE_DIR = p.parent.parent.parent.parent
 
+# local dirs
 LOCAL_DIR = BASE_DIR / ".local"
 
-FEEDS_PICKLE_FILE = LOCAL_DIR / "feeds" / "feed_%(name)s_%(time)s.pickle"
+FEEDS_FILE_PATH = LOCAL_DIR / "feeds" / "feed_%(name)s_%(time)s.pickle"
+HTTP_CACHE_DIR_PATH = LOCAL_DIR / "http_cache"
+FILES_DIR_PATH = LOCAL_DIR / "files"
 
 env = DjangoCustomSettings(prefix="GATHER_VISION_SCRAPY")
-env.load_file(LOCAL_DIR / ".env_scrapy")
+env.load_file(LOCAL_DIR / "gather_vision_scrapy.ini")
 env.load_env(name="ENV_PATH")
 
 
@@ -24,30 +32,42 @@ USER_AGENT = env.get_str(
 )
 
 # http cache
-HTTPCACHE_ENABLED = env.get_bool("HTTPCACHE_ENABLED", True)
-HTTPCACHE_DIR = env.get_path("HTTPCACHE_DIR", LOCAL_DIR / "http_cache")
+HTTPCACHE_ENABLED = env.get_bool(
+    "HTTPCACHE_ENABLED",
+    True,
+)
+HTTPCACHE_DIR = make_scrapy_path(
+    env.get_path(
+        "HTTPCACHE_DIR",
+        HTTP_CACHE_DIR_PATH,
+    ),
+)
 HTTPCACHE_POLICY = env.get_str(
-    "HTTPCACHE_POLICY", "scrapy.extensions.httpcache.DummyPolicy"
+    "HTTPCACHE_POLICY",
+    "scrapy.extensions.httpcache.DummyPolicy",
 )
 HTTPCACHE_STORAGE = env.get_str(
     "HTTPCACHE_STORAGE",
     "scrapy.extensions.httpcache.FilesystemCacheStorage",
 )
 EXTENSIONS = env.get_dict(
-    "EXTENSIONS", default={"scrapy.extensions.telnet.TelnetConsole": None}
+    "EXTENSIONS",
+    default={
+        "scrapy.extensions.telnet.TelnetConsole": None,
+    },
 )
 
 # feed
 FEED_EXPORTERS = env.get_dict(
     "FEED_EXPORTERS",
     default={
-        "pickle_raw": "gather_vision.app.AppPickleItemExporter",
+        "pickle_raw": "gather_vision.obtain.core.data.AppPickleItemExporter",
     },
 )
 FEEDS = env.get_dict(
     "FEEDS",
     default={
-        f"file:///{FEEDS_PICKLE_FILE}": {
+        f"file:///{make_scrapy_path(FEEDS_FILE_PATH)}": {
             "format": "pickle_raw",
         }
     },
@@ -58,7 +78,7 @@ FEEDS = env.get_dict(
 LOG_ENABLED = env.get_bool("LOG_ENABLED", True)
 LOG_FILE = env.get_path("LOG_FILE", None)
 LOG_STDOUT = env.get_bool("LOG_STDOUT", False)
-LOG_LEVEL = env.get_str("LOG_LEVEL", "ERROR")
+LOG_LEVEL = env.get_str("LOG_LEVEL", "WARNING")
 
 # throttling requests
 DOWNLOAD_DELAY = env.get_int("DOWNLOAD_DELAY", 3)
@@ -78,7 +98,7 @@ ITEM_PIPELINES = env.get_dict(
     },
 )
 
-FILES_STORE = env.get_path("FILES_STORE", LOCAL_DIR / "files")
+FILES_STORE = make_scrapy_path(env.get_path("FILES_STORE", FILES_DIR_PATH))
 MEDIA_ALLOW_REDIRECTS = env.get_bool("MEDIA_ALLOW_REDIRECTS", True)
 
 # Set settings whose default value is deprecated to a future-proof value

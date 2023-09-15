@@ -3,7 +3,9 @@ import typing
 import json
 
 from zoneinfo import ZoneInfo
-from gather_vision.plugin import data
+
+from gather_vision.obtain.core import data
+
 
 # https://www.data.qld.gov.au/dataset/find-a-charging-station-electric-vehicle/resource/a34d4b5f-8e3c-4995-8950-2e84fd7bb4d5
 # https://www.data.qld.gov.au/dataset/fuel-price-reporting
@@ -14,14 +16,23 @@ class QueenslandFuelItem:
     pass
 
 
-class QueenslandFuel(data.WebData):
+class QueenslandFuelWebData(data.WebData):
     def initial_urls(self) -> typing.Iterable[str]:
-        return [self.list_url]
+        return []
 
     def parse_response(
         self, data: data.WebDataAvailable
     ) -> typing.Generator[typing.Union[str, data.IsDataclass], typing.Any, typing.Any]:
         pass
+
+    def web_resources(
+        self, web_data: data.WebDataAvailable
+    ) -> typing.Iterable[typing.Union[str, data.GatherDataItem]]:
+        yield None
+
+    @property
+    def tags(self) -> dict[str, str]:
+        return {}
 
 
 class QueenslandRailEvents:
@@ -56,9 +67,9 @@ class QueenslandRailEvents:
 
     def __init__(
         self,
-        logger: Logger,
-        http_client: HttpClient,
-        normalise: Normalise,
+        logger: "Logger",
+        http_client: "HttpClient",
+        normalise: "Normalise",
         tz: ZoneInfo,
     ):
         self._logger = logger
@@ -84,7 +95,7 @@ class QueenslandRailEvents:
         items2 = json.loads(items1)
         return items2
 
-    def get_event(self, item: dict) -> TransportEvent:
+    def get_event(self, item: dict) -> "TransportEvent":
         tags = self.get_links(item)
 
         all_day = item.get("fAllDayEvent")

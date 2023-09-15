@@ -1,7 +1,8 @@
 import dataclasses
 import typing
 
-from gather_vision.plugin import data
+from gather_vision.obtain.core import data
+from gather_vision.obtain.core.data import WebDataAvailable, GatherDataItem
 
 
 @dataclasses.dataclass
@@ -9,7 +10,16 @@ class QueenslandAirItem:
     pass
 
 
-class QueenslandAir(data.WebData):
+class QueenslandAirWebData(data.WebData):
+    def web_resources(
+        self, web_data: data.WebDataAvailable
+    ) -> typing.Iterable[typing.Union[str, data.GatherDataItem]]:
+        yield None
+
+    @property
+    def tags(self) -> dict[str, str]:
+        return {}
+
     # qld air quality
     # https://aqicn.org/station/@131722
     # https://www.iqair.com/au/australia/queensland/toowoomba/south-street
@@ -21,7 +31,7 @@ class QueenslandAir(data.WebData):
     # planned burns: https://www.data.qld.gov.au/dataset/queensland-parks-and-wildlife-service-fire-advisories/resource/db74c713-a1cf-4109-be1f-b78130ec65d5
 
     def initial_urls(self) -> typing.Iterable[str]:
-        return [self.list_url]
+        return []
 
     def parse_response(
         self, data: data.WebDataAvailable
