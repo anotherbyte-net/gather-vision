@@ -11,7 +11,7 @@ class QueenslandGovernmentPetitionItem(data.GatherDataItem):
 
 class QueenslandGovernmentPetitionsWebData(data.WebData):
     base_url = "https://www.parliament.qld.gov.au/Work-of-the-Assembly/Petitions"
-    list_url = f"{base_url}/Current-EPetitions"
+    current_url = f"{base_url}/Current-EPetitions"
 
     # div.current-petitions
 
@@ -22,7 +22,31 @@ class QueenslandGovernmentPetitionsWebData(data.WebData):
     # url: .petitions-listing__details-row a (href)
     # id: .petitions-listing__details-row span strong (not including 'a')
 
-    item_url = f"{base_url}/Petition-Details?id=${{item_id}}"
+    closed_url = f"{base_url}/Closed-EPetitions"
+
+    # No.
+    # Subject	 (+url and id)
+    # Closed
+    # Number of Signatures	 (int)
+    # Tabled	 (date)
+    # Referred to Minister(s)	 (name)
+    # Date Referred	(date)
+    # Response Due	(date)
+    # Response Tabled - (date and url)
+    # e6a02297-f541-4a29-85c5-0ba6aff24b8d
+
+    paper_url = f"{base_url}/Tabled-Paper-Petitions"
+
+    # No.
+    # Subject
+    # Number of Signatures
+    # Tabled
+    # Referred to Minister(s)
+    # Date Referred
+    # Response Due
+    # Response Tabled
+
+    item_url = f"{base_url}/Petition-Details?id="
 
     # principal petitioner: .petition-details__petitioner-details-wrapper
     # signature count: .petition-details__signatures-highlight
@@ -31,7 +55,11 @@ class QueenslandGovernmentPetitionsWebData(data.WebData):
 
     # sponsoring member: .petition-details__prop
     # posting date: .petition-details__prop
-    # closing date: .petition-details__prop
+    # (online) closing date: .petition-details__prop
+    # (paper) tabled date: .petition-details__prop
+    # (online) sign url:
+
+    resp_url = "https://apps.parliament.qld.gov.au/E-Petitions/Home/DownloadResponse"
 
     @property
     def tags(self) -> dict[str, str]:
@@ -43,7 +71,7 @@ class QueenslandGovernmentPetitionsWebData(data.WebData):
         }
 
     def initial_urls(self) -> typing.Iterable[str]:
-        return [self.list_url]
+        return [self.current_url]
 
     def web_resources(
         self, web_data: data.WebDataAvailable
