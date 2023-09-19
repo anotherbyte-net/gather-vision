@@ -2,6 +2,8 @@ import abc
 import dataclasses
 import logging
 import pickle
+import re
+import shutil
 import typing
 
 import parsel
@@ -62,8 +64,22 @@ class GatherDataItem(abc.ABC):
     """The tag keys and values applied to this data item."""
 
 
+@dataclasses.dataclass
+class GatherDataRequest(abc.ABC):
+    """Abstract base class for data items."""
+
+    url: str
+    """The url to request."""
+
+    data: dict
+    """The arbitrary data to include in the response."""
+
+
 class BaseData(abc.ABC):
     """The essential information for an approach to obtaining data."""
+
+    _re_collapse = re.compile(r"[^\S\n\r]+")
+    _re_newline = re.compile(r"[\n\r]+")
 
     def __init__(self):
         self._data: typing.List[GatherDataItem] = []
@@ -77,6 +93,12 @@ class BaseData(abc.ABC):
             Dictionary of tag keys and values.
         """
         raise NotImplementedError("Must implement 'tags'.")
+
+    def str_collapse(self, value: str) -> str:
+        collapsed = self._re_collapse.sub(" ", value)
+        newline = self._re_newline.sub("\n", collapsed)
+        result = newline.strip()
+        return result
 
 
 class WebData(BaseData, abc.ABC):
@@ -97,7 +119,7 @@ class WebData(BaseData, abc.ABC):
     @abc.abstractmethod
     def web_resources(
         self, web_data: WebDataAvailable
-    ) -> typing.Iterable[typing.Union[str, GatherDataItem]]:
+    ) -> typing.Iterable[typing.Union[GatherDataRequest, GatherDataItem]]:
         """Parse a web response and provide urls and items.
 
         Args:
@@ -135,7 +157,7 @@ class WebDataFetch(scrapy.Spider):
         """
         data_sources: typing.List[WebData] = self.settings.get("WEB_DATA_SOURCES")
         for data_source in data_sources:
-            logger.info("Starting %s", type(data_source).__name__)
+            logger.info("%s: Start", type(data_source).__name__)
             for initial_url in data_source.initial_urls():
                 if initial_url:
                     yield scrapy.Request(
@@ -159,11 +181,16 @@ class WebDataFetch(scrapy.Spider):
         data_source: WebData = response.cb_kwargs.get("web_data_source")
         content_type_header = response.headers["Content-Type"].decode("utf-8").lower()
 
-        logger.info(
-            "Response for %s: %s",
-            type(data_source).__name__,
-            response.url,
-        )
+        if logger.isEnabledFor(logging.INFO):
+            log_response_flags = (
+                " [" + ",".join(sorted(response.flags)) + "]" if response.flags else ""
+            )
+            logger.info(
+                "%s: %s%s",
+                type(data_source).__name__,
+                response.url,
+                log_response_flags,
+            )
 
         if isinstance(response, http.TextResponse):
             if "json" in content_type_header:
@@ -189,16 +216,14 @@ class WebDataFetch(scrapy.Spider):
             meta=response.cb_kwargs,
         )
         for i in data_source.web_resources(web_data):
-            if i is None:
-                yield None
-            elif i and isinstance(i, str):
-                yield scrapy.Request(
-                    url=i,
-                    callback=self.parse,
-                    cb_kwargs={"web_data_source": data_source},
-                )
-            else:
+            if i and isinstance(i, GatherDataItem):
                 yield i
+            elif i and isinstance(i, GatherDataRequest):
+                yield scrapy.Request(
+                    url=i.url,
+                    callback=self.parse,
+                    cb_kwargs={**i.data, "web_data_source": data_source},
+                )
 
 
 class DataLoad:
@@ -252,21 +277,21 @@ class DataLoad:
         settings = get_project_settings()
         settings.set("WEB_DATA_SOURCES", data_sources_list)
 
-        process = crawler.CrawlerProcess(settings=settings, install_root_handler=False)
+        process = crawler.CrawlerProcess(settings=settings, install_root_handler=True)
 
         process.crawl(WebDataFetch)
 
-        logging.getLogger("scrapy").setLevel("ERROR")
-        logging.getLogger("py.warnings").setLevel("CRITICAL")
+        # logging.getLogger("scrapy").setLevel("ERROR")
+        # logging.getLogger("py.warnings").setLevel("CRITICAL")
 
         # the script will block here until the crawling is finished
         process.start()
 
         # load the feed items
-        feed_path = settings.get("FEEDS_FILE_PATH")
-        feed_path.parent.mkdir(parents=True, exist_ok=True)
+        feed_dir = settings.get("FEEDS_FILE_PATH").parent
+        feed_dir.mkdir(parents=True, exist_ok=True)
         item_count = 0
-        for item in feed_path.parent.iterdir():
+        for item in feed_dir.iterdir():
             if not item.is_file():
                 continue
             if item.suffix != ".pickle":
@@ -280,6 +305,9 @@ class DataLoad:
                         yield data_item
                     except EOFError:
                         break
+
+        # remove the feeds dir, as the pickle files are specific to the run
+        shutil.rmtree(feed_dir)
 
         logger.info(
             "Finished loading %s data items from %s web data sources.",

@@ -179,7 +179,7 @@ AUTH_USER_MODEL = "explore.CustomUser"
 LOGGING_LEVEL = env.get_str(key="LOG_LEVEL", default="INFO")
 LOGGING = {
     "version": 1,
-    "disable_existing_loggers": True,
+    "disable_existing_loggers": False,
     "formatters": {
         "gather_vision.console.verbose": {
             "format": "{asctime} [{name}] [{levelname}] "
@@ -187,7 +187,7 @@ LOGGING = {
             "style": "{",
         },
         "gather_vision.console.basic": {
-            "format": "{asctime} [{levelname:8}] {message}",
+            "format": "{asctime} [{levelname:<8}] {message}",
             "style": "{",
         },
     },
@@ -198,15 +198,11 @@ LOGGING = {
             "formatter": "gather_vision.console.basic",
         },
     },
-    "root": {
-        "handlers": ["gather_vision.console"],
-        "level": LOGGING_LEVEL,
-    },
     "loggers": {
-        "": {
+        "gather_vision": {
             "handlers": ["gather_vision.console"],
             "level": LOGGING_LEVEL,
-            "propagate": True,
+            "propagate": False,
         },
     },
 }

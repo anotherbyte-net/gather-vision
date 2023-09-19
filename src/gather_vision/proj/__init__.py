@@ -22,7 +22,7 @@ class DjangoCustomSettings:
             self.load_file(pathlib.Path(value))
 
     def load_file(self, path: pathlib.Path) -> None:
-        self._config_parser = configparser.ConfigParser()
+        self._config_parser = configparser.ConfigParser(interpolation=None)
         self._successful_paths = self._config_parser.read(path)
 
     def get_str(self, key: str, default: str | None = None) -> str:

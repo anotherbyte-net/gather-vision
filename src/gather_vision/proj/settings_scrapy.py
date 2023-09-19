@@ -79,6 +79,11 @@ LOG_ENABLED = env.get_bool("LOG_ENABLED", True)
 LOG_FILE = env.get_path("LOG_FILE", None)
 LOG_STDOUT = env.get_bool("LOG_STDOUT", False)
 LOG_LEVEL = env.get_str("LOG_LEVEL", "WARNING")
+LOG_SHORT_NAMES = env.get_bool("LOG_SHORT_NAMES", False)
+LOG_FORMAT = env.get_str(
+    "LOG_FORMAT", "%(asctime)s [%(name)s] %(levelname)s: %(message)s"
+)
+LOG_DATEFORMAT = env.get_str("LOG_DATEFORMAT", "%Y-%m-%d %H:%M:%S")
 
 # throttling requests
 DOWNLOAD_DELAY = env.get_int("DOWNLOAD_DELAY", 3)
