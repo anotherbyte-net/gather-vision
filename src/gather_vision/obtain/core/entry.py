@@ -8,7 +8,7 @@ import typing
 from gather_vision.obtain.core import data
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class UpdateArgs:
     """The arguments for the update command."""
 
@@ -21,7 +21,7 @@ class UpdateArgs:
     data_path: typing.Optional[pathlib.Path] = None
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class UpdateResult:
     """The result from the update command."""
 
@@ -29,7 +29,7 @@ class UpdateResult:
     local_data: typing.List[data.LocalData]
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class ListArgs:
     """The arguments for the list command."""
 
@@ -40,7 +40,7 @@ class ListArgs:
     """The plugin data source name."""
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class ListResult:
     """The result from the list command."""
 

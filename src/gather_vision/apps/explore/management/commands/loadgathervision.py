@@ -2,7 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from gather_vision.obtain import available_web_data
+from gather_vision.obtain.place import available_web_data
 from gather_vision.obtain.core import data
 
 
@@ -27,3 +27,5 @@ class Command(BaseCommand):
         web_items = data_load.run_web(available_web_data)
         for web_item in web_items:
             pass
+
+        logger.info(f"Finished {__name__}")

@@ -11,12 +11,16 @@ from gather_vision.obtain.core import data
 # https://www.data.qld.gov.au/dataset/fuel-price-reporting
 
 
-@dataclasses.dataclass
-class QueenslandFuelItem:
+@dataclasses.dataclass(frozen=True)
+class QueenslandFuelItem(data.GatherDataItem):
     pass
 
 
 class QueenslandFuelWebData(data.WebData):
+    @property
+    def name(self) -> str:
+        return "au-qld-fuel"
+
     def initial_urls(self) -> typing.Iterable[str]:
         return []
 

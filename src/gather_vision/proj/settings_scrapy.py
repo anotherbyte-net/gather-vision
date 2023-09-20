@@ -17,7 +17,7 @@ with path("gather_vision.proj", "settings_scrapy.py") as p:
 # local dirs
 LOCAL_DIR = BASE_DIR / ".local"
 
-FEEDS_FILE_PATH = LOCAL_DIR / "feeds" / "feed_%(name)s_%(time)s.pickle"
+FEEDS_FILE_PATH = LOCAL_DIR / "feeds" / "feed_%(name)s_%(time)s.jsonl.gz"
 HTTP_CACHE_DIR_PATH = LOCAL_DIR / "http_cache"
 FILES_DIR_PATH = LOCAL_DIR / "files"
 
@@ -58,21 +58,16 @@ EXTENSIONS = env.get_dict(
 )
 
 # feed
-FEED_EXPORTERS = env.get_dict(
-    "FEED_EXPORTERS",
-    default={
-        "pickle_raw": "gather_vision.obtain.core.data.AppPickleItemExporter",
-    },
-)
 FEEDS = env.get_dict(
     "FEEDS",
     default={
         f"file:///{make_scrapy_path(FEEDS_FILE_PATH)}": {
-            "format": "pickle_raw",
+            "format": "jsonlines",
+            "postprocessing": ["scrapy.extensions.postprocessing.GzipPlugin"],
+            "gzip_compresslevel": 5,
         }
     },
 )
-
 
 # logs
 LOG_ENABLED = env.get_bool("LOG_ENABLED", True)

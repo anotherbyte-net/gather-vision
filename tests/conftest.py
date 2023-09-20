@@ -1,22 +1,10 @@
 import re
-import importlib_metadata
 import pytest
-import example_plugin
 import logging
 
 logging.basicConfig(
     format="%(asctime)s [%(levelname)-8s] %(message)s", level=logging.DEBUG
 )
-
-
-@pytest.fixture(autouse=True)
-def patch_app_get_entry_points(monkeypatch):
-    """Provide an example plugin for tests."""
-
-    def _get_entry_points(self, group: str):
-        return importlib_metadata.EntryPoints(example_plugin.ExamplePlugin)
-
-    monkeypatch.setattr("gather_vision.app.App._get_entry_points", _get_entry_points)
 
 
 @pytest.fixture()

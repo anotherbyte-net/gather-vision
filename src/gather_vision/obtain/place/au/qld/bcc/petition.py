@@ -5,7 +5,7 @@ import typing
 from gather_vision.obtain.core import data
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class BrisbaneCityCouncilPetitionItem(data.GatherDataItem):
     view_url: str
     sign_url: str
@@ -19,6 +19,10 @@ class BrisbaneCityCouncilPetitionItem(data.GatherDataItem):
 
 
 class BrisbaneCityCouncilPetitionsWebData(data.WebData):
+    @property
+    def name(self):
+        return "au-qld-bcc-petitions"
+
     @property
     def tags(self) -> dict[str, str]:
         return {
@@ -55,6 +59,7 @@ class BrisbaneCityCouncilPetitionsWebData(data.WebData):
         elif url.startswith(self.item_url):
             raw = self._parse_petition(web_data)
             yield BrisbaneCityCouncilPetitionItem(
+                gather_name=self.name,
                 tags=self.tags,
                 view_url=raw.get("view_url"),
                 sign_url=raw.get("sign_url"),

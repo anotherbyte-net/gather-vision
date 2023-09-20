@@ -1,22 +1,25 @@
 import abc
 import dataclasses
+import gzip
+import json
 import logging
-import pickle
+import pathlib
 import re
-import shutil
 import typing
 
 import parsel
 import scrapy
 from defusedxml.ElementTree import fromstring
-from scrapy import crawler, exporters
+from scrapy import crawler
 from scrapy import http
+from scrapy.settings import Settings
 from scrapy.utils.project import get_project_settings
+
 
 logger = logging.getLogger(__name__)
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class WebDataAvailable:
     """The web data available for providing new urls and/or items."""
 
@@ -30,6 +33,9 @@ class WebDataAvailable:
     """The url that provided the response."""
 
     body_text: str
+    """The raw response body text."""
+
+    body_raw: bytes
     """The raw response body text."""
 
     body_data: typing.Optional[typing.List]
@@ -56,15 +62,24 @@ class IsDataclass(typing.Protocol):
     __dataclass_fields__: typing.Dict
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class GatherDataItem(abc.ABC):
     """Abstract base class for data items."""
+
+    gather_type: str = dataclasses.field(init=False)
+    """The name of this item class."""
+
+    gather_name: str
+    """The name of the spider that created this item."""
 
     tags: dict[str, str]
     """The tag keys and values applied to this data item."""
 
+    def __post_init__(self):
+        object.__setattr__(self, "gather_type", self.__class__.__name__)
 
-@dataclasses.dataclass
+
+@dataclasses.dataclass(frozen=True)
 class GatherDataRequest(abc.ABC):
     """Abstract base class for data items."""
 
@@ -101,11 +116,16 @@ class BaseData(abc.ABC):
         return result
 
 
-class WebData(BaseData, abc.ABC):
+class WebData(BaseData, scrapy.Spider, abc.ABC):
     """
     A class that retrieves web data and
     converts it into data items and/or additional urls.
     """
+
+    @property
+    @abc.abstractmethod
+    def name(self) -> str:
+        raise NotImplementedError("Must specify data_descr.")
 
     @abc.abstractmethod
     def initial_urls(self) -> typing.Iterable[str]:
@@ -114,7 +134,7 @@ class WebData(BaseData, abc.ABC):
         Returns:
             An iterable of strings.
         """
-        raise NotImplementedError("Must implement 'initial_urls'.")
+        raise NotImplementedError("Must implement 'start_requests'.")
 
     @abc.abstractmethod
     def web_resources(
@@ -130,41 +150,19 @@ class WebData(BaseData, abc.ABC):
         """
         raise NotImplementedError("Must implement 'web_resources'.")
 
-
-class LocalData(BaseData, abc.ABC):
-    """A class that loads local data and converts it into data items."""
-
-    @abc.abstractmethod
-    def local_resources(self) -> typing.Iterable[GatherDataItem]:
-        """Load local resource and provide  items.
-
-        Returns:
-            An iterable of data items.
-        """
-        raise NotImplementedError("Must implement 'load_resources'.")
-
-
-class WebDataFetch(scrapy.Spider):
-    """Fetch items from data sources."""
-
-    name = "web-data"
-
     def start_requests(self) -> typing.Iterable[scrapy.Request]:
         """Start the web requests.
 
         Returns:
             An iterable of requests.
         """
-        data_sources: typing.List[WebData] = self.settings.get("WEB_DATA_SOURCES")
-        for data_source in data_sources:
-            logger.info("%s: Start", type(data_source).__name__)
-            for initial_url in data_source.initial_urls():
-                if initial_url:
-                    yield scrapy.Request(
-                        url=initial_url,
-                        callback=self.parse,
-                        cb_kwargs={"web_data_source": data_source},
-                    )
+        logger.info("%s: Start", self.__class__.__name__)
+        for initial_url in self.initial_urls():
+            if initial_url:
+                yield scrapy.Request(
+                    url=initial_url,
+                    callback=self.parse,
+                )
 
     def parse(
         self, response: http.Response, **kwargs
@@ -178,7 +176,6 @@ class WebDataFetch(scrapy.Spider):
         Returns:
             An iterable of requests and/or data items.
         """
-        data_source: WebData = response.cb_kwargs.get("web_data_source")
         content_type_header = response.headers["Content-Type"].decode("utf-8").lower()
 
         if logger.isEnabledFor(logging.INFO):
@@ -187,7 +184,7 @@ class WebDataFetch(scrapy.Spider):
             )
             logger.info(
                 "%s: %s%s",
-                type(data_source).__name__,
+                self.__class__.__name__,
                 response.url,
                 log_response_flags,
             )
@@ -199,8 +196,10 @@ class WebDataFetch(scrapy.Spider):
                 body_data = fromstring(response.text)
             else:
                 body_data = None
+            body_text = response.text
             selector = response.selector
         else:
+            body_text = None
             body_data = None
             selector = None
 
@@ -208,22 +207,36 @@ class WebDataFetch(scrapy.Spider):
             request_url=response.request.url,
             request_method=response.request.method,
             response_url=response.url,
-            body_text=response.text,
+            body_text=body_text,
+            body_raw=response.body,
             body_data=body_data,
             selector=selector,
             status=response.status,
             headers=response.headers,
             meta=response.cb_kwargs,
         )
-        for i in data_source.web_resources(web_data):
+        for i in self.web_resources(web_data):
             if i and isinstance(i, GatherDataItem):
                 yield i
             elif i and isinstance(i, GatherDataRequest):
                 yield scrapy.Request(
                     url=i.url,
                     callback=self.parse,
-                    cb_kwargs={**i.data, "web_data_source": data_source},
+                    cb_kwargs={**i.data},
                 )
+
+
+class LocalData(BaseData, abc.ABC):
+    """A class that loads local data and converts it into data items."""
+
+    @abc.abstractmethod
+    def local_resources(self) -> typing.Iterable[GatherDataItem]:
+        """Load local resource and provide  items.
+
+        Returns:
+            An iterable of data items.
+        """
+        raise NotImplementedError("Must implement 'load_resources'.")
 
 
 class DataLoad:
@@ -258,7 +271,7 @@ class DataLoad:
         )
 
     def run_web(
-        self, data_sources: typing.Iterable[WebData]
+        self, data_sources: typing.Iterable[typing.Type[WebData]]
     ) -> typing.Iterable[tuple[WebData, GatherDataItem]]:
         """Run the web data to get items, using scrapy.
         Save the feed to a temp file, then read the items back in.
@@ -269,7 +282,6 @@ class DataLoad:
         Returns:
             An iterable where each entry is a web source and data item.
         """
-
         logger.info("Starting to load data items from web data sources.")
 
         data_sources_list = list(data_sources)
@@ -277,9 +289,19 @@ class DataLoad:
         settings = get_project_settings()
         settings.set("WEB_DATA_SOURCES", data_sources_list)
 
+        self._run_crawler(settings, data_sources)
+
+        yield from self._load_feed_items(settings)
+
+        logger.info("Finished %s web data sources.", len(data_sources_list))
+
+    def _run_crawler(
+        self, settings: Settings, data_sources: typing.Iterable[typing.Type[WebData]]
+    ) -> None:
         process = crawler.CrawlerProcess(settings=settings, install_root_handler=True)
 
-        process.crawl(WebDataFetch)
+        for data_source in data_sources:
+            process.crawl(data_source)
 
         # logging.getLogger("scrapy").setLevel("ERROR")
         # logging.getLogger("py.warnings").setLevel("CRITICAL")
@@ -287,41 +309,31 @@ class DataLoad:
         # the script will block here until the crawling is finished
         process.start()
 
+    def _load_feed_items(self, settings: Settings) -> typing.Iterable[GatherDataItem]:
         # load the feed items
-        feed_dir = settings.get("FEEDS_FILE_PATH").parent
+        feed_dir: pathlib.Path = settings.get("FEEDS_FILE_PATH").parent
         feed_dir.mkdir(parents=True, exist_ok=True)
+
+        from gather_vision.obtain.place import available_web_items
+
+        web_items_map = {i.__name__: i for i in available_web_items}
+
         item_count = 0
         for item in feed_dir.iterdir():
             if not item.is_file():
                 continue
-            if item.suffix != ".pickle":
+            if item.suffixes != [".jsonl", ".gz"]:
                 continue
 
-            with item.open("rb") as f:
-                while True:
-                    try:
-                        data_item = pickle.load(f)
+            with gzip.GzipFile(item, "rb") as f:
+                for line in f.readlines():
+                    data_raw = json.loads(line)
+                    gather_type = data_raw.pop("gather_type")
+                    found = web_items_map.get(gather_type)
+                    if found:
                         item_count += 1
-                        yield data_item
-                    except EOFError:
-                        break
+                        yield found(**data_raw)
+                    else:
+                        yield None
 
-        # remove the feeds dir, as the pickle files are specific to the run
-        shutil.rmtree(feed_dir)
-
-        logger.info(
-            "Finished loading %s data items from %s web data sources.",
-            item_count,
-            len(data_sources_list),
-        )
-
-
-class AppPickleItemExporter(exporters.BaseItemExporter):
-    def __init__(self, file, protocol=4, **kwargs):
-        super().__init__(**kwargs)
-        self.file = file
-        self.protocol = protocol
-
-    def export_item(self, item):
-        d = item
-        pickle.dump(d, self.file, self.protocol)
+        logger.info("Finished loading %s web data items.", item_count)

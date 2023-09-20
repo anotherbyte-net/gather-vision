@@ -4,25 +4,25 @@ import typing
 from gather_vision.obtain.core import data
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class BrisbaneCityCouncilGovernmentPersonItem(data.GatherDataItem):
     # people
     pass
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class BrisbaneCityCouncilGovernmentSittingDateItem(data.GatherDataItem):
     # sitting dates
     pass
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class BrisbaneCityCouncilGovernmentMeetingPersonAttendanceItem(data.GatherDataItem):
     # meeting minutes - attendance?
     pass
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class BrisbaneCityCouncilGovernmentMeetingVoteItem(data.GatherDataItem):
     # meeting minutes - votes?
     pass
@@ -30,6 +30,10 @@ class BrisbaneCityCouncilGovernmentMeetingVoteItem(data.GatherDataItem):
 
 class BrisbaneCityCouncilGovernmentWebData(data.WebData):
     list_url = ""
+
+    @property
+    def name(self) -> str:
+        return "au-qld-bcc-government"
 
     @property
     def tags(self) -> dict[str, str]:

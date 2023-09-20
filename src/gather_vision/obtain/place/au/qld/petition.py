@@ -4,7 +4,7 @@ import typing
 from gather_vision.obtain.core import data
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class QueenslandGovernmentPetitionItem(data.GatherDataItem):
     pass
 
@@ -60,6 +60,10 @@ class QueenslandGovernmentPetitionsWebData(data.WebData):
     # (online) sign url:
 
     resp_url = "https://apps.parliament.qld.gov.au/E-Petitions/Home/DownloadResponse"
+
+    @property
+    def name(self) -> str:
+        return "au-qld-petitions"
 
     @property
     def tags(self) -> dict[str, str]:

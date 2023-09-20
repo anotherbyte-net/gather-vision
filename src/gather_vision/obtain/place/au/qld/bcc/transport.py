@@ -52,6 +52,10 @@ class BrisbaneTranslinkNoticesWebData(data.WebData):
     }
 
     @property
+    def name(self):
+        return "au-qld-bcc-translink-notices"
+
+    @property
     def tags(self) -> dict[str, str]:
         return {}
 

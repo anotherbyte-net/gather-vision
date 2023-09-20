@@ -4,8 +4,8 @@ import typing
 from gather_vision.obtain.core import data
 
 
-@dataclasses.dataclass
-class AustraliaElectionItem:
+@dataclasses.dataclass(frozen=True)
+class AustraliaElectionItem(data.GatherDataItem):
     pass
 
 
@@ -17,6 +17,10 @@ class AustraliaElectionWebData(data.WebData):
     # could use known paths to files
     # could also gather links from the page using the link titles or file paths
     # https://results.aec.gov.au/13745/Website/Downloads/HouseVotesCountedByDivisionDownload-13745.csv
+
+    @property
+    def name(self) -> str:
+        return "au-election"
 
     def initial_urls(self) -> typing.Iterable[str]:
         return []

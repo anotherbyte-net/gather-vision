@@ -5,12 +5,16 @@ from gather_vision.obtain.core import data
 from gather_vision.obtain.core.data import WebDataAvailable, GatherDataItem
 
 
-@dataclasses.dataclass
-class QueenslandEnergexElectricityItem:
+@dataclasses.dataclass(frozen=True)
+class QueenslandEnergexElectricityItem(data.GatherDataItem):
     pass
 
 
 class QueenslandEnergexElectricityWebData(data.WebData):
+    @property
+    def name(self) -> str:
+        return "au-qld-electricity"
+
     def web_resources(
         self, web_data: data.WebDataAvailable
     ) -> typing.Iterable[typing.Union[str, data.GatherDataItem]]:
@@ -35,12 +39,16 @@ class QueenslandEnergexElectricityWebData(data.WebData):
         pass
 
 
-@dataclasses.dataclass
-class QueenslandErgonEnergyElectricityItem:
+@dataclasses.dataclass(frozen=True)
+class QueenslandErgonEnergyElectricityItem(data.GatherDataItem):
     pass
 
 
 class QueenslandErgonEnergyElectricityWebData(data.WebData):
+    @property
+    def name(self) -> str:
+        return "au-qld-electricity"
+
     # "high"
     category_high_max = 5000
     category_high_min = 2000
