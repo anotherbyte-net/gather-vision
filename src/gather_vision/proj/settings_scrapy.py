@@ -45,6 +45,7 @@ HTTPCACHE_DIR = make_scrapy_path(
 HTTPCACHE_POLICY = env.get_str(
     "HTTPCACHE_POLICY",
     "scrapy.extensions.httpcache.DummyPolicy",
+    # "scrapy.extensions.httpcache.RFC2616Policy",
 )
 HTTPCACHE_STORAGE = env.get_str(
     "HTTPCACHE_STORAGE",

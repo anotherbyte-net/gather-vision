@@ -1,5 +1,15 @@
 # Change log
 
+## [0.1.0](https://github.com/anotherbyte-net/gather-vision/releases/tag/v0.1.0)
+
+[full change log](https://github.com/anotherbyte-net/gather-vision/compare/v0.0.4...v0.1.0)
+
+- refactor to not use plugins and contain all the functionality in this library
+- implemented:
+  - BrisbaneCityCouncilPetitionsWebData
+  - BrisbaneCityCouncilWaterWebData
+  - BrisbaneTranslinkNoticesWebData
+
 ## [v0.0.4](https://github.com/anotherbyte-net/gather-vision/releases/tag/v0.0.4)
 
 [full change log](https://github.com/anotherbyte-net/gather-vision/compare/v0.0.3...v0.0.4)

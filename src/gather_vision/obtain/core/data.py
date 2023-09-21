@@ -193,7 +193,7 @@ class WebData(BaseData, scrapy.Spider, abc.ABC):
             if "json" in content_type_header:
                 body_data = response.json()
             elif "xml" in content_type_header:
-                body_data = fromstring(response.text)
+                body_data = self._xml_to_data(fromstring(response.text))
             else:
                 body_data = None
             body_text = response.text
@@ -224,6 +224,15 @@ class WebData(BaseData, scrapy.Spider, abc.ABC):
                     callback=self.parse,
                     cb_kwargs={**i.data},
                 )
+
+    def _xml_to_data(self, item):
+        return {
+            "attrs": item.attrib,
+            "tag": item.tag,
+            "tail": item.tail,
+            "text": item.text,
+            "children": [self._xml_to_data(i) for i in item],
+        }
 
 
 class LocalData(BaseData, abc.ABC):
