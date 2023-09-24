@@ -62,8 +62,7 @@ class WaterQuality:
         self._logger.info("Finished updating water quality measures.")
 
     def create_au_qld_bcc_waterways(self):
-
-        (obj, created) = app_models.InformationSource.objects.get_or_create(
+        (obj, created) = app_models.InformationSource.objects.aget_or_create(
             name=AuQldBccWaterways.code,
             defaults={
                 "title": AuQldBccWaterways.title,

@@ -28,6 +28,12 @@ class Event(
         related_name="electricity_event_areas",
         on_delete=db_models.PROTECT,
     )
+    gatherer = db_models.ForeignKey(
+        explore_models.Gatherer,
+        related_name="electricity_events",
+        on_delete=db_models.CASCADE,
+        null=True,
+    )
     start_date = db_models.DateTimeField(
         blank=True,
         null=True,
@@ -126,6 +132,12 @@ class Usage(
         explore_models.Origin,
         related_name="electricity_usages",
         on_delete=db_models.CASCADE,
+    )
+    gatherer = db_models.ForeignKey(
+        explore_models.Gatherer,
+        related_name="electricity_usages",
+        on_delete=db_models.CASCADE,
+        null=True,
     )
     demand = db_models.PositiveIntegerField(
         help_text="The measure of electricity demand in megawatts.",

@@ -17,22 +17,14 @@ class BrisbaneCityCouncilPetitionItem(data.GatherDataItem):
     retrieved_at: datetime
     closed_at: datetime
 
+    async def save_models(self) -> None:
+        pass
+
 
 class BrisbaneCityCouncilPetitionsWebData(data.WebData):
     @property
     def name(self):
         return "au-qld-bcc-petitions"
-
-    @property
-    def tags(self) -> dict[str, str]:
-        return {
-            "country": "Australia",
-            "region": "Queensland",
-            "district": "Brisbane City Council",
-            "locality": "City of Brisbane",
-            "data_source_location": "web",
-            "data_source_category": "petition",
-        }
 
     list_url = "https://www.epetitions.brisbane.qld.gov.au"
     archive_url = f"{list_url}/petition/archives"
@@ -49,7 +41,9 @@ class BrisbaneCityCouncilPetitionsWebData(data.WebData):
         self, web_data: data.WebDataAvailable
     ) -> typing.Iterable[typing.Union[data.GatherDataRequest, data.GatherDataItem]]:
         url = web_data.response_url.strip("/")
+
         if url in [self.list_url, self.archive_url]:
+            # the initial urls provide basic lists of petitions their item urls
             for raw in self._parse_petitions_table(web_data):
                 yield data.GatherDataRequest(
                     url=f"{self.item_url}/{raw.get('item_id')}",
@@ -57,10 +51,11 @@ class BrisbaneCityCouncilPetitionsWebData(data.WebData):
                 )
 
         elif url.startswith(self.item_url):
+            # get the detailed petition info from the item page
             raw = self._parse_petition(web_data)
+            # TODO: create the petition models and forms in the legislation app
             yield BrisbaneCityCouncilPetitionItem(
                 gather_name=self.name,
-                tags=self.tags,
                 view_url=raw.get("view_url"),
                 sign_url=raw.get("sign_url"),
                 title=raw.get("title"),
@@ -73,13 +68,15 @@ class BrisbaneCityCouncilPetitionsWebData(data.WebData):
             )
 
         elif url.startswith(self.signed_url):
-            # TODO: consider gathering the signature suburbs?
+            # TODO: consider gathering the suburbs from the signature list?
             yield None
 
         elif url.startswith(self.sign_url):
+            # nothing to get from the add signature page
             yield None
 
         else:
+            # unexpected url
             raise ValueError(f"Unexpected url '{url}'.")
 
     def _parse_petitions_table(self, web_data: data.WebDataAvailable):

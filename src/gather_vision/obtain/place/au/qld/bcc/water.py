@@ -56,16 +56,6 @@ class BrisbaneCityCouncilWaterWebData(data.WebData):
     water_url = "https://www.brisbane.qld.gov.au/clean-and-green/natural-environment-and-water/water/water-quality-monitoring"
 
     # water levels in dams
-    @property
-    def tags(self) -> dict[str, str]:
-        return {
-            "country": "Australia",
-            "region": "Queensland",
-            "district": "Brisbane City Council",
-            "locality": "City of Brisbane",
-            "data_source_location": "web",
-            "data_source_category": "water",
-        }
 
     @property
     def name(self):

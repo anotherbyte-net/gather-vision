@@ -1,110 +1,227 @@
 import dataclasses
+import logging
 import re
 import typing
 from datetime import datetime
-from zoneinfo import ZoneInfo
 
-from django.utils.text import slugify
-
+from gather_vision.apps.explore import models as explore_models
+from gather_vision.apps.transport import models as transport_models
 from gather_vision.obtain.core import data
-from gather_vision.obtain.core.data import WebDataAvailable, GatherDataItem
+from gather_vision.obtain.place.au import area_au
+from gather_vision.obtain.place.au.qld import area_qld
+from gather_vision.obtain.place.au.qld.bcc import (
+    origin_bcc,
+    area_bcc,
+    area_brisbane,
+    tz_bne as tz_bne,
+)
+
+logger = logging.getLogger(__name__)
 
 
 @dataclasses.dataclass(frozen=True)
 class BrisbaneTranslinkNoticesItem(data.GatherDataItem):
-    event: typing.Optional[str]
-    description: typing.Optional[str]
-    locations: typing.Optional[list[str]]
-    services: typing.Optional[list[str]]
-    date_start: typing.Optional[datetime]
-    date_stop: typing.Optional[datetime]
-    date_published: typing.Optional[datetime]
-    url: typing.Optional[str]
-    id: typing.Optional[str]
-    categories: typing.Optional[set[str]]
+    title: str
+    retrieved_date: datetime
+    issued_date: datetime
+    description: str
+    url: str
+    start_date: datetime
+    stop_date: datetime
+    category: str
+    severity: str
+    locations: list[str]
+
+    groups: list[tuple[str, str]]
+    """A list of groups.
+    Each group is a (`title`, `category`) pair.
+    A `category` must be one of 
+    `gather_vision.apps.transport.models.Group.CATEGORY_CHOICES`.
+    """
+
+    areas: list[data.GatherDataArea]
+    """The `Area` items for the `Event`.
+    Each entry is a 
+    (`gather_vision.apps.explore.models.Area.LEVEL_CHOICES`, `title`) pair.
+    There must be only one instance of each level option.
+    """
+
+    origin: data.GatherDataOrigin
+    """The data was sourced from this `Origin`.
+    Requires a `title`, optional `description` and `url`,
+    plus an `areas` entry, which is the same as the :prop:`areas` entry.
+    """
+
+    async def save_models(self):
+        # origin and origin's area
+        origin_area = await explore_models.Area.from_obtain_data(self.origin.areas)
+        origin = await explore_models.Origin.from_obtain_data(
+            title=self.origin.title,
+            description=self.origin.description,
+            url=self.origin.url,
+            area=origin_area,
+        )
+
+        # gatherer
+        gatherer = await explore_models.Gatherer.from_obtain_data(
+            title=self.gather_name,
+            gather_type=self.gather_type,
+            description=self.description,
+            url=self.url,
+        )
+
+        # area
+        area = await explore_models.Area.from_obtain_data(self.areas)
+
+        # groups
+        groups = []
+        for title, category in self.groups:
+            groups.append(
+                await transport_models.Group.from_obtain_data(title, category)
+            )
+
+        await transport_models.Event.from_obtain_data(
+            title=self.title,
+            retrieved_date=self.retrieved_date,
+            issued_date=self.issued_date,
+            occurred_date=self.start_date,
+            description=self.description,
+            url=self.url,
+            origin=origin,
+            area=area,
+            gatherer=gatherer,
+            groups=groups,
+            start_date=self.start_date,
+            stop_date=self.stop_date,
+            category=self.category,
+            severity=self.severity,
+            locations=self.locations,
+        )
 
 
 class BrisbaneTranslinkNoticesWebData(data.WebData):
-    # from https://translink.com.au/about-translink/open-data
-    # see also https://translink.com.au/service-updates
-    notice_url = "https://translink.com.au/service-updates/rss"
+    # see also: https://translink.com.au/about-translink/open-data
     page_url = "https://translink.com.au/service-updates"
+    _notice_url = "https://translink.com.au/service-updates/rss"
 
-    descr_patterns = [
+    # extract:
+    # title - entry title
+    # description - entry description
+    # issued_date - published date
+    # url - link to entry
+    # start_date - entry starts affecting date
+    # stop_date - entry stops affecting date
+    # affected_infra -
+    #   infrastructure affected:
+    #   gather_vision.apps.transport.models.Event.CATEGORY_CHOICES
+    # severity - gather_vision.apps.transport.models.Event.SEVERITY_CHOICES
+    # locations - text description of the more precise Area instances
+    # services - title (service or line name),
+    #   gather_vision.apps.transport.models.Group.CATEGORY_CHOICES
+    # areas - locations affected by the event
+    # origin - where the data was sourced from
+
+    _descr_patterns = [
         re.compile(
             r"^\((?P<type>[^)]+)\)\s*(?P<description>.+)\.\s*"
-            r"Starts\s*affecting:\s*(?P<date_start>.+)\s*"
-            r"Finishes affecting:\s*(?P<date_stop>.+)$"
+            r"Starts\s*affecting:\s*(?P<start_date>.+)\s*"
+            r"Finishes affecting:\s*(?P<stop_date>.+)$"
         ),
         re.compile(
-            r"^Start\s*date:\s*(?P<date_start>[^a-z]+),\s*"
-            r"End\s*date:\s*(?P<date_stop>[^a-z]+),\s*"
+            r"^Start\s*date:\s*(?P<start_date>[^a-z]+),\s*"
+            r"End\s*date:\s*(?P<stop_date>[^a-z]+),\s*"
             r"Services:\s*(?P<services>.+)$"
         ),
         re.compile(
             r"^\((?P<type>[^)]+)\)\s*(?P<description>.+)\.\s*"
-            r"Starts\s*affecting:\s*(?P<date_start>.+)$"
+            r"Starts\s*affecting:\s*(?P<start_date>.+)$"
         ),
         re.compile(
-            r"^Start\s*date:\s*(?P<date_start>[^a-z]+),\s*"
+            r"^Start\s*date:\s*(?P<start_date>[^a-z]+),\s*"
+            r"Services:\s*(?P<services>.+)$"
+        ),
+        re.compile(
+            r"^Affects\s*services:\s*(?P<start_date>[^a-z]+)\s*"
             r"Services:\s*(?P<services>.+)$"
         ),
     ]
 
-    title_patterns = [
-        re.compile(
-            r"^(?P<location>.+)\s*[:-]\s*" r"(?P<event>temporary\s*stop\s*closure)$",
-            re.IGNORECASE,
-        ),
-        re.compile(
-            r"^(?P<locations>.+)\s*[:-]\s*" r"(?P<event>temporary\s*stop\s*closure)s$",
-            re.IGNORECASE,
-        ),
-        re.compile(
-            r"^(?P<location>.+)\s*" r"(?P<event>carpark\s*closure)$",
-            re.IGNORECASE,
-        ),
-    ]
+    _pattern_group_name = "found"
 
-    tag_keys = {
-        "Current": "When",
-        "Upcoming": "When",
-        "Minor": "Severity",
-        "Major": "Severity",
-        "Informative": "EventType",
-    }
+    @staticmethod
+    def _build_re(group_name: str, values: typing.Iterable[str]) -> re.Pattern:
+        definition = "|".join(values)
+        return re.compile(rf"\b(?P<{group_name}>{definition})\b", re.IGNORECASE)
+
+    _event_durations = _build_re(
+        _pattern_group_name,
+        [
+            "temporary",
+            "extended",
+            "permanent",
+            "weekend",
+            "weekday",
+            "evening",
+            "late night",
+        ],
+    )
+    _event_affected = _build_re(
+        _pattern_group_name,
+        [
+            r"bus\s*stops?",
+            "stops?",
+            r"bus\s*stations?",
+            "stations?",
+            r"park\s*('?n'?|and)\s*rides?",
+            "tracks?",
+            "entrances?",
+            r"bus\s*services?",
+            "services?",
+            "timetables?",
+            "platforms?",
+            r"bus\s*routes?",
+            "routes?",
+            r"bus\s*lines?",
+            "lines?",
+        ],
+    )
+    _event_changes = _build_re(
+        _pattern_group_name,
+        [
+            "closures?",
+            "changes?",
+            "disruptions?",
+            "diversions?",
+            "relocations?",
+            "reduced",
+            "missed",
+            "re-?opened",
+            "more",
+            "delays?",
+            "additional",
+            r"free\s*travel",
+        ],
+    )
 
     @property
     def name(self):
         return "au-qld-bcc-translink-notices"
 
-    @property
-    def tags(self) -> dict[str, str]:
-        return {
-            "country": "Australia",
-            "region": "Queensland",
-            "district": "Brisbane City Council",
-            "locality": "City of Brisbane",
-            "data_source_location": "web",
-            "data_source_category": "transport",
-            "data_source_owner": "TransLink",
-        }
-
     def initial_urls(self) -> typing.Iterable[str]:
-        return [self.notice_url]
+        return [self._notice_url]
 
     def web_resources(
-        self, web_data: WebDataAvailable
-    ) -> typing.Iterable[typing.Union[str, GatherDataItem]]:
-        items = web_data.body_data
-        for rss_item in items.get("children"):
+        self, web_data: data.WebDataAvailable
+    ) -> typing.Iterable[data.GatherDataRequest | data.GatherDataItem | None]:
+        items: dict = web_data.body_data
+        for rss_item in items.get("children", {}):
             if rss_item.get("tag") != "channel":
                 continue
 
             doc_info = {}
-            for info in rss_item.get("children"):
+            for info in rss_item.get("children", {}):
                 tag = info.get("tag")
-                text = info.get("text")
+                text = info.get("text", "")
                 match tag:
                     case "title":
                         doc_info["doc_title"] = text
@@ -115,10 +232,14 @@ class BrisbaneTranslinkNoticesWebData(data.WebData):
                     case "lastBuildDate":
                         doc_info["doc_build_date"] = text
                     case "item":
-                        yield self._get_item(doc_info, info.get("children"))
-                        doc_info = {}
+                        item_data = self._get_item(
+                            {**doc_info}, info.get("children", [])
+                        )
+                        yield self._build(item_data)
+                    case _:
+                        pass
 
-    def _get_item(self, info: dict, item: list[dict]) -> BrisbaneTranslinkNoticesItem:
+    def _get_item(self, info: dict, item: list[dict]) -> dict:
         for entry in item:
             match entry.get("tag"):
                 case "title":
@@ -130,245 +251,122 @@ class BrisbaneTranslinkNoticesWebData(data.WebData):
                 case "guid":
                     info["guid"] = entry.get("text").split("/")[-1].strip()
                 case "category":
-                    if "categories" not in info:
-                        info["categories"] = set()
-                    info["categories"].add(entry.get("text").strip())
-        return self._build(info)
+                    if "labels" not in info:
+                        info["labels"] = set()
+                    info["labels"].add(entry.get("text").strip())
+        return info
 
-    def _build(self, info: dict) -> BrisbaneTranslinkNoticesItem:
+    def _build(self, info: dict) -> BrisbaneTranslinkNoticesItem | None:
         doc_title = info.get("doc_title")
         doc_descr = info.get("doc_descr")
         doc_pub_date = info.get("doc_pub_date")
         doc_build_date = info.get("doc_build_date")
-        title = info.get("title").strip()
+
+        title = info.get("title")
         descr = info.get("descr")
         link = info.get("link")
         guid = info.get("guid")
-        categories = info.get("categories")
+        labels = info.get("labels")
 
-        # extract info from description
-        descr_match = None
-        for descr_pattern in self.descr_patterns:
-            descr_match = descr_pattern.match(descr)
-            if descr_match:
-                break
+        # extract info
+        info_descr = self._extract_descr_info(descr)
+        info_title = self._extract_title_info(title)
+        info_title_new = info_title.get("title_new")
+        info_title_affected = info_title.get("event_affected")
+        info_title_changes = info_title.get("event_changes")
+        info_services = self._extract_service_info(info_descr.get("services", ""))
 
-        if descr_match:
-            groups = descr_match.groupdict()
-            if "type" in groups:
-                info["EventType"] = groups.get("type")
+        # infer item properties from extracted data
+        date_parser = BrisbaneTranslinkNoticesItem.datetime_parse
+        date_now = BrisbaneTranslinkNoticesItem.datetime_now
 
-            if "description" in groups:
-                info["descr_precise"] = groups.get("description")
+        description = ""
+        start_date = date_parser(info_descr.get("start_date"), tz_bne)
+        stop_date = date_parser(info_descr.get("stop_date"), tz_bne)
+        category = transport_models.Event.guess_category(
+            "; ".join([*info_title_affected, *info_services])
+        )
+        severity = transport_models.Event.guess_severity(
+            "; ".join([*labels, *info_title_changes])
+        )
+        groups = list(transport_models.Group.guess_categories(info_services))
+        locations = []
 
-            if "services" in groups:
-                services_raw = (groups.get("services") or "").split(",")
-                services = [i.strip() for i in services_raw]
-                services_more = "..."
-                if services_more in services:
-                    services[services.index(services_more)] = "ALL"
-                info["lines"] = sorted(services)
-
-            if "date_start" in groups:
-                info["date_start"] = groups.get("date_start")
-
-            if "date_stop" in groups:
-                info["date_stop"] = groups.get("date_stop")
-
-        # extract info from title
-        title_match = None
-        for title_pattern in self.title_patterns:
-            title_match = title_pattern.match(title)
-            if title_match:
-                break
-
-        if title_match:
-            groups = title_match.groupdict()
-            if "location" in groups:
-                info["locations"] = [groups.get("location").strip()]
-            if "locations" in groups:
-                info["locations"] = [groups.get("locations").split(",")]
-            if "event" in groups:
-                info["event"] = groups.get("event")
-
-        # infer details from title
-        if self._is_station_closure(title):
-            categories.add("Station")
-        if self._is_carpark_closure(title):
-            categories.add("Carpark")
-        if self._is_track_closure(title):
-            categories.add("Track")
-        if self._is_accessibility_closure(title):
-            categories.add("Accessibility")
-        if self._is_stop_closure(descr):
-            categories.add("Stop")
-
-        # TODO: what are these?
-        # if info.get("descr_precise"):
-        #     pass
-        # if info.get("EventType"):
-        #     pass
-
+        # build the result item
+        areas = [area_au, area_qld, area_bcc, area_brisbane]
         return BrisbaneTranslinkNoticesItem(
             gather_name=self.name,
-            tags=self.tags,
-            event=title,
-            description=info.get("event"),
-            locations=info.get("locations"),
-            services=info.get("lines"),
-            date_start=self._parse_date(info.get("date_start")),
-            date_stop=self._parse_date(info.get("date_stop")),
-            id=guid,
+            title=title,
+            retrieved_date=date_now(tz_bne),
+            issued_date=date_parser(doc_pub_date, tz_bne),
+            description=description,
             url=link,
-            date_published=self._parse_date(doc_pub_date),
-            categories=categories,
+            start_date=start_date,
+            stop_date=stop_date,
+            category=category,
+            severity=severity,
+            locations=locations,
+            groups=groups,
+            areas=areas,
+            origin=origin_bcc,
         )
 
-    def _is_station_closure(self, value: str):
-        value = slugify(value)
-        return all(
-            [
-                "station" in value,
-                ("closure" in value or "reopening" in value),
-                "park" not in value,
-                "escalator" not in value,
-                "lift" not in value,
-            ]
+    def _extract_descr_info(self, value: str) -> dict:
+        for descr_pattern in self._descr_patterns:
+            descr_match = descr_pattern.match(value)
+            if descr_match:
+                return descr_match.groupdict()
+
+        logger.warning("No match for description '%s'.", value)
+        return {}
+
+    def _extract_title_info(self, value: str) -> dict:
+        current_title = str(value)
+        group_name = self._pattern_group_name
+        current_title, event_durations = self._extract_event_info(
+            current_title, group_name, self._event_durations
+        )
+        current_title, event_affected = self._extract_event_info(
+            current_title, group_name, self._event_affected
+        )
+        current_title, event_changes = self._extract_event_info(
+            current_title, group_name, self._event_changes
         )
 
-    def _is_carpark_closure(self, value: str):
-        value = slugify(value)
-        return all(
-            [
-                "station" in value,
-                ("closure" in value or "changes" in value or "alternatives" in value),
-                ("park" in value or "parking" in value),
-            ]
-        )
+        # known replacement to make in new title
+        replacements = {" - ": " ", " for ": " ", " in ": " "}
+        for repl_old, repl_new in replacements.items():
+            current_title = current_title.replace(repl_old, repl_new)
+        current_title = self.str_collapse(current_title)
 
-    def _is_track_closure(self, value: str):
-        value = slugify(value)
-        return all(
-            [
-                "track" in value,
-                "closure" in value,
-                "park" not in value,
-                "car" not in value,
-                "station" not in value,
-                "escalator" not in value,
-                "lift" not in value,
-            ]
-        )
+        return {
+            "event_durations": event_durations,
+            "event_affected": event_affected,
+            "event_changes": event_changes,
+            "title_new": current_title,
+        }
 
-    def _is_accessibility_closure(self, value: str):
-        value = slugify(value)
-        return all(
-            [
-                ("closure" in value or "outage" in value),
-                ("lift" in value or "escalator" in value),
-            ]
-        )
+    def _extract_service_info(self, value: str) -> typing.Iterable[str]:
+        services_raw = (value or "").split(",")
+        services = [i.strip() for i in services_raw]
+        services_more = "..."
+        if services_more in services:
+            services[services.index(services_more)] = "ELLIPSIS"
+        return sorted(services)
 
-    def _is_stop_closure(self, value: str):
-        value = slugify(value)
-        return any(
-            [
-                "temporary-stop-closure" == value,
-                "temporary-stop-closures" == value,
-            ]
-        )
+    def _extract_event_info(
+        self, value: str, name: str, pattern: re.Pattern
+    ) -> tuple[str, list[str]]:
+        out = str(value)
+        found = set()
+        while True:
+            match = pattern.search(out)
+            if not match:
+                return out, sorted(found)
 
-    def _parse_date(self, value: str) -> typing.Optional[datetime]:
-        if not value or not value.strip():
-            return None
-        options = ["%d/%m/%Y %I:%M %p", "%I:%M %p", "%a, %d %b %Y %H:%M:%S %z"]
-        for option in options:
-            try:
-                parsed = datetime.strptime(value, option)
-                result = parsed.replace(tzinfo=ZoneInfo("Australia/Brisbane"))
-                return result
-            except ValueError:
-                continue
-        raise ValueError(f"Cannot parse datetime '{value}'.")
-
-    # def get_event(self, item: dict) -> "TransportEvent":
-    #     tz = self._tz
-    #
-    #     tags = []
-    #
-    #     # item data
-    #     title = item.get("title", "").strip("⚠ⓘ☒").strip()
-    #     description = self._normalise.extract_html_data(item.get("description"))
-    #     link = item.get("link", "").strip()
-    #     guid = slugify(item.get("guid" "").split("/")[-1])
-    #     categories = item.get("category")
-    #
-    #     # links
-    #     if link:
-    #         tags.append(("Link", link))
-    #
-    #     # categories
-    #     if isinstance(categories, list):
-    #         for category in categories:
-    #             tags.append((self.tag_keys[category], category))
-    #     elif isinstance(categories, str):
-    #         tags.append((self.tag_keys[categories], categories))
-    #     else:
-    #         raise ValueError()
-    #
-    #     # description
-    #     summary_match = self._normalise.regex_match(
-    #         self.summary_patterns, description, unmatched_key="description"
-    #     )
-    #
-    #     event_type = summary_match.get("type")
-    #     if event_type:
-    #         tags.append(("EventType", event_type))
-    #
-    #     description = summary_match.get("description", "")
-    #
-    #     lines = summary_match.get("services", "").split(",")
-    #     lines = sorted([i.strip(" .") for i in lines if i and i.strip(" .")])
-    #
-    #     event_start = self._normalise.parse_date(summary_match.get("date_start"), tz)
-    #     event_stop = self._normalise.parse_date(summary_match.get("date_stop"), tz)
-    #
-    #     # title data
-    #     title_text = self._normalise.extract_html_data(title)
-    #     title_match = self._normalise.regex_match(
-    #         self.title_patterns, title_text, unmatched_key="description"
-    #     )
-    #
-    #     locations = [title_match.get("location")] + title_match.get(
-    #         "locations", ""
-    #     ).split(",")
-    #     locations = [i.strip() for i in locations if i and i.strip()]
-    #     if locations:
-    #         tags.append(("Locations", ", ".join(locations)))
-    #
-    #     if self._is_station_closure(title_text):
-    #         tags.append(("Category", "station"))
-    #     if self._is_carpark_closure(title_text):
-    #         tags.append(("Category", "carpark"))
-    #     if self._is_track_closure(title_text):
-    #         tags.append(("Category", "track"))
-    #     if self._is_accessibility_closure(title_text):
-    #         tags.append(("Category", "accessibility"))
-    #     if self._is_stop_closure(description):
-    #         tags.append(("Category", "stop"))
-    #
-    #     description += ", " + title_match.get("description", "")
-    #     description = description.strip(" ,")
-    #
-    #     result = TransportEvent(
-    #         raw=item,
-    #         title=title,
-    #         description=description if description != title else "",
-    #         tags=tags,
-    #         lines=lines,
-    #         source_id=guid,
-    #         source_name=self.code,
-    #         event_start=event_start,
-    #         event_stop=event_stop,
-    #     )
-    #     return result
+            group_value = match.group(name)
+            if group_value:
+                found.add(group_value.strip().lower())
+                index_start = match.start(name)
+                index_end = match.end(name)
+                out = out[0:index_start].strip() + " " + out[index_end:].strip()

@@ -2,7 +2,10 @@
 The Scrapy settings for the project.
 """
 import pathlib
-from importlib.resources import path
+from importlib.resources import path, files
+
+from importlib_resources import as_file
+
 from gather_vision.proj import DjangoCustomSettings
 
 
@@ -10,7 +13,7 @@ def make_scrapy_path(path: pathlib.Path) -> str:
     return str(path).replace("\\", "/")
 
 
-with path("gather_vision.proj", "settings_scrapy.py") as p:
+with as_file(files("gather_vision.proj").joinpath("settings_scrapy.py")) as p:
     # Build paths inside the project like this: BASE_DIR / 'subdir'.
     BASE_DIR = p.parent.parent.parent.parent
 
@@ -95,7 +98,8 @@ AUTOTHROTTLE_TARGET_CONCURRENCY = env.get_float(
 ITEM_PIPELINES = env.get_dict(
     "ITEM_PIPELINES",
     default={
-        "scrapy.pipelines.files.FilesPipeline": 1,
+        "scrapy.pipelines.files.FilesPipeline": 100,
+        "gather_vision.obtain.core.data.GatherVisionStoreDjangoItemPipeline": 300,
     },
 )
 

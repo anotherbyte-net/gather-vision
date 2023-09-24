@@ -17,12 +17,8 @@ class QueenslandEnergexElectricityWebData(data.WebData):
 
     def web_resources(
         self, web_data: data.WebDataAvailable
-    ) -> typing.Iterable[typing.Union[str, data.GatherDataItem]]:
+    ) -> typing.Iterable[typing.Union[data.GatherDataRequest, data.GatherDataItem]]:
         yield None
-
-    @property
-    def tags(self) -> dict[str, str]:
-        return {}
 
     demand_min = 0
     demand_max = 5500
@@ -75,9 +71,5 @@ class QueenslandErgonEnergyElectricityWebData(data.WebData):
 
     def web_resources(
         self, web_data: data.WebDataAvailable
-    ) -> typing.Iterable[typing.Union[str, data.GatherDataItem]]:
+    ) -> typing.Iterable[typing.Union[data.GatherDataRequest, data.GatherDataItem]]:
         yield None
-
-    @property
-    def tags(self) -> dict[str, str]:
-        return {}

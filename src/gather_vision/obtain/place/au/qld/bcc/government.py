@@ -35,21 +35,10 @@ class BrisbaneCityCouncilGovernmentWebData(data.WebData):
     def name(self) -> str:
         return "au-qld-bcc-government"
 
-    @property
-    def tags(self) -> dict[str, str]:
-        return {
-            "country": "Australia",
-            "region": "Queensland",
-            "district": "Brisbane City Council",
-            "locality": "City of Brisbane",
-            "data_source_location": "web",
-            "data_source_category": "legislatures",
-        }
-
     def initial_urls(self) -> typing.Iterable[str]:
         return [self.list_url]
 
     def web_resources(
         self, web_data: data.WebDataAvailable
-    ) -> typing.Iterable[typing.Union[str, data.GatherDataItem]]:
+    ) -> typing.Iterable[typing.Union[data.GatherDataRequest, data.GatherDataItem]]:
         yield None

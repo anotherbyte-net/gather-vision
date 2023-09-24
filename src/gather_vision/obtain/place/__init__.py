@@ -6,11 +6,12 @@ from gather_vision.obtain.place.au.qld.bcc.government import (
     BrisbaneCityCouncilGovernmentWebData,
 )
 from gather_vision.obtain.place.au.qld.bcc.petition import (
-    BrisbaneCityCouncilPetitionItem,
     BrisbaneCityCouncilPetitionsWebData,
+    BrisbaneCityCouncilPetitionItem,
 )
 from gather_vision.obtain.place.au.qld.bcc.transport import (
     BrisbaneTranslinkNoticesWebData,
+    BrisbaneTranslinkNoticesItem,
 )
 from gather_vision.obtain.place.au.qld.bcc.water import (
     BrisbaneCityCouncilWaterQualityItem,
@@ -67,6 +68,7 @@ available_web_items = [
     BrisbaneCityCouncilPetitionItem,
     BrisbaneCityCouncilWaterQualityItem,
     BrisbaneCityCouncilWaterLevelItem,
+    BrisbaneTranslinkNoticesItem,
     QueenslandAirItem,
     QueenslandEnergexElectricityItem,
     QueenslandErgonEnergyElectricityItem,

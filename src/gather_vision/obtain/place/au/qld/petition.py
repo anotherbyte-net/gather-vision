@@ -65,19 +65,10 @@ class QueenslandGovernmentPetitionsWebData(data.WebData):
     def name(self) -> str:
         return "au-qld-petitions"
 
-    @property
-    def tags(self) -> dict[str, str]:
-        return {
-            "country": "Australia",
-            "region": "Queensland",
-            "data_source_location": "web",
-            "data_source_category": "petition",
-        }
-
     def initial_urls(self) -> typing.Iterable[str]:
         return [self.current_url]
 
     def web_resources(
         self, web_data: data.WebDataAvailable
-    ) -> typing.Iterable[typing.Union[str, data.GatherDataItem]]:
+    ) -> typing.Iterable[typing.Union[data.GatherDataRequest, data.GatherDataItem]]:
         yield None

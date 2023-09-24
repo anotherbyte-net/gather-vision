@@ -1,4 +1,5 @@
 """Base model and mixins."""
+from asgiref.sync import sync_to_async
 from django.db import models as db_models
 
 
@@ -7,6 +8,12 @@ class ModelBase(db_models.Model):
 
     class Meta:
         abstract = True
+
+    @classmethod
+    async def do_validation(cls, obj: db_models.Model):
+        await sync_to_async(obj.full_clean)(
+            validate_unique=False, validate_constraints=False
+        )
 
 
 class ChangedModelBase(db_models.Model):
@@ -74,10 +81,11 @@ class NameTitleModelBase(db_models.Model):
     """A mixin to provide name and title for a model."""
 
     name = db_models.SlugField(
+        max_length=300,
         help_text="The internal name of the record.",
     )
     title = db_models.CharField(
-        max_length=200,
+        max_length=300,
         help_text="The displayed title.",
     )
 

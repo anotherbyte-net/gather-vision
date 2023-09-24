@@ -37,6 +37,12 @@ class Station(
         related_name="water_stations",
         on_delete=db_models.PROTECT,
     )
+    gatherer = db_models.ForeignKey(
+        explore_models.Gatherer,
+        related_name="water_stations",
+        on_delete=db_models.CASCADE,
+        null=True,
+    )
 
     objects = StationManager()
 

@@ -17,12 +17,8 @@ class AustralianGovernmentPetitionsWebData(data.WebData):
 
     def web_resources(
         self, web_data: data.WebDataAvailable
-    ) -> typing.Iterable[typing.Union[str, data.GatherDataItem]]:
+    ) -> typing.Iterable[typing.Union[data.GatherDataRequest, data.GatherDataItem]]:
         yield None
-
-    @property
-    def tags(self) -> dict[str, str]:
-        return {}
 
     list_url = "https://www.aph.gov.au/e-petitions"
     item_url = f"{list_url}/petition/${{item_id}}"
