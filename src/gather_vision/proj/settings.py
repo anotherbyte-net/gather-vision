@@ -30,6 +30,7 @@ env.load_env(name="ENV_PATH")
 
 # Set debug or default to false.
 DEBUG = env.get_bool(key="DEBUG", default=False)
+USE_DEBUG_TOOLBAR = env.get_bool(key="USE_DEBUG_TOOLBAR", default=False)
 
 # secret key
 SECRET_KEY = env.get_str(key="SECRET_KEY")
@@ -58,8 +59,16 @@ INSTALLED_APPS = [
     "gather_vision.apps.water.apps.WaterAppConfig",
 ]
 
-if DEBUG is True:
+if USE_DEBUG_TOOLBAR is True:
     INSTALLED_APPS.append("debug_toolbar")
+
+if DEBUG is True:
+    # distill for static site generation needs to be after django apps
+    # and before the local apps
+    for index, installed_app in enumerate(INSTALLED_APPS):
+        if installed_app.startswith("gather_vision.apps."):
+            INSTALLED_APPS.insert(index, "django_distill")
+            break
 
 
 MIDDLEWARE = [
@@ -67,17 +76,16 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-if DEBUG is True:
+if USE_DEBUG_TOOLBAR is True:
     MIDDLEWARE.insert(
         MIDDLEWARE.index("django.middleware.csrf.CsrfViewMiddleware"),
-        "debug_toolbar",
+        "debug_toolbar.middleware.DebugToolbarMiddleware",
     )
 
 
@@ -157,6 +165,7 @@ STATIC_URL = env.get_str(key="STATIC_URL", default="static/")
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
+STATIC_ROOT = LOCAL_DIR / "staticfiles"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

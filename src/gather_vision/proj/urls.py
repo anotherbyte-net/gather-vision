@@ -14,12 +14,12 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-import debug_toolbar
-from django.contrib.auth import views as auth_views
-from django.urls import path, include
 
-from gather_vision.proj import views
-from gather_vision.proj.admin import admin_site
+from django.contrib.auth import views as auth_views
+from django.urls import include, path
+from django_distill import distill_path
+from gather_vision.proj import views, settings, admin
+
 
 urlpatterns = [
     path(
@@ -48,7 +48,7 @@ urlpatterns = [
     ),
     path(
         "admin/",
-        admin_site.urls,
+        admin.admin_site.urls,
     ),
     path(
         "electricity",
@@ -74,13 +74,19 @@ urlpatterns = [
         "explore",
         include("gather_vision.apps.explore.urls", namespace="explore"),
     ),
-    path(
+    distill_path(
         "",
         views.HomePageView.as_view(),
         name="index",
     ),
-    path(
-        "__debug__/",
-        include(debug_toolbar.urls),
-    ),
 ]
+
+if settings.USE_DEBUG_TOOLBAR:
+    import debug_toolbar
+
+    urlpatterns.append(
+        path(
+            "__debug__/",
+            include(debug_toolbar.urls),
+        )
+    )

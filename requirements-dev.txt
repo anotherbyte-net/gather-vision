@@ -6,6 +6,7 @@ pip-audit
 
 # local dev
 django-debug-toolbar
+django-distill
 
 # tests
 pytest
