@@ -28,3 +28,8 @@ types-PyYAML
 types-requests
 types-backports
 types-urllib3
+
+# docs
+mkdocs
+mkdocs-material
+mkdocstrings

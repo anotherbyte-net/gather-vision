@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
+
+site_name: Gather Vision
+site_url: https://www.anotherbyte.net/gather-vision
+site_dir: website
+
+theme:
+  name: material
