@@ -76,7 +76,7 @@ class Area(
     """A known geographical location."""
 
     LEVEL_COUNTRY = "L1"
-    """administrative extent of a sovereign government"""
+    """administrative extent of a top-level government"""
 
     LEVEL_REGION = "L2"
     """administrative division / state / province"""

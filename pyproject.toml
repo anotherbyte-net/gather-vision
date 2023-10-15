@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 name = "gather-vision"
 description = "Obtain, extract, organise, and store information. "
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "License :: OSI Approved :: Apache Software License",
@@ -100,7 +100,7 @@ src_paths = [
 legacy_tox_ini = """
 [tox]
 isolated_build = True
-envlist = py38,py39,py310,py311
+envlist = py310,py311,py312
 
 [testenv]
 recreate = true
@@ -111,8 +111,6 @@ allowlist_externals =
     echo
 commands =
     echo "::group::Show app help"
-    gather-vision --version
-    gather-vision --help
     echo "::endgroup::"
     echo "::group::Outdated deps"
     -pip list --outdated
@@ -123,8 +121,17 @@ commands =
     echo "::group::Coverage report"
     -python -X dev -m coverage report
     echo "::endgroup::"
-    echo "::group::Linter - mypy"
-    -python -X dev -m mypy src
+    echo "::group::Type checker - mypy"
+    -python -X dev -m mypy src --any-exprs-report .local/mypy-rpt/{env_name}/any-exprs-report --cobertura-xml-report .local/mypy-rpt/{env_name}/cobertura-xml-report --html-report .local/mypy-rpt/{env_name}/html-report --linecount-report .local/mypy-rpt/{env_name}/linecount-report --linecoverage-report .local/mypy-rpt/{env_name}/linecoverage-report --lineprecision-report .local/mypy-rpt/{env_name}/lineprecision-report --txt-report .local/mypy-rpt/{env_name}/txt-report --xml-report .local/mypy-rpt/{env_name}/xml-report
+    echo "::endgroup::"
+    echo "::group::Type checker - pytype"
+    -python -X dev -m pytype src
+    echo "::endgroup::"
+    echo "::group::Type checker - pyright"
+    -python -X dev -m pyright src
+    echo "::endgroup::"
+    echo "::group::Type checker - pyre"
+    -python -X dev -m pyre src
     echo "::endgroup::"
     echo "::group::Linter - black"
     -python -X dev -m black --check src
@@ -133,13 +140,16 @@ commands =
     -python -X dev -m pylint src
     echo "::endgroup::"
     echo "::group::Linter - pydocstyle"
-    -python -X dev -m pydocstyle src
+    -python -X dev -m ruff src
     echo "::endgroup::"
-    echo "::group::Linter - flake8"
-    -python -X dev -m flake8 src --count --show-source --statistics --exit-zero
+    echo "::group::Linter - bandit"
+    -python -X dev -m bandit -r src
+    echo "::endgroup::"
+    echo "::group::Linter - pyupgrade"
+    -python -X dev -m pyupgrade src
     echo "::endgroup::"
     echo "::group::Build"
-    python -m build --sdist --wheel --outdir dist/ .
+    python -m build --sdist --wheel --outdir build/dist-test/{env_name}/ .
     echo "::endgroup::"
 """
 

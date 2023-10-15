@@ -46,7 +46,7 @@ class BrisbaneCityCouncilPetitionsWebData(data.WebData):
             # the initial urls provide basic lists of petitions their item urls
             for raw in self._parse_petitions_table(web_data):
                 yield data.GatherDataRequest(
-                    url=f"{self.item_url}/{raw.get('item_id')}",
+                    url=self._make_abs_url(self.item_url, raw.get("item_id")),
                     data=raw,
                 )
 

@@ -4,6 +4,7 @@ import pathlib
 import typing
 import importlib_metadata
 import importlib_resources
+from defusedxml.ElementTree import fromstring
 
 
 def get_name_dash() -> str:
@@ -99,3 +100,16 @@ class GatherVisionException(Exception):
     """A gather vision error."""
 
     pass
+
+
+def xml_to_data(value):
+    if isinstance(value, str):
+        return xml_to_data(fromstring(value))
+    else:
+        return {
+            "attrs": value.attrib,
+            "tag": value.tag,
+            "tail": value.tail,
+            "text": value.text,
+            "children": [xml_to_data(i) for i in value],
+        }

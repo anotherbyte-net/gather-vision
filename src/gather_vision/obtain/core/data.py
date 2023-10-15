@@ -8,16 +8,19 @@ import re
 import typing
 from datetime import datetime
 import zoneinfo
+from urllib.parse import urljoin
 
 import parsel
 import scrapy
-from defusedxml.ElementTree import fromstring
+
 from django.conf import settings as proj_django_settings
 from django.utils.dateparse import parse_datetime
 from itemadapter import ItemAdapter
 from scrapy import crawler as scrapy_crawler, http, settings as scrapy_settings
 from scrapy.utils.project import get_project_settings
 from twisted.internet.defer import Deferred
+
+from gather_vision.obtain.core.utils import xml_to_data
 
 logger = logging.getLogger(__name__)
 
@@ -302,10 +305,10 @@ class WebData(BaseData, scrapy.Spider, abc.ABC):
             )
 
         if isinstance(response, http.TextResponse):
-            if "json" in content_type_header:
+            if "json" in content_type_header or response.url.endswith(".json"):
                 body_data = response.json()
             elif "xml" in content_type_header:
-                body_data = self._xml_to_data(fromstring(response.text))
+                body_data = xml_to_data(response.text)
             else:
                 body_data = None
             body_text = response.text
@@ -341,14 +344,10 @@ class WebData(BaseData, scrapy.Spider, abc.ABC):
             else:
                 raise ValueError(i)
 
-    def _xml_to_data(self, item):
-        return {
-            "attrs": item.attrib,
-            "tag": item.tag,
-            "tail": item.tail,
-            "text": item.text,
-            "children": [self._xml_to_data(i) for i in item],
-        }
+    def _make_abs_url(self, base: str, suffix: str) -> str:
+        # https://results.ecq.qld.gov.au/elections/
+        # state/State2017/results/summary.html
+        return urljoin(base, suffix)
 
 
 class LocalData(BaseData, abc.ABC):

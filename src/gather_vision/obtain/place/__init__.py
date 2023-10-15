@@ -22,6 +22,9 @@ from gather_vision.obtain.place.au.qld.air import (
     QueenslandAirItem,
     QueenslandAirWebData,
 )
+from gather_vision.obtain.place.au.qld.election import (
+    QueenslandGovernmentElectionsWebData,
+)
 from gather_vision.obtain.place.au.qld.electricity import (
     QueenslandEnergexElectricityItem,
     QueenslandEnergexElectricityWebData,
@@ -55,6 +58,7 @@ available_web_data = [
     QueenslandAirWebData,
     QueenslandEnergexElectricityWebData,
     QueenslandErgonEnergyElectricityWebData,
+    QueenslandGovernmentElectionsWebData,
     QueenslandGovernmentPetitionsWebData,
     QueenslandFuelWebData,
     AustraliaElectionWebData,
