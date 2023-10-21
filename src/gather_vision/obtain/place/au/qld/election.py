@@ -1,4 +1,5 @@
 import io
+import logging
 import typing
 from zipfile import ZipFile
 
@@ -10,42 +11,52 @@ from gather_vision.obtain.core.data import (
 )
 from gather_vision.obtain.core.utils import xml_to_data
 
+logger = logging.getLogger(__name__)
+
 
 class QueenslandGovernmentElectionsWebData(data.WebData):
     # 'All You Need To Know' html tables index page
-    list_v1_url = "https://results.ecq.qld.gov.au/elections/index.html"
+    list_ecq_results_index_url = "https://results.ecq.qld.gov.au/elections/index.html"
     # Past Elections, links to dynamic pages built from json files
-    list_v2_url = "https://resultsdata.elections.qld.gov.au/elections.json"
+    list_elections_resultsdata_url = (
+        "https://resultsdata.elections.qld.gov.au/elections.json"
+    )
     # Current and recent results, links to a  mixture of page types
-    list_v3_url = "https://www.ecq.qld.gov.au/elections/election-results"
+    list_ecq_results_url = "https://www.ecq.qld.gov.au/elections/election-results"
 
-    list_base1_v1_url = "https://results.ecq.qld.gov.au/"
-    # list_base2_v1_url = "https://results1.ecq.qld.gov.au/"
-    list_base_v2_url = "https://resultsdata.elections.qld.gov.au/"
-    list_base2_v2_url = "https://results.elections.qld.gov.au/"
-    # list_base_v3_url = "https://www.ecq.qld.gov.au/"
+    # known ECQ domains
+    base_ecq_results_url = "https://results.ecq.qld.gov.au/"
+    base_ecq_results1_url = "https://results1.ecq.qld.gov.au/"
+    base_ecq_www_url = "https://www.ecq.qld.gov.au/"
+    base_elections_results1_url = "https://results1.elections.qld.gov.au/"
+    base_elections_resultsdata_url = "https://resultsdata.elections.qld.gov.au/"
+    base_elections_results_url = "https://results.elections.qld.gov.au/"
 
     @property
     def name(self) -> str:
         return "au-qld-elections"
 
     def initial_urls(self) -> typing.Iterable[str]:
-        return [self.list_v1_url, self.list_v2_url, self.list_v3_url]
+        return [
+            self.list_ecq_results_index_url,
+            self.list_elections_resultsdata_url,
+            self.list_ecq_results_url,
+        ]
 
     def web_resources(
         self, web_data: WebDataAvailable
     ) -> typing.Iterable[typing.Union[GatherDataRequest, GatherDataItem]]:
         url = web_data.response_url
-        if url == self.list_v1_url:
-            yield from self._parse_list_v1(web_data)
-        elif url == self.list_v2_url:
-            yield from self._parse_list_v2(web_data)
-        elif url == self.list_v3_url:
-            yield from self._parse_list_v3(web_data)
+        if url == self.list_ecq_results_index_url:
+            yield from self._parse_ecq_result_index(web_data)
+        elif url == self.list_elections_resultsdata_url:
+            yield from self._parse_elections_resultsdata(web_data)
+        elif url == self.list_ecq_results_url:
+            yield from self._parse_ecq_result(web_data)
         else:
-            self._parse_data(web_data)
+            yield from self._parse_data(web_data)
 
-    def _parse_list_v1(
+    def _parse_ecq_result_index(
         self, web_data: WebDataAvailable
     ) -> typing.Iterable[typing.Union[GatherDataRequest, GatherDataItem]]:
         for section in web_data.selector.css('td[colspan="4"]'):
@@ -62,7 +73,7 @@ class QueenslandGovernmentElectionsWebData(data.WebData):
                 summary_url = tds[2].css("a").attrib.get("href")
                 if summary_url:
                     yield data.GatherDataRequest(
-                        url=self._make_abs_url(self.list_base1_v1_url, summary_url),
+                        url=self._make_abs_url(self.base_ecq_results_url, summary_url),
                         data={
                             "section_title": section_title,
                             "entry_title": entry_title,
@@ -72,14 +83,14 @@ class QueenslandGovernmentElectionsWebData(data.WebData):
                 index_url = tds[3].css("a").attrib.get("href")
                 if index_url:
                     yield data.GatherDataRequest(
-                        url=self._make_abs_url(self.list_base1_v1_url, index_url),
+                        url=self._make_abs_url(self.base_ecq_results_url, index_url),
                         data={
                             "section_title": section_title,
                             "entry_title": entry_title,
                         },
                     )
 
-    def _parse_list_v2(
+    def _parse_elections_resultsdata(
         self, web_data: WebDataAvailable
     ) -> typing.Iterable[typing.Union[GatherDataRequest, GatherDataItem]]:
         for election in web_data.body_data.get("elections"):
@@ -111,10 +122,10 @@ class QueenslandGovernmentElectionsWebData(data.WebData):
                 f"{el_stub}-status.json",
             ]
             for url in urls:
-                url = self._make_abs_url(self.list_base_v2_url, url)
+                url = self._make_abs_url(self.base_elections_resultsdata_url, url)
                 yield data.GatherDataRequest(url=url, data=el_data)
 
-    def _parse_list_v3(
+    def _parse_ecq_result(
         self, web_data: WebDataAvailable
     ) -> typing.Iterable[typing.Union[GatherDataRequest, GatherDataItem]]:
         for anchor in web_data.selector.css("div.content__main ul li a"):
@@ -127,37 +138,87 @@ class QueenslandGovernmentElectionsWebData(data.WebData):
         self, web_data: WebDataAvailable
     ) -> typing.Iterable[typing.Union[GatherDataRequest, GatherDataItem]]:
         url = web_data.response_url
+        is_ecq_results1 = url.startswith(self.base_ecq_results1_url)
+        is_elections_resultsdata = url.startswith(self.base_elections_resultsdata_url)
+        is_elections_results1 = url.startswith(self.base_elections_results1_url)
         if url.endswith(".zip"):
-            xml_data = self._parse_zip_xml(web_data)
-            # TODO: parse xml data
-            pass
-        elif url.startswith(self.list_base2_v2_url) and not url.endswith(".json"):
-            # TODO: parse 'https://results.elections.qld.gov.au/aurukun2020/01'
-            pass
-        elif url.startswith(self.list_base_v2_url) and url.endswith(".json"):
-            # TODO: parse 'https://resultsdata.elections.qld.gov.au/bundamba2020-status.json'
-            pass
-        elif url.startswith(self.list_base1_v1_url) and url.endswith(".html"):
-            # TODO: parse 'https://results.ecq.qld.gov.au/elections/state/REF2016/results/summary.html'
-            pass
+            yield from self._parse_data_zip_xml(url, web_data)
+        elif url.startswith(self.base_elections_results_url) and not url.endswith(
+            ".json"
+        ):
+            yield from self._parse_data_html(url, web_data)
+        elif is_elections_resultsdata and url.endswith("-status.json"):
+            yield from self._parse_data_status(url, web_data)
+        elif is_elections_resultsdata and url.endswith("-banners.json"):
+            yield from self._parse_data_banner(url, web_data)
+        elif is_elections_resultsdata and url.endswith("-declared_candidates.json"):
+            yield from self._parse_data_candidates(url, web_data)
+        elif is_elections_resultsdata and url.endswith("-boundary_venues.json"):
+            yield from self._parse_data_boundary_venues(url, web_data)
+        elif is_elections_resultsdata and url.endswith("-electorates.json"):
+            yield from self._parse_data_electorates(url, web_data)
+        elif url.startswith(self.base_ecq_results_url) and url.endswith(".html"):
+            yield from self._parse_ecq_results_summary(url, web_data)
+        elif is_elections_results1:
+            yield from self._parse_elections_results1_html(url, web_data)
+        elif is_ecq_results1:
+            yield from self._parse_ecq_results1(url, web_data)
+        elif url.startswith(self.base_ecq_www_url):
+            yield from self._parse_ecq_www(url, web_data)
         else:
-            # TODO: other pages:
-            #  'https://results1.elections.qld.gov.au/currumbin2020/02401/state',
-            #  'https://www.ecq.qld.gov.au/elections/election-events',
-            #  'https://www.ecq.qld.gov.au/elections/election-results/2009-state-election'
-            pass
-        return []
+            raise ValueError(url, web_data)
 
     def _parse_zip_xml(self, web_data: WebDataAvailable):
         url = web_data.response_url
         with io.BytesIO(web_data.body_raw) as zip_data:
             with ZipFile(zip_data, "r") as zip_reader:
-                # zip_test = zip_reader.testzip()
-                # if zip_test is not None:
-                #     raise ValueError(f"Bad zip file '{url}': {zip_test}")
+                if logger.isEnabledFor(logging.DEBUG):
+                    zip_test = zip_reader.testzip()
+                    if zip_test is not None:
+                        raise ValueError(f"Bad zip file '{url}': {zip_test}")
+
                 file_list = zip_reader.infolist()
                 for file_info in file_list:
                     if not file_info.filename.endswith("xml"):
                         continue
                     file_data = zip_reader.read(file_info.filename).decode("utf-8")
                     return xml_to_data(file_data)
+
+    def _parse_data_zip_xml(self, url: str, web_data: WebDataAvailable):
+        xml_data = self._parse_zip_xml(web_data)
+        yield None
+
+    def _parse_data_html(self, url: str, web_data: WebDataAvailable):
+        # TODO: parse 'https://results.elections.qld.gov.au/aurukun2020/01'
+        yield None
+
+    def _parse_data_status(self, url: str, web_data: WebDataAvailable):
+        # TODO: parse 'https://resultsdata.elections.qld.gov.au/bundamba2020-status.json'
+        yield None
+
+    def _parse_data_banner(self, url: str, web_data: WebDataAvailable):
+        # TODO: parse 'https://resultsdata.elections.qld.gov.au/bundamba2020-banner.json'
+        yield None
+
+    def _parse_ecq_results_summary(self, url: str, web_data: WebDataAvailable):
+        # TODO: parse 'https://results.ecq.qld.gov.au/elections/state/REF2016/results/summary.html'
+        yield None
+
+    def _parse_data_candidates(self, url: str, web_data: WebDataAvailable):
+        # TODO: parse 'https://resultsdata.elections.qld.gov.au/bundamba2020-declared_candidates.json'
+        yield None
+
+    def _parse_data_boundary_venues(self, url: str, web_data: WebDataAvailable):
+        yield None
+
+    def _parse_data_electorates(self, url: str, web_data: WebDataAvailable):
+        yield None
+
+    def _parse_elections_results1_html(self, url: str, web_data: WebDataAvailable):
+        yield None
+
+    def _parse_ecq_results1(self, url: str, web_data: WebDataAvailable):
+        yield None
+
+    def _parse_ecq_www(self, url: str, web_data: WebDataAvailable):
+        yield None
