@@ -11,11 +11,12 @@ concurrency:
 
 jobs:
   label:
+    name: "Label Pull Request"
+    runs-on: ubuntu-latest
+
     permissions:
       contents: read
       pull-requests: write
-    runs-on: ubuntu-latest
+
     steps:
       - uses: actions/labeler@v5
-        with:
-          repo-token: "${{ secrets.GITHUB_TOKEN }}"
